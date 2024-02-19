@@ -1,0 +1,48 @@
+Package: UPDhmm
+Title: What the Package Does (One Line, Title Case)
+Version: 1.2.0
+Authors@R: 
+    person(given = "Marta",
+           family = "Sevilla",
+           role= c("aut", "cre"),
+           email = "marta.sevilla@upf.edu",
+           comment = c(ORCID = "0009-0005-0179-920X"))
+Description: 
+  Uniparental disomy (UPD) is a genetic condition
+  where an individual inherits both copies of a 
+  chromosome or part of it from one parent, 
+  rather than one copy from each parent. This package contains a 
+  HMM for detecting UPDs throguh HTS (High Throughput Sequencing) 
+  data from trio assays. By analizing the genotypes in the trio, the model infers
+  a hidden state (normal, father isodiosmy, mother isodisomy, father 
+  heterodisomy and mother heterodisomy).
+biocViews: 
+  Workflow,
+  GenomicVariantsWorkflow
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: false
+RoxygenNote: 7.3.1
+Depends: 
+    R (>= 4.3.0)
+Imports:
+  HMM,
+  SummarizedExperiment,
+  utils,
+  purrr,
+  data.table,
+  VariantAnnotation,
+  GenomicRanges,
+  methods,
+  karyoploteR
+Suggests: 
+    knitr,
+    testthat (>= 2.1.0),
+    BiocStyle,
+    rmarkdown,
+    markdown,
+    dplyr
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+Bugreports: https://github.com/martasevilla/UPDhmm/issues
+URL:https://github.com/martasevilla/UPDhmm

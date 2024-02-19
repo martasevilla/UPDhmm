@@ -1,0 +1,180 @@
+---
+title: "The UPDhmm's User Guide"
+author:
+- name: Marta Sevilla
+  affiliation:
+  - Universitat Pompeu Fabra (UPF)
+  - Centro de Investigación Biomédica en Red (CIBERER)
+  email: marta.sevilla@upf.edu
+date: "`r Sys.Date()`"
+package: "`r BiocStyle::pkg_ver('UPDhmm')`"
+abstract: >
+    Uniparental disomy (UPD) is a genetic condition where an individual 
+    inherits both copies of a chromosome or part of it from one parent, 
+    rather than one copy from each parent. This can lead to homozygosity 
+    for certain alleles, potentially expressing recessive traits or 
+    contributing to genetic disorders by causing errors related to genetic 
+    imprinting.
+    
+    This vignette provides an introductory guide to the `UPDhmm` package.
+    The package contains a HMM for detecting UPDs throguh HTS (High Throughput 
+    Sequencing) data from trio assays.The areas covered in this document are: 
+    (1) package installation; (2) data loading and preprocessing; and (3) UPDs
+    identification.
+
+output: 
+    BiocStyle::html_document:
+    number_sections: true
+    toc: yes
+    fig_caption: yes
+    toc_float: true
+vignette: >
+  %\VignetteIndexEntry{Detection of UPDs in HTS data}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "",
+  warning = FALSE,
+  message = FALSE,
+  cache = FALSE
+)
+```
+
+# Introduction
+
+## Background
+
+Uniparental disomy (UPD) is a rare genetic condition in which an individual inherits both copies of a chromosome from one parent instead of one copy from each parent. Its role as a causative factor in rare genetic diseases is still largely unexplored. UPDs can result in disease either by inheriting a carrier pathogenic mutation as homozygous from a carrier parent or by producing imprinting errors. Nonetheless, no standard methods are available to detect and describe these events.
+
+We have developed `UPDhmm` R/Bioconductor package. The package provides a tool to detect, classify and stablish the location of uniparental disomy events. The full `UPDhmm` user´s guide is available in this vignette.
+
+## Methodology
+
+The `UPDhmm` package uses a HMM to identify the regions to be considered as Uniparental disomy events taking HTS data from a trio (mother,father and proband) of samples. The HMM was constructed based on the difference on allelic frequencies between the different possible states (isodisomy, heterodisomy or normal). With that, is possible to calcualte the odds of each of them giving a genotype sequencing, using the Viterbi alogrithm. In other words, based on the inheritance pattern within the trio, the package through the HMM infer wheter there is an UPD event in the proband or not.
+
+
+```{r implementation, echo=FALSE, fig.cap= "UPDhmm package workflow", out.width = '90%', fig.align='center'}
+knitr::include_graphics("fig/workflow.png")
+```
+
+# Setup
+
+## Installing the packages
+
+```{r, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager")
+}
+
+BiocManager::install("UPDhmm")
+```
+
+## Loading libraries
+
+```{r, message = FALSE}
+library(UPDhmm)
+```
+
+## Quick start
+
+
+The package needs a multisample vcf input so maybe a preprocessing is needed in order to use the package. 
+
+There are the requirements:
+
+-Multisample vcf file
+
+-Biallelic sites are only allowd
+
+-GT format allowed are: 0/1, 1/0, 0/1 and 1/1 or 0|1, 1|0, 0|1 and 1|1
+
+# Datasets {#datasets}
+
+The package contains 1 example dataset adapted from [GIB (genome in a bottle) database](https://www.nist.gov/programs-projects/genome-bottle).
+
+# Preprocessing
+
+After reading the vcf file, vcf_check is used in order to preprocess the input.
+The `vcf_check()` function allows reading the vcf in the correct format for UPDhmm package. The function changes the name of the different individuals, a mandatory step for the package to analyze the data.
+
+The following table describes the arguments:
+
+```{r echo=TRUE}
+library(UPDhmm)
+library(VariantAnnotation)
+file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
+vcf <- readVcf(file)
+def_vcf <- vcf_check(vcf,
+  proband = "Sample1", mother = "Sample3",father = "Sample2")
+
+```
+
+# Uniparental disomy detection
+
+The function `calculate_events()` includes 6 subprocess for UPDs identification: 
+The main steps are
+(1) Split vcf into chromosomes
+(2) Apply viterbi algorithm to every chromosome 
+(3) Transform the inferred hidden states to a coordinates dataframe 
+(4) Create blocks of contiguous variants with the same state
+(5) Calculate the statistics parameters (OR and p-value).
+
+The function takes the object previously created with function `vcf_check()`.
+
+
+
+```{r echo=TRUE}
+results_blocks <- calculate_events(def_vcf)
+```
+
+## Results description
+
+The `calculate_events` function returns a data frame (data.frame) containing all the events detected in the given trio. If no events is found, the function will print "No events found":
+
+| Column name         | Description                                        |
+|---------------------|----------------------------------------------------|
+| `sample_id`         | Sample proband ID                                  |
+| `seqnames`          | Chromosome                                         | 
+|  `end`              | End position of the block                          |
+| `n_snps`            | Number of variants within the event                |
+| `group`             | Predicted hidden states                            |
+| `log_OR`            | Odds ratio value of the predicted states vs normal |
+| `p_value`           | p-value obtained from the Model                    |
+
+## Results visualization
+The results can be plot using karyoploteR package
+
+```{r echo=TRUE}
+library(karyoploteR)
+
+#change chromosome in seqnames
+results_blocks$seqnames<-paste0("chr",results_blocks$seqnames)
+normal <- toGRanges(subset(results_blocks,results_blocks$group=="normal")[,c("seqnames","start","end")])
+het_fat <- toGRanges(subset(results_blocks,results_blocks$group=="het_fat")[,c("seqnames","start","end")])
+het_mat <- toGRanges(subset(results_blocks,results_blocks$group=="het_mat")[,c("seqnames","start","end")])
+iso_fat <- toGRanges(subset(results_blocks,results_blocks$group=="iso_fat")[,c("seqnames","start","end")])
+iso_mat <- toGRanges(subset(results_blocks,results_blocks$group=="iso_mat")[,c("seqnames","start","end")])
+
+
+kp <- plotKaryotype(genome="hg19")
+kpPlotRegions(kp, normal, col="#FFAACC")
+kpPlotRegions(kp, het_fat, col="#53BF65")
+kpPlotRegions(kp, het_mat, col="#E9B864")
+kpPlotRegions(kp, iso_fat, col="#A6E5FC")
+kpPlotRegions(kp, iso_mat, col="#676779")
+
+colors <- c("#FFAACC", "#53BF65", "#E9B864", "#A6E5FC", "#676779")
+legend("topright", legend=c("Normal", "Het_Fat", "Het_Mat", "Iso_Fat", "Iso_Mat"), fill=colors)
+  
+```
+# Session Info
+
+```{r}
+sessionInfo()
+```
+
+# References
+
