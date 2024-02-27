@@ -1,7 +1,7 @@
-#' Function for transform a largecollapsedVcf into a dataframe with predicted
-#' states (only with chr,start,end and metadatacolumn)
+#' Function to transform a large collapsed VCF into a dataframe with predicted
+#' states, including only chromosome, start position, end position, and metadata column.
 #'
-#' @param largecollapsedVcf Vcf file
+#' @param largecollapsedVcf Name of the large collapsed VCF file.
 #'
 #' @return dataframe
 as_df_vcf <- function(largecollapsedVcf) {

@@ -33,15 +33,15 @@ Imports:
   data.table,
   VariantAnnotation,
   GenomicRanges,
-  methods,
-  karyoploteR
+  methods
 Suggests: 
     knitr,
     testthat (>= 2.1.0),
     BiocStyle,
     rmarkdown,
     markdown,
-    dplyr
+    dplyr,
+    karyoploteR
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 Bugreports: https://github.com/martasevilla/UPDhmm/issues

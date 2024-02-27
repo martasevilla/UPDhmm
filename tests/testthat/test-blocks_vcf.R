@@ -16,7 +16,7 @@ input <- data.frame(
   group = c("het_fat", "het_fat", "het_fat"),
   seqnames = c("chr10", "chr10", "chr10")
 )
-test_that("Check if simplification into blocks is working", {
+test_that("Test if simplification into blocks works", {
   out <- blocks_vcf(input)
 
   expect_equal(out, expected_df)

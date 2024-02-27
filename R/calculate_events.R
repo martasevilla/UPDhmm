@@ -1,12 +1,12 @@
-#' Calculate UPD events in trio vcfs
+#' Calculate UPD events in trio VCFs.
 #'
-#' This function is for appliying the hidden-markov-model using the viterbi
-#' algorithm after that it simplify into blocks and finally export into a
-#' bed file
+#' This function predicts the hidden states by applying the Viterbi algorithm
+#' using the Hidden Markov Model (HMM) from the UPDhmm package. It takes the
+#' genotypes of the trio as input and includes a final step to simplify the
+#' results into blocks.
 #'
-#' @param largecollapsedVcf The general format of vcf with VariantAnnotation
-#' package
-#' @return optional save object (raw and simplify ) and export bed file
+#' @param largecollapsedVcf The VCF file in the general format (largecollapsedVcf) with VariantAnnotation package.
+#' @return Dataframe object containing blocks of predicted events.
 #'
 #' @export
 #' @examples
@@ -18,6 +18,7 @@
 #' )
 #' calculate_events(largecollapsedVcf)
 calculate_events <- function(largecollapsedVcf) {
+
   # split the vcf into chromosomes
   split_vcf <- split(largecollapsedVcf,
     f = GenomicRanges::seqnames(largecollapsedVcf)
@@ -43,7 +44,8 @@ calculate_events <- function(largecollapsedVcf) {
       error = function(e) NULL
     )
   }, simplify = FALSE)
-  # simplify all chr into one datafram
+
+  # simplify all chr objects into one dataframe
   def_blocks_states <- data.table::rbindlist(blocks_state[!sapply(
     blocks_state,
     is.null

@@ -11,7 +11,7 @@ colnames(input) <- c("proband", "father", "mother")
 GenomicRanges::elementMetadata(input)$metadata <- c("het_fat", "het_fat", "het_fat")
 
 
-test_that("vcf with states to basic dataframe", {
+test_that("Test if transofrmation of vcf with states to basic dataframe works", {
   out <- as_df_vcf(input)
 
   expect_s3_class(out, "data.frame")

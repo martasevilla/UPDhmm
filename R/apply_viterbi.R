@@ -1,17 +1,16 @@
-#' This function is for applying the hidden-markov-model using the
-#' viterbi algorithm
-#' IMPORTANT: vector_samples should be previously created
+#' Apply the hidden Markov model using the Viterbi algorithm.
+#'
 #'
 #' @param largecollapsedVcf input vcf file
 #'
 #' @return largecollapsedVcf
 
 apply_viterbi <- function(largecollapsedVcf) {
-  # first assign the names of the samples, according to the trio,
-  # it is important the order for appliying Viterbi algortihm
+  # First, assign the names of the samples according to the trio.
+  # It is crucial to maintain the order for applying the Viterbi algorithm.
   vector_samples <- rownames(SummarizedExperiment::colData(largecollapsedVcf))
-  # now, tranfsofr genotypes into numerical code, and apply viterbi alogortihm.
-  # The result would be stored as a metatadata column in the object
+  # Now, transform genotypes into numerical codes and apply the Viterbi algorithm.
+  # The results will be stored as a metadata column in the object.
   genotypes <- c(
     "0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
     "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3"

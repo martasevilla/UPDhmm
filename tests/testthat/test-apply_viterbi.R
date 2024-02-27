@@ -10,7 +10,7 @@ GenomicRanges::elementMetadata(expected_vcf)$metadata <-
 input <- VariantAnnotation::readVcf("test.vcf.gz")
 colnames(input) <- c("proband", "father", "mother")
 
-test_that("Check if viterbi algorithm is working", {
+test_that("Test if viterbi algorithm works", {
   #### no meter otras funciones del paquete
 
   out <- apply_viterbi(input)

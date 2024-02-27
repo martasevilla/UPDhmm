@@ -1,17 +1,17 @@
-#' check quality parameters and change ids
+#' Check quality parameters (optional) and change IDs.
 #'
-#' This function will take the vcf (must be gz with an index file and will
-#' convert it into a large collapsedVcf object using variantanntoation package)
-#' it will have one additional parameter, quality_check, that will give warnigns
-#' if there are positions with no good quality.
+#' This function takes a VCF file and converts it into a large collapsedVcf
+#' object using the VariantAnnotation package. It includes an optional parameter,
+#' quality_check, which issues warnings if positions lack good quality based on
+#' RD and GQ parameters in the input VCF.
 #'
-#' @param path_vcf The file in largeCollapsed format
-#' @param check_quality If desired, quality parameters can be measured
-#' @param father Introduce father's name sample
-#' @param mother Introduce mother's name sample
-#' @param proband Introduce proband's name sample
+#' @param path_vcf The file in largeCollapsed format.
+#' @param check_quality TRUE/FALSE. If desired, quality parameters can be measured.
+#' @param father Name of the father's sample.
+#' @param mother Name of the mother's sample.
+#' @param proband Name of the proband's sample.
 #'
-#' @return LargecollapdsedVCf (VariantAnnotation vcf format)
+#' @return LargecollapsedVCF (VariantAnnotation VCF format).
 #' @export
 #' @examples
 #' fl <- system.file("extdata", "test.vcf.gz", package = "UPDhmm")
@@ -23,11 +23,10 @@
 #'
 #'
 #'
-# sacar esto de fuera
 vcf_check <- function(path_vcf, check_quality = NULL, father = NULL,
                       mother = NULL, proband = NULL) {
+  # Quality parameters
   if (isTRUE(check_quality)) {
-    # quality parameters
     if (any(VariantAnnotation::geno(path_vcf)$GQ < 20 |
       is.na(VariantAnnotation::geno(path_vcf)$GQ)) == TRUE) {
       warning("No filter quality (GQ) parameter used")
@@ -37,13 +36,13 @@ vcf_check <- function(path_vcf, check_quality = NULL, father = NULL,
       warning("No filter quality (RD) parameter used")
     }
 
-
     # Update sample names in the header lines
     colnames(path_vcf) <- gsub(father, "father", colnames(path_vcf))
     colnames(path_vcf) <- gsub(mother, "mother", colnames(path_vcf))
     colnames(path_vcf) <- gsub(proband, "proband", colnames(path_vcf))
-  } else {
-    # Update sample names in the header lines
+  }
+  else {
+    # No quality parameters, just update sample names in the header lines
     colnames(path_vcf) <- gsub(father, "father", colnames(path_vcf))
     colnames(path_vcf) <- gsub(mother, "mother", colnames(path_vcf))
     colnames(path_vcf) <- gsub(proband, "proband", colnames(path_vcf))

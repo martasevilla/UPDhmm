@@ -11,7 +11,7 @@ expected_def_blocks <- data.frame(
 
 input <- VariantAnnotation::readVcf("test.vcf.gz")
 colnames(input) <- c("proband", "father", "mother")
-test_that("Check the general function", {
+test_that("Test if the general function works", {
   out <- calculate_events(input)
   out$log_OR <- floor(as.numeric(out$log_OR) * 10) / 10
   out$p_value <- floor(as.numeric(out$p_value) * 10^8) / 10^8

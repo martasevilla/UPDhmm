@@ -1,8 +1,9 @@
-#' Function for simplify into blocks contiguous variants with same state
+#' Function to simplify contiguous variants with the same state into blocks.
 #'
-#' @param df df result from as_df_vcf function
+#' @param df Dataframe resulting from the `as_df_vcf` function.
 #'
-#' @return dataframe
+#' @return Dataframe containing information on the chromosome, start position of the block, end position of the block, and predicted state.
+
 blocks_vcf <- function(df) {
   df$n_snps <- 1
 
