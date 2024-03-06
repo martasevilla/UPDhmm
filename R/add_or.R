@@ -49,7 +49,7 @@ add_or <- function(filtered_def_blocks_states=NULL,
 
 
   df<-as.data.frame(gRanges_block)
-  df <- df[, !(names(df) %in% "strand")]
+  df <- df[, !(names(df) %in% c("strand","width"))]
   return(df)
 }
 

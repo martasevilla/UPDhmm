@@ -6,21 +6,18 @@
 #' results into blocks.
 #'
 #' @param largecollapsedVcf The VCF file in the general format
-#' @param hmm Hidden Markov Model used to infer the events
 #' @param genotypes Possible GT formats and its correspondency with the hmm
 #' (largecollapsedVcf) with VariantAnnotation package.
 #' @return Dataframe object containing blocks of predicted events.
 #' @export
 #' @examples
 #' file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
-#' def_vcf <- vcf_check(vcf,
-#' proband = "NA19675",
-#' mother = "NA19678",
-#' father = "NA19679")
+#' vcf <- VariantAnnotation::readVcf(file)
+#' def_vcf <- vcf_check(vcf,proband = "NA19675",mother = "NA19678",father = "NA19679")
 #'
 #' calculate_events(def_vcf)
 
-calculate_events <- function(largecollapsedVcf=NULL,genotypes=NULL,hmm=NULL) {
+calculate_events <- function(largecollapsedVcf=NULL,genotypes=NULL) {
 
   utils::data("hmm")
   hmm <- hmm
@@ -34,7 +31,7 @@ calculate_events <- function(largecollapsedVcf=NULL,genotypes=NULL,hmm=NULL) {
   #2 apply viterbi
   split_vcf <- lapply(split_vcf_raw, function(x) {
    tryCatch(
-     UPDhmm:::apply_viterbi(largecollapsedVcf = x, hmm = hmm, genotypes = genotypes),
+     apply_viterbi(largecollapsedVcf = x, hmm = hmm, genotypes = genotypes),
      error = function(e) NULL  # Return NULL if an error occurs
    )
  })
@@ -43,14 +40,14 @@ calculate_events <- function(largecollapsedVcf=NULL,genotypes=NULL,hmm=NULL) {
 
   #3 as_df
   split_vcf_df <- lapply(split_vcf, function(x)
-  { tryCatch(UPDhmm:::as_df_vcf(largecollapsedVcf=x,
+  { tryCatch(as_df_vcf(largecollapsedVcf=x,
                        genotypes = genotypes),
              error = function(e) NULL) })
 
 
   # #4 Create blocks of contiguous positions with same state
    blocks_state <- lapply(split_vcf_df, function(df) {
-    tryCatch(UPDhmm:::blocks_vcf(df),error = function(e) NULL)})
+    tryCatch(blocks_vcf(df),error = function(e) NULL)})
 
    #5 simplify all chr objects into one data.frame
    def_blocks_states <- data.table::rbindlist(blocks_state[!sapply(blocks_state, is.null)])
@@ -66,7 +63,7 @@ calculate_events <- function(largecollapsedVcf=NULL,genotypes=NULL,hmm=NULL) {
   # 7 Calculate statistics parameters
    if (nrow(filtered_def_blocks_states) > 0) {
    blocks_list <- lapply(seq_len(nrow(filtered_def_blocks_states)), function(i) {
-     UPDhmm:::add_or(
+     add_or(
        filtered_def_blocks_states = filtered_def_blocks_states[i, , drop = FALSE],
        largecollapsedVcf = largecollapsedVcf,
        hmm = hmm,

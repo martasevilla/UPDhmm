@@ -11,8 +11,6 @@ calculate_events(largecollapsedVcf = NULL, genotypes = NULL)
 
 \item{genotypes}{Possible GT formats and its correspondency with the hmm
 (largecollapsedVcf) with VariantAnnotation package.}
-
-\item{hmm}{Hidden Markov Model used to infer the events}
 }
 \value{
 Dataframe object containing blocks of predicted events.
@@ -24,11 +22,9 @@ genotypes of the trio as input and includes a final step to simplify the
 results into blocks.
 }
 \examples{
-fl <- system.file("extdata", "test.vcf.gz", package = "UPDhmm")
-vcf <- VariantAnnotation::readVcf(fl)
-largecollapsedVcf <- vcf_check(vcf,
-  proband = "Sample1", mother = "Sample3",
-  father = "Sample2"
-)
-calculate_events(largecollapsedVcf)
+file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
+vcf <- VariantAnnotation::readVcf(file)
+def_vcf <- vcf_check(vcf,proband = "NA19675",mother = "NA19678",father = "NA19679")
+
+calculate_events(def_vcf)
 }

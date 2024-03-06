@@ -2,9 +2,8 @@ expected_df <- data.frame(
   start = 100017453,
   end = 100144782,
   group = as.character("het_fat"),
-  n_snps = 3,
   seqnames = "chr10",
-  row.names = "1"
+  n_snps = 3
 )
 
 expected_df$group <- as.character(expected_df$group)
@@ -18,7 +17,7 @@ input <- data.frame(
 )
 test_that("Test if simplification into blocks works", {
   out <- blocks_vcf(input)
-
+  out<-as.data.frame(out)
   expect_equal(out, expected_df)
   expect_s3_class(out, "data.frame")
 })

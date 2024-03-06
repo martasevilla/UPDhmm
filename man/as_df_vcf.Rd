@@ -3,7 +3,7 @@
 \name{as_df_vcf}
 \alias{as_df_vcf}
 \title{Function to transform a large collapsed VCF into a dataframe with predicted
-states, including only chromosome, start position, end position, and metadata column.}
+states, including chromosome, start position, end position, and metadata.}
 \usage{
 as_df_vcf(largecollapsedVcf = NULL, genotypes = NULL)
 }
@@ -17,5 +17,5 @@ dataframe
 }
 \description{
 Function to transform a large collapsed VCF into a dataframe with predicted
-states, including only chromosome, start position, end position, and metadata column.
+states, including chromosome, start position, end position, and metadata.
 }

@@ -76,12 +76,16 @@ sequence, using the Viterbi alogrithm. All in all, `UPDhmm` infers the most like
 
 ## Installing the packages
 
-```{r installation, eval=FALSE}
+```{r installation, eval=FALSE, include=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
   install.packages("BiocManager")
 }
 
 BiocManager::install("UPDhmm")
+BiocManager::install("regioneR")
+BiocManager::install("karyoploteR")
+
+
 ```
 
 ## Loading libraries
@@ -163,9 +167,8 @@ To visualize the results, the `karyoploteR` package can be employed.
 Here, a custom function is provided for easy implementation with the output results.
 
 ```{r echo=TRUE}
-library(karyoploteR)
-library(regioneR)
-
+ library(karyoploteR)
+ library(regioneR)
 plot_kp_upd <- function(results_blocks) {
   results_blocks$seqnames <- paste0("chr", results_blocks$seqnames)
 

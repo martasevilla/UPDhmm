@@ -15,11 +15,11 @@ add_or(
 \arguments{
 \item{filtered_def_blocks_states}{data.frame object containing the blocks}
 
+\item{largecollapsedVcf}{Input VCF file}
+
 \item{hmm}{Hidden Markov Model used to infer the events}
 
 \item{genotypes}{Possible GT formats and its correspondency with the hmm}
-
-\item{largecollapdsedVcf}{Input VCF file}
 }
 \value{
 data.frame containing the transformed information.

@@ -34,7 +34,7 @@ parameter, quality_check, which issues warnings if positions lack good
 quality based on RD and GQ parameters in the input VCF.
 }
 \examples{
-fl <- system.file("extdata", "test.vcf.gz", package = "UPDhmm")
+fl <- system.file("extdata", "test_het_mat.vcf.gz", package = "UPDhmm")
 vcf <- VariantAnnotation::readVcf(fl)
 vcf_check(vcf, proband = "Sample1", mother = "Sample3", father = "Sample2")
 

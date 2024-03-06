@@ -32,14 +32,18 @@ Imports:
   VariantAnnotation,
   GenomicRanges,
   S4Vectors,
-  IRanges
+  IRanges,
+  stats,
+  magrittr,
+  dplyr
 Suggests: 
     knitr,
     testthat (>= 2.1.0),
     BiocStyle,
     rmarkdown,
     markdown,
-    karyoploteR
+    karyoploteR,
+    regioneR
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 Bugreports: https://github.com/martasevilla/UPDhmm/issues

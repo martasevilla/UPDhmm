@@ -11,7 +11,7 @@ blocks_vcf(df)
 }
 \value{
 Dataframe containing information on the chromosome, start
-position of the block, end position of the block, and predicted state.
+#' position of the block, end position of the block, and predicted state.
 }
 \description{
 Function to simplify contiguous variants with the same state into blocks.
