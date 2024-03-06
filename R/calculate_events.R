@@ -12,14 +12,15 @@
 #' @return Dataframe object containing blocks of predicted events.
 #' @export
 #' @examples
-#' fl <- system.file("extdata", "test.vcf.gz", package = "UPDhmm")
-#' vcf <- VariantAnnotation::readVcf(fl)
-#' largecollapsedVcf <- vcf_check(vcf,
-#'   proband = "Sample1", mother = "Sample3",
-#'   father = "Sample2"
-#' )
-#' calculate_events(largecollapsedVcf)
-calculate_events <- function(largecollapsedVcf=NULL,genotypes=NULL) {
+#' file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
+#' def_vcf <- vcf_check(vcf,
+#' proband = "NA19675",
+#' mother = "NA19678",
+#' father = "NA19679")
+#'
+#' calculate_events(def_vcf)
+
+calculate_events <- function(largecollapsedVcf=NULL,genotypes=NULL,hmm=NULL) {
 
   utils::data("hmm")
   hmm <- hmm
