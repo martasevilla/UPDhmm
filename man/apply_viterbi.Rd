@@ -2,20 +2,20 @@
 % Please edit documentation in R/apply_viterbi.R
 \name{apply_viterbi}
 \alias{apply_viterbi}
-\title{This function is for applying the hidden-markov-model using the
-viterbi algorithm
-IMPORTANT: vector_samples should be previously created}
+\title{Apply the hidden Markov model using the Viterbi algorithm.}
 \usage{
-apply_viterbi(largecollapsedVcf)
+apply_viterbi(largecollapsedVcf = NULL, hmm = NULL, genotypes = NULL)
 }
 \arguments{
 \item{largecollapsedVcf}{input vcf file}
+
+\item{hmm}{Hidden Markov Model used to infer the events}
+
+\item{genotypes}{Possible GT formats and its correspondency with the hmm}
 }
 \value{
 largecollapsedVcf
 }
 \description{
-This function is for applying the hidden-markov-model using the
-viterbi algorithm
-IMPORTANT: vector_samples should be previously created
+Apply the hidden Markov model using the Viterbi algorithm.
 }

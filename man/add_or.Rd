@@ -2,26 +2,29 @@
 % Please edit documentation in R/add_or.R
 \name{add_or}
 \alias{add_or}
-\title{Function for transform a largecollapsedVcf into a dataframe with
-predicted states (only with chr,start,end and metadatacolumn)}
+\title{Function to transform a large collapsed VCF into a dataframe, incorporating
+predicted states along with the log-likelihood ratio and p-value.}
 \usage{
-add_or(start_coord, end_coord, seqnames, group, split_vcf_df = NULL)
+add_or(
+  filtered_def_blocks_states = NULL,
+  largecollapsedVcf = NULL,
+  hmm = NULL,
+  genotypes = NULL
+)
 }
 \arguments{
-\item{start_coord}{start chromosomal position of every block}
+\item{filtered_def_blocks_states}{data.frame object containing the blocks}
 
-\item{end_coord}{end chromosomal position of every block}
+\item{hmm}{Hidden Markov Model used to infer the events}
 
-\item{seqnames}{name of the chromosome of the blocks (e.g. chr1 or 1)}
+\item{genotypes}{Possible GT formats and its correspondency with the hmm}
 
-\item{group}{hidden state assigned by  UPDHmm}
-
-\item{split_vcf_df}{input vcf file}
+\item{largecollapdsedVcf}{Input VCF file}
 }
 \value{
-dataframe
+data.frame containing the transformed information.
 }
 \description{
-Function for transform a largecollapsedVcf into a dataframe with
-predicted states (only with chr,start,end and metadatacolumn)
+Function to transform a large collapsed VCF into a dataframe, incorporating
+predicted states along with the log-likelihood ratio and p-value.
 }

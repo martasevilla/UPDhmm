@@ -2,35 +2,36 @@
 % Please edit documentation in R/vcf_check.R
 \name{vcf_check}
 \alias{vcf_check}
-\title{check quality parameters and change ids}
+\title{Check quality parameters (optional) and change IDs.}
 \usage{
 vcf_check(
-  path_vcf,
-  check_quality = NULL,
+  largecollapsedVcf,
+  check_quality = FALSE,
   father = NULL,
   mother = NULL,
   proband = NULL
 )
 }
 \arguments{
-\item{path_vcf}{The file in largeCollapsed format}
+\item{largecollapsedVcf}{The file in largeCollapsed format.}
 
-\item{check_quality}{If desired, quality parameters can be measured}
+\item{check_quality}{TRUE/FALSE. If quality parameters want to be measured.
+Default = FALSE}
 
-\item{father}{Introduce father's name sample}
+\item{father}{Name of the father's sample.}
 
-\item{mother}{Introduce mother's name sample}
+\item{mother}{Name of the mother's sample.}
 
-\item{proband}{Introduce proband's name sample}
+\item{proband}{Name of the proband's sample.}
 }
 \value{
-LargecollapdsedVCf (VariantAnnotation vcf format)
+LargecollapsedVCF (VariantAnnotation VCF format).
 }
 \description{
-This function will take the vcf (must be gz with an index file and will
-convert it into a large collapsedVcf object using variantanntoation package)
-it will have one additional parameter, quality_check, that will give warnigns
-if there are positions with no good quality.
+This function takes a VCF file and converts it into a large collapsedVcf
+object using the VariantAnnotation package. It includes an optional
+parameter, quality_check, which issues warnings if positions lack good
+quality based on RD and GQ parameters in the input VCF.
 }
 \examples{
 fl <- system.file("extdata", "test.vcf.gz", package = "UPDhmm")

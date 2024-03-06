@@ -2,16 +2,17 @@
 % Please edit documentation in R/blocks_vcf.R
 \name{blocks_vcf}
 \alias{blocks_vcf}
-\title{Function for simplify into blocks contiguous variants with same state}
+\title{Function to simplify contiguous variants with the same state into blocks.}
 \usage{
 blocks_vcf(df)
 }
 \arguments{
-\item{df}{df result from as_df_vcf function}
+\item{df}{Dataframe resulting from the \code{as_df_vcf} function.}
 }
 \value{
-dataframe
+Dataframe containing information on the chromosome, start
+position of the block, end position of the block, and predicted state.
 }
 \description{
-Function for simplify into blocks contiguous variants with same state
+Function to simplify contiguous variants with the same state into blocks.
 }

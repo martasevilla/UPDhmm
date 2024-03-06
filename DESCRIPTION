@@ -14,7 +14,7 @@ Description:
   rather than one copy from each parent. This package contains a 
   HMM for detecting UPDs throguh HTS (High Throughput Sequencing) 
   data from trio assays. By analizing the genotypes in the trio, the model infers
-  a hidden state (normal, father isodiosmy, mother isodisomy, father 
+  a hidden state (normal, father isodisomy, mother isodisomy, father 
   heterodisomy and mother heterodisomy).
 biocViews: 
   Workflow,
@@ -24,7 +24,8 @@ Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.3.1
 Depends: 
-    R (>= 4.3.0)
+    R (>= 4.3.0),
+    data.table
 Imports:
   HMM,
   SummarizedExperiment,
@@ -33,14 +34,15 @@ Imports:
   data.table,
   VariantAnnotation,
   GenomicRanges,
-  methods
+  methods,
+  S4Vectors,
+  IRanges
 Suggests: 
     knitr,
     testthat (>= 2.1.0),
     BiocStyle,
     rmarkdown,
     markdown,
-    dplyr,
     karyoploteR
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
