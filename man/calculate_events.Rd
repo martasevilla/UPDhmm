@@ -24,7 +24,8 @@ results into blocks.
 \examples{
 file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
 vcf <- VariantAnnotation::readVcf(file)
-def_vcf <- vcf_check(vcf,proband = "NA19675",mother = "NA19678",father = "NA19679")
+def_vcf <- vcf_check(vcf,proband = "NA19675",mother = "NA19678",
+father = "NA19679")
 
 calculate_events(def_vcf)
 }

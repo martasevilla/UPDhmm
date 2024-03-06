@@ -25,27 +25,27 @@
 #'
 #'
 vcf_check <- function(largecollapsedVcf, check_quality = FALSE, father = NULL,
-                      mother = NULL, proband = NULL) {
+            mother = NULL, proband = NULL) {
   # Quality parameters
   if (isTRUE(check_quality)) {
-    if (any(VariantAnnotation::geno(largecollapsedVcf)$GQ < 20 |
-      is.na(VariantAnnotation::geno(largecollapsedVcf)$GQ)) == TRUE) {
-      warning("No filter quality (GQ) parameter used")
-    }
-    if (any(VariantAnnotation::geno(largecollapsedVcf)$DP < 30 |
-      is.na(VariantAnnotation::geno(largecollapsedVcf)$DP)) == TRUE) {
-      warning("No filter quality (RD) parameter used")
-    }
+  if (any(VariantAnnotation::geno(largecollapsedVcf)$GQ < 20 |
+    is.na(VariantAnnotation::geno(largecollapsedVcf)$GQ)) == TRUE) {
+    warning("No filter quality (GQ) parameter used")
+  }
+  if (any(VariantAnnotation::geno(largecollapsedVcf)$DP < 30 |
+    is.na(VariantAnnotation::geno(largecollapsedVcf)$DP)) == TRUE) {
+    warning("No filter quality (RD) parameter used")
+  }
 
   }
 
 
   colnames(largecollapsedVcf) <- gsub(father, "father",
-                                      colnames(largecollapsedVcf))
+                    colnames(largecollapsedVcf))
   colnames(largecollapsedVcf) <- gsub(mother, "mother",
-                                      colnames(largecollapsedVcf))
+                    colnames(largecollapsedVcf))
   colnames(largecollapsedVcf) <- gsub(proband, "proband",
-                                      colnames(largecollapsedVcf))
+                    colnames(largecollapsedVcf))
   return(largecollapsedVcf)
 }
 

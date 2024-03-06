@@ -1,5 +1,6 @@
-#' Function to transform a large collapsed VCF into a dataframe, incorporating
-#' predicted states along with the log-likelihood ratio and p-value.
+#' Function to transform a large collapsed VCF into a dataframe,
+#' incorporating predicted states along with the log-likelihood
+#' ratio and p-value.
 #'
 #' @param largecollapsedVcf Input VCF file
 #'
@@ -11,33 +12,33 @@
 
 
 add_or <- function(filtered_def_blocks_states=NULL,
-                   largecollapsedVcf=NULL, hmm=NULL, genotypes=NULL) {
+           largecollapsedVcf=NULL, hmm=NULL, genotypes=NULL) {
 
   gRanges_block<-
-    GenomicRanges::makeGRangesFromDataFrame(filtered_def_blocks_states,
-                                            keep.extra.columns=TRUE,
-                                            ignore.strand=TRUE,
-                                            seqnames.field=c("seqnames"),
-                                            start.field="start",
-                                            end.field=c("end"))
+  GenomicRanges::makeGRangesFromDataFrame(filtered_def_blocks_states,
+                      keep.extra.columns=TRUE,
+                      ignore.strand=TRUE,
+                      seqnames.field=c("seqnames"),
+                      start.field="start",
+                      end.field=c("end"))
 
   overlaps <- IRanges::subsetByOverlaps(largecollapsedVcf, gRanges_block)
 
   genotypes_uncoded <- VariantAnnotation::geno(overlaps)$GT
 
   genotypes_coded <- c(
-    paste0(genotypes[genotypes_uncoded[, "father"]],
-           genotypes[genotypes_uncoded[, "mother"]],
-           genotypes[genotypes_uncoded[, "proband"]])
+  paste0(genotypes[genotypes_uncoded[, "father"]],
+       genotypes[genotypes_uncoded[, "mother"]],
+       genotypes[genotypes_uncoded[, "proband"]])
   )
 
   forward_matrix <- HMM::forward(hmm, genotypes_coded)
 
   log_likelihood_normal <-
-    utils::tail(forward_matrix["normal", ], 1)
+  utils::tail(forward_matrix["normal", ], 1)
 
   log_likelihood_other <-
-    utils::tail(forward_matrix[gRanges_block@elementMetadata$group, ], 1)
+  utils::tail(forward_matrix[gRanges_block@elementMetadata$group, ], 1)
 
 
   overall_log_odds_ratio <- -2 * (log_likelihood_normal - log_likelihood_other)

@@ -2,7 +2,8 @@
 % Please edit documentation in R/blocks_vcf.R
 \name{blocks_vcf}
 \alias{blocks_vcf}
-\title{Function to simplify contiguous variants with the same state into blocks.}
+\title{Function to simplify contiguous variants with the same state into
+blocks.}
 \usage{
 blocks_vcf(df)
 }
@@ -14,5 +15,6 @@ Dataframe containing information on the chromosome, start
 #' position of the block, end position of the block, and predicted state.
 }
 \description{
-Function to simplify contiguous variants with the same state into blocks.
+Function to simplify contiguous variants with the same state into
+blocks.
 }

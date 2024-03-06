@@ -11,12 +11,12 @@ colnames(input) <- c("proband", "father", "mother")
 S4Vectors::mcols(input)$states <- c("het_fat", "het_fat", "het_fat")
 
 genotypes <-  c("0/0" = "1", "0/1" = "2","1/0" = "2", "1/1" = "3",
-                "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3" )
+        "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3" )
 
 
 
-test_that("Test if transofrmation of vcf with states to basic dataframe works", {
-  out <- as_df_vcf(largecollapsedVcf = input,genotypes = genotypes)
+test_that("Test if transofrmation of vcf with states to basic dataframe works",
+          { out <- as_df_vcf(largecollapsedVcf = input,genotypes = genotypes)
   expect_s3_class(out, "data.frame")
   expect_equal(expect_df, out)
 })

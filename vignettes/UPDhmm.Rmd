@@ -16,26 +16,27 @@ author 2:
 date: "`r Sys.Date()`"
 package: "`r BiocStyle::pkg_ver('UPDhmm')`"
 abstract: >
-    Uniparental disomy (UPD) is a genetic condition in which an individual 
-    inherits both copies or a segment of a chromosome or part of it from the same parent, 
-    instead of receiving one copy from each parent. This can result in homozygosity
-    for specific alleles, potentially manifesting recessive traits or contributing
-    to genetic disorders through errors associated with genetic imprinting.
-    
-    This vignette provides an introductory guide to the `UPDhmm` package, 
-    `UPDhmm` relies on a Hidden Markov Model to detect UPDs on genetic data from trio 
-    assays. The key topics covered in this document include:
-    
-    (1) Package installation
-    (2) Data loading and preprocessing
-    (3) Identification of UPDs
+  Uniparental disomy (UPD) is a genetic condition in which an individual 
+  inherits both copies or a segment of a chromosome or part of it from the same 
+  parent, instead of receiving one copy from each parent. This can result in 
+  homozygosity for specific alleles, potentially manifesting recessive traits
+  or contributing to genetic disorders through errors associated with genetic
+  imprinting.
+  
+  This vignette provides an introductory guide to the `UPDhmm` package, 
+  `UPDhmm` relies on a Hidden Markov Model to detect UPDs on genetic data 
+  from trio assays. The key topics covered in this document include:
+  
+  (1) Package installation
+  (2) Data loading and preprocessing
+  (3) Identification of UPDs
 
 output: 
-    BiocStyle::html_document:
-    number_sections: true
-    toc: yes
-    fig_caption: yes
-    toc_float: true
+  BiocStyle::html_document:
+  number_sections: true
+  toc: yes
+  fig_caption: yes
+  toc_float: true
 vignette: >
   %\VignetteIndexEntry{Detection of UPDs in HTS data}
   %\VignetteEngine{knitr::knitr}
@@ -55,17 +56,31 @@ knitr::opts_chunk$set(
 
 ## Background
 
-Uniparental disomy (UPD) is a rare genetic condition where an individual inherits both copies of a chromosome from one parent, as opposed to the typical inheritance of one copy from each parent. The extent of its contribution as a causative factor in rare genetic diseases remains largely unexplored. UPDs can lead to disease either by inheriting a carrier pathogenic mutation as homozygous from a carrier parent or by causing errors in genetic imprinting. Nevertheless, there are currently no standardized methods available for the detection and characterization of these events.
+Uniparental disomy (UPD) is a rare genetic condition where an individual
+inherits both copies of a chromosome from one parent, as opposed to the typical
+inheritance of one copy from each parent. The extent of its contribution as a 
+causative factor in rare genetic diseases remains largely unexplored. UPDs can 
+lead to disease either by inheriting a carrier pathogenic mutation as homozygous
+from a carrier parent or by causing errors in genetic imprinting. Nevertheless,
+there are currently no standardized methods available for the detection and 
+characterization of these events.
 
-We have developed `UPDhmm` R/Bioconductor package. The package provides a tool method to detect, classify and stablish the location
+We have developed `UPDhmm` R/Bioconductor package. The package provides
+a tool method to detect, classify and stablish the location
 of uniparental disomy events.
 
 
 ## Method overview
 
-The UPDhmm package uses a Hidden Markov Model (HMM) to identify regions to be considered as Uniparental disomy events taking genetic data from a trio (mother,father and proband) as input. The HMM was constructed based on the difference on the genotype allelic frequencies obtained with the different inheritance
-models (isodisomy, heterodisomy, or normal). With that, is possible to calculate the likelihood of each inheritance model giving a genotype
-sequence, using the Viterbi alogrithm. All in all, `UPDhmm` infers the most likely inheritance pattern of each genomic regions, thus identifying UPD events in the proband.
+The UPDhmm package uses a Hidden Markov Model (HMM) to identify regions to be
+considered as Uniparental disomy events taking genetic data from a trio 
+(mother,father and proband) as input. The HMM was constructed based on the 
+difference on the genotype allelic frequencies obtained with the different 
+inheritance models (isodisomy, heterodisomy, or normal). With that, is possible
+to calculate the likelihood of each inheritance model giving a genotype sequence,
+using the Viterbi alogrithm. All in all, `UPDhmm` infers the most likely
+inheritance pattern of each genomic regions, thus identifying UPD events
+in the proband.
 
 
 ```{r workflow, echo=FALSE, fig.cap= "UPDhmm package workflow", out.width = '90%', fig.align='center'}
@@ -97,7 +112,8 @@ library(dplyr)
 
 ## Quick start
 
-The input of the package is a multisample vcf file with the following requirements:
+The input of the package is a multisample vcf file with the following 
+requirements:
 
 - Only Bbiallelic sites are only allowd
 - GT format allowed are: 0/1, 1/0, 0/1 and 1/1 or 0|1, 1|0, 0|1
@@ -106,11 +122,16 @@ and 1|1
 
 # Datasets {#datasets}
 
-The UPDhmm package includes one example dataset, adapted from [GIB (genome in a bottle) database](https://www.nist.gov/programs-projects/genome-bottle). This dataset serves as a practical illustration and can be utilized for testing and familiarizing users with the functionality of the package.
+The UPDhmm package includes one example dataset, adapted from
+[GIB (genome in a bottle) database](https://www.nist.gov/programs-projects/genome-bottle).
+This dataset serves as a practical illustration and can be utilized for testing
+and familiarizing users with the functionality of the package.
 
 # Preprocessing
 
-After reading the VCF file, the `vcf_check()` function is employed for preprocessing the input data. This function facilitates reading the VCF in the suitable format for the UPDhmm package. 
+After reading the VCF file, the `vcf_check()` function is employed for 
+preprocessing the input data. This function facilitates reading the VCF in the
+suitable format for the UPDhmm package. 
 
 
 ```{r read Vcf,echo=TRUE}
@@ -126,7 +147,10 @@ def_vcf <- vcf_check(vcf,
 # Uniparental disomy detection
 
 
-The principal function of the `UPDhmm` package, `calculate_events()`, is the central function for identifying Uniparental Disomy (UPD) events. It takes the output from the previous `vcf_check()` function and systematically analyzes genomic data, splitting the VCF into chromosomes, applying the Viterbi algorithm,
+The principal function of `UPDhmm` package, `calculate_events()`, is the central
+function for identifying Uniparental Disomy (UPD) events. It takes the output
+from the previous `vcf_check()` function and systematically analyzes genomic
+data, splitting the VCF into chromosomes, applying the Viterbi algorithm,
 
 
  `calculate_events()` function encompasses a serie of subprocesses for identifying Uniparental Disomies (UPDs):
@@ -148,23 +172,25 @@ head(results_blocks)
 
 ## Results description
 
-The `calculate_events` function returns a `data.frame` containing all detected events in the provided trio. 
-If no events are found, the function will return an empty data.frame.
+The `calculate_events` function returns a `data.frame` containing all 
+detected events in the provided trio. If no events are found, the function 
+will return an empty data.frame.
 
-| Column name         | Description                                        |
+| Column name   | Description          |
 |---------------------|----------------------------------------------------|
-| `sample_id`         | Sample proband ID                                  |
-| `seqnames`          | Chromosome                                         | 
-|  `start`            | Start position of the block                        |
-|  `end`              | End position of the block                          |
-| `n_snps`            | Number of variants within the event                |
-| `group`             | Predicted state                                    |
-| `log_OR`            | log likelihood ratio                               |
-| `p_value`           | p-value                                            |
+| `sample_id`   | Sample proband ID          |
+| `seqnames`    | Chromosome           | 
+|  `start`    | Start position of the block      |
+|  `end`    | End position of the block        |
+| `n_snps`    | Number of variants within the event    |
+| `group`     | Predicted state          |
+| `log_OR`    | log likelihood ratio         |
+| `p_value`     | p-value            |
 
 ## Results Visualization
 To visualize the results, the `karyoploteR` package can be employed. 
-Here, a custom function is provided for easy implementation with the output results.
+Here, a custom function is provided for easy implementation with the output 
+results.
 
 ```{r echo=TRUE}
  library(karyoploteR)

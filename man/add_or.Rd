@@ -2,8 +2,9 @@
 % Please edit documentation in R/add_or.R
 \name{add_or}
 \alias{add_or}
-\title{Function to transform a large collapsed VCF into a dataframe, incorporating
-predicted states along with the log-likelihood ratio and p-value.}
+\title{Function to transform a large collapsed VCF into a dataframe,
+incorporating predicted states along with the log-likelihood
+ratio and p-value.}
 \usage{
 add_or(
   filtered_def_blocks_states = NULL,
@@ -25,6 +26,7 @@ add_or(
 data.frame containing the transformed information.
 }
 \description{
-Function to transform a large collapsed VCF into a dataframe, incorporating
-predicted states along with the log-likelihood ratio and p-value.
+Function to transform a large collapsed VCF into a dataframe,
+incorporating predicted states along with the log-likelihood
+ratio and p-value.
 }

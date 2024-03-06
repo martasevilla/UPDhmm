@@ -16,9 +16,9 @@ apply_viterbi<- function(largecollapsedVcf=NULL,hmm=NULL,genotypes=NULL) {
 # Now, transform genotypes into numerical codes and apply Viterbi algorithm.
   # The results will be stored as a metadata column in the object.
   genotypes_coded<-c(paste0(
-    genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "father"]],
-    genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "mother"]],
-    genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "proband"]]
+  genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "father"]],
+  genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "mother"]],
+  genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "proband"]]
   ))
 
   states<-HMM::viterbi(hmm,genotypes_coded)

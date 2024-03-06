@@ -1,4 +1,5 @@
-#' Function to simplify contiguous variants with the same state into blocks.
+#' Function to simplify contiguous variants with the same state into
+#' blocks.
 #'
 #' @param df Dataframe resulting from the `as_df_vcf` function.
 #' @return Dataframe containing information on the chromosome, start
@@ -14,17 +15,18 @@ blocks_vcf <- function(df) {
   seqnames<-NULL
   start<-NULL
   df <- df %>%
-    dplyr::mutate(n_snps_raw = cumsum(c(TRUE, group[-1L] != group[-length(group)])))
+  dplyr::mutate(n_snps_raw = cumsum(c(TRUE,
+                                      group[-1L] != group[-length(group)])))
 
   simplified_df <- df %>%
-    dplyr::group_by(n_snps_raw) %>%
-    dplyr::summarise(
-      start = min(start),
-      end = max(end),
-      group = unique(group),
-      seqnames = unique(seqnames),
-      n_snps = n()
-    )
+  dplyr::group_by(n_snps_raw) %>%
+  dplyr::summarise(
+    start = min(start),
+    end = max(end),
+    group = unique(group),
+    seqnames = unique(seqnames),
+    n_snps = n()
+  )
 
 
   simplified_df$n_snps_raw<-NULL
