@@ -1,14 +1,14 @@
 expect_df <- data.frame(
   start = c(100017453, 100018844, 100144782),
   end = c(100017453, 100018844, 100144782),
-  group = c("het_fat", "het_fat", "het_fat"),
+  group = c("iso_fat", "iso_fat", "iso_fat"),
   seqnames = c("chr10", "chr10", "chr10"),
   genotype = c("313", "313", "313")
 )
 
 input <- VariantAnnotation::readVcf("test.vcf.gz")
 colnames(input) <- c("proband", "father", "mother")
-S4Vectors::mcols(input)$states <- c("het_fat", "het_fat", "het_fat")
+S4Vectors::mcols(input)$states <- c("iso_fat", "iso_fat", "iso_fat")
 
 genotypes <-  c("0/0" = "1", "0/1" = "2","1/0" = "2", "1/1" = "3",
         "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3" )

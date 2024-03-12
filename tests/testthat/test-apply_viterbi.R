@@ -2,7 +2,7 @@
 expected_vcf <- VariantAnnotation::readVcf("test.vcf.gz")
 colnames(expected_vcf) <- c("proband", "father", "mother")
 S4Vectors::mcols(expected_vcf)$states <-
-  c("het_fat", "het_fat", "het_fat")
+  c("iso_fat", "iso_fat", "iso_fat")
 
 
 
@@ -19,7 +19,6 @@ genotypes <-  c("0/0" = "1", "0/1" = "2","1/0" = "2", "1/1" = "3",
 
 
 test_that("Test if viterbi algorithm works", {
-  #### no meter otras funciones del paquete
 
   out <- apply_viterbi(largecollapsedVcf = input,
                        genotypes = genotypes,

@@ -2,5 +2,3 @@
 
 export(calculate_events)
 export(vcf_check)
-import(dplyr)
-importFrom(magrittr,"%>%")

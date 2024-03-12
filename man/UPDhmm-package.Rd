@@ -18,5 +18,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Marta Sevilla \email{marta.sevilla@upf.edu} (\href{https://orcid.org/0009-0005-0179-920X}{ORCID})
 
+Authors:
+\itemize{
+  \item Carlos Ruiz-Arenas \email{cruizarenas@unav.es} (\href{https://orcid.org/0000-0002-6014-3498}{ORCID})
+}
+
 }
 \keyword{internal}

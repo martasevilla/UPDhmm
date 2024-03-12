@@ -17,7 +17,7 @@ input <- data.frame(
 )
 test_that("Test if simplification into blocks works", {
   out <- blocks_vcf(input)
-  out<-as.data.frame(out)
+  out <- as.data.frame(out)
   expect_equal(out, expected_df)
   expect_s3_class(out, "data.frame")
 })

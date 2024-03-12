@@ -1,12 +1,17 @@
 Package: UPDhmm
 Title: What the Package Does (One Line, Title Case)
-Version: 1.2.0
+Version: 0.9
 Authors@R: 
-  person(given = "Marta",
+  c(person(given = "Marta",
      family = "Sevilla",
      role= c("aut", "cre"),
      email = "marta.sevilla@upf.edu",
-     comment = c(ORCID = "0009-0005-0179-920X"))
+     comment = c(ORCID = "0009-0005-0179-920X")),
+     person(given = "Carlos",
+     family = "Ruiz-Arenas",
+     role= c("aut"),
+     email = "cruizarenas@unav.es",
+     comment = c(ORCID = "0000-0002-6014-3498")))
 Description: 
   Uniparental disomy (UPD) is a genetic condition
   where an individual inherits both copies 
@@ -36,7 +41,9 @@ Imports:
   IRanges,
   stats,
   magrittr,
-  dplyr
+  dplyr,
+  base,
+  methods
 Suggests: 
   knitr,
   testthat (>= 2.1.0),

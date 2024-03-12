@@ -8,10 +8,10 @@ blocks.}
 blocks_vcf(df)
 }
 \arguments{
-\item{df}{Dataframe resulting from the \code{as_df_vcf} function.}
+\item{df}{data.frame resulting from the \code{as_df_vcf} function.}
 }
 \value{
-Dataframe containing information on the chromosome, start
+data.frame containing information on the chromosome, start
 #' position of the block, end position of the block, and predicted state.
 }
 \description{

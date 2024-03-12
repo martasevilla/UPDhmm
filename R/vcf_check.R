@@ -39,7 +39,7 @@ vcf_check <- function(largecollapsedVcf, check_quality = FALSE, father = NULL,
 
   }
 
-
+#Change names in vcf for subsequent steps
   colnames(largecollapsedVcf) <- gsub(father, "father",
                     colnames(largecollapsedVcf))
   colnames(largecollapsedVcf) <- gsub(mother, "mother",

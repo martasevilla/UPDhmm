@@ -6,10 +6,10 @@
 #' @param genotypes Possible GT formats and its correspondency with the hmm
 #'
 #' @return dataframe
-as_df_vcf <- function(largecollapsedVcf=NULL,genotypes=NULL) {
+as_df_vcf <- function(largecollapsedVcf = NULL,genotypes = NULL) {
 
 
-  genotypes_coded<-paste0(
+  genotypes_coded <- paste0(
   genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "father"]],
   genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "mother"]],
   genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "proband"]]
