@@ -4,10 +4,12 @@
 \alias{calculate_events}
 \title{Calculate UPD events in trio VCFs.}
 \usage{
-calculate_events(largecollapsedVcf = NULL, genotypes = NULL)
+calculate_events(largecollapsedVcf = NULL, hmm = "hmm", genotypes = NULL)
 }
 \arguments{
 \item{largecollapsedVcf}{The VCF file in the general format}
+
+\item{hmm}{hmm constructed for identifying hidden states}
 
 \item{genotypes}{Possible GT formats and its correspondency with the hmm
 (largecollapsedVcf) with VariantAnnotation package.}

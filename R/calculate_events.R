@@ -61,7 +61,7 @@ calculate_events <- function(largecollapsedVcf = NULL,
   tryCatch(blocks_vcf(df),error = function(e) NULL)})
 
 #5 simplify all chr objects into one data.frame
-   def_blocks_states <- data.table::rbindlist(blocks_state)
+   def_blocks_states <- base::Reduce(rbind,blocks_state)
 
 #6 Filter normal state blocks , sexual chromosomes and isolated variants
    filtered_def_blocks_states <-
@@ -84,7 +84,7 @@ calculate_events <- function(largecollapsedVcf = NULL,
      block_def<-data.frame()
    }
    # 8 Transform final output to data.frame
-   block_def <- base::Reduce(blocks_list)
+   block_def <- base::Reduce(rbind,blocks_list)
 
 
   return(block_def)

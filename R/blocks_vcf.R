@@ -20,7 +20,7 @@ blocks_vcf <- function(df) {
                               stringsAsFactors = FALSE)
 
   # Loop through unique n_snps_raw values
-  for (n in cumsum::unique(df$n_snps_raw)) {
+  for (n in base::unique(df$n_snps_raw)) {
     subset_df <- df[df$n_snps_raw == n, ]
     new_row <- data.frame(
       start = min(subset_df$start),

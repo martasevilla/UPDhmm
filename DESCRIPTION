@@ -34,14 +34,11 @@ Depends:
 Imports:
   HMM,
   utils,
-  data.table,
   VariantAnnotation,
   GenomicRanges,
   S4Vectors,
   IRanges,
   stats,
-  magrittr,
-  dplyr,
   base,
   methods
 Suggests: 
@@ -51,7 +48,8 @@ Suggests:
   rmarkdown,
   markdown,
   karyoploteR,
-  regioneR
+  regioneR,
+  dplyr
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 Bugreports: https://github.com/martasevilla/UPDhmm/issues
