@@ -2,28 +2,30 @@
 % Please edit documentation in R/calculate_events.R
 \name{calculate_events}
 \alias{calculate_events}
-\title{Calculate UPD events in trio vcfs}
+\title{Calculate UPD events in trio VCFs.}
 \usage{
-calculate_events(largecollapsedVcf)
+calculate_events(largecollapsedVcf = NULL, genotypes = NULL)
 }
 \arguments{
-\item{largecollapsedVcf}{The general format of vcf with VariantAnnotation
-package}
+\item{largecollapsedVcf}{The VCF file in the general format}
+
+\item{genotypes}{Possible GT formats and its correspondency with the hmm
+(largecollapsedVcf) with VariantAnnotation package.}
 }
 \value{
-optional save object (raw and simplify ) and export bed file
+Dataframe object containing blocks of predicted events.
 }
 \description{
-This function is for appliying the hidden-markov-model using the viterbi
-algorithm after that it simplify into blocks and finally export into a
-bed file
+This function predicts the hidden states by applying the Viterbi algorithm
+using the Hidden Markov Model (HMM) from the UPDhmm package. It takes the
+genotypes of the trio as input and includes a final step to simplify the
+results into blocks.
 }
 \examples{
-fl <- system.file("extdata", "test.vcf.gz", package = "UPDhmm")
-vcf <- VariantAnnotation::readVcf(fl)
-largecollapsedVcf <- vcf_check(vcf,
-  proband = "Sample1", mother = "Sample3",
-  father = "Sample2"
-)
-calculate_events(largecollapsedVcf)
+file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
+vcf <- VariantAnnotation::readVcf(file)
+def_vcf <- vcf_check(vcf,proband = "NA19675",mother = "NA19678",
+father = "NA19679")
+
+calculate_events(def_vcf)
 }

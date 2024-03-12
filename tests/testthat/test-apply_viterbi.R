@@ -1,8 +1,8 @@
 # create the expected output
 expected_vcf <- VariantAnnotation::readVcf("test.vcf.gz")
 colnames(expected_vcf) <- c("proband", "father", "mother")
-GenomicRanges::elementMetadata(expected_vcf)$metadata <-
-  c("het_fat", "het_fat", "het_fat")
+S4Vectors::mcols(expected_vcf)$states <-
+  c("iso_fat", "iso_fat", "iso_fat")
 
 
 
@@ -10,13 +10,20 @@ GenomicRanges::elementMetadata(expected_vcf)$metadata <-
 input <- VariantAnnotation::readVcf("test.vcf.gz")
 colnames(input) <- c("proband", "father", "mother")
 
-test_that("Check if viterbi algorithm is working", {
-  #### no meter otras funciones del paquete
 
-  out <- apply_viterbi(input)
+
+utils::data("hmm")
+hmm <- hmm
+genotypes <-  c("0/0" = "1", "0/1" = "2","1/0" = "2", "1/1" = "3",
+        "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3" )
+
+
+test_that("Test if viterbi algorithm works", {
+
+  out <- apply_viterbi(largecollapsedVcf = input,
+                       genotypes = genotypes,
+                       hmm = hmm)
   expect_s4_class(out, "CollapsedVCF")
-  expect_equal(
-    GenomicRanges::elementMetadata(out)$metadata,
-    GenomicRanges::elementMetadata(expected_vcf)$metadata
-  )
+  expect_equal(S4Vectors::mcols(out)$states,
+               S4Vectors::mcols(expected_vcf)$states)
 })

@@ -1,85 +1,92 @@
-#' Calculate UPD events in trio vcfs
+#' Calculate UPD events in trio VCFs.
 #'
-#' This function is for appliying the hidden-markov-model using the viterbi
-#' algorithm after that it simplify into blocks and finally export into a
-#' bed file
+#' This function predicts the hidden states by applying the Viterbi algorithm
+#' using the Hidden Markov Model (HMM) from the UPDhmm package. It takes the
+#' genotypes of the trio as input and includes a final step to simplify the
+#' results into blocks.
 #'
-#' @param largecollapsedVcf The general format of vcf with VariantAnnotation
-#' package
-#' @return optional save object (raw and simplify ) and export bed file
-#'
+#' @param largecollapsedVcf The VCF file in the general format
+#' @param hmm hmm constructed for identifying hidden states
+#' @param genotypes Possible GT formats and its correspondency with the hmm
+#' (largecollapsedVcf) with VariantAnnotation package.
+#' @return Dataframe object containing blocks of predicted events.
 #' @export
 #' @examples
-#' fl <- system.file("extdata", "test.vcf.gz", package = "UPDhmm")
-#' vcf <- VariantAnnotation::readVcf(fl)
-#' largecollapsedVcf <- vcf_check(vcf,
-#'   proband = "Sample1", mother = "Sample3",
-#'   father = "Sample2"
-#' )
-#' calculate_events(largecollapsedVcf)
-calculate_events <- function(largecollapsedVcf) {
-  # split the vcf into chromosomes
-  split_vcf <- split(largecollapsedVcf,
-    f = GenomicRanges::seqnames(largecollapsedVcf)
-  )
+#' file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
+#' vcf <- VariantAnnotation::readVcf(file)
+#' def_vcf <- vcf_check(vcf,proband = "NA19675",mother = "NA19678",
+#' father = "NA19679")
+#'
+#' calculate_events(def_vcf)
 
-  #apply viterbi
-   split_vcf <- lapply(
-     split_vcf,
-     purrr::possibly(apply_viterbi, otherwise = NULL)
-   )
+calculate_events <- function(largecollapsedVcf = NULL,
+                             hmm,
+                             genotypes) {
 
-  # as_df
-  split_vcf_df <- sapply(split_vcf, function(x) {
-    tryCatch(
-      as_df_vcf(x),
-      error = function(e) NULL
-    )
-  }, simplify = FALSE)
-
-  blocks_state <- sapply(split_vcf_df, function(df) {
-    tryCatch(
-      blocks_vcf(df),
-      error = function(e) NULL
-    )
-  }, simplify = FALSE)
-  # simplify all chr into one datafram
-  def_blocks_states <- data.table::rbindlist(blocks_state[!sapply(
-    blocks_state,
-    is.null
-  )])
-
-  colnames(def_blocks_states) <- c("start", "end", "group", "n_snps", "seqnames")
-  filtered_def_blocks_states <- subset(
-    def_blocks_states,
-    def_blocks_states$n_snps > 1 &
-      def_blocks_states$group != "normal" &
-      !(def_blocks_states$seqnames %in%
-        c("chrX", "X"))
-  )
-  filtered_def_blocks_states$log_OR <- numeric(nrow(filtered_def_blocks_states))
-  filtered_def_blocks_states$p_value <- numeric(nrow(filtered_def_blocks_states))
-  if (nrow(filtered_def_blocks_states) > 0) {
-    for (i in seq_len(nrow(filtered_def_blocks_states))) {
-      filtered_def_blocks_states$log_OR[[i]] <-
-        as.numeric(add_or(
-          filtered_def_blocks_states$start[[i]],
-          filtered_def_blocks_states$end[[i]],
-          filtered_def_blocks_states$seqnames[[i]],
-          filtered_def_blocks_states$group[[i]],
-          split_vcf_df
-        )["log_OR"])
-      filtered_def_blocks_states$p_value[[i]] <-
-        as.numeric(add_or(
-          filtered_def_blocks_states$start[[i]],
-          filtered_def_blocks_states$end[[i]],
-          filtered_def_blocks_states$seqnames[[i]],
-          filtered_def_blocks_states$group[[i]],
-          split_vcf_df
-        )["p_value"])
-    }
-  } else {
-    methods::show("No events found")
+  if (!methods::is(hmm, "list")) {
+    utils::data(hmm, package = "UPDhmm", envir = environment())
+    hmm<-get(hmm)
   }
-  return(filtered_def_blocks_states)
+
+  genotypes <- if (base::is.null(genotypes)) {
+    c("0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
+      "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3")
+  } else {
+    genotypes
+  }
+
+
+# 1 split the vcf into chromosomes
+  split_vcf_raw <- split(largecollapsedVcf,
+           f = GenomicRanges::seqnames(largecollapsedVcf))
+
+#2 apply viterbi
+  split_vcf <- lapply(split_vcf_raw, function(x) {
+  tryCatch(
+   apply_viterbi(largecollapsedVcf = x, hmm = hmm, genotypes = genotypes),
+   error = function(e) NULL  # Return NULL if an error occurs
+   )
+ })
+
+#3 as_df
+  split_vcf_df <- lapply(split_vcf, function(x)
+  { tryCatch(as_df_vcf(largecollapsedVcf=x,
+             genotypes = genotypes),
+       error = function(e) NULL) })
+
+# #4 Create blocks of contiguous positions with same state
+   blocks_state <- lapply(split_vcf_df, function(df) {
+  tryCatch(blocks_vcf(df),error = function(e) NULL)})
+
+#5 simplify all chr objects into one data.frame
+   def_blocks_states <- data.table::rbindlist(blocks_state)
+
+#6 Filter normal state blocks , sexual chromosomes and isolated variants
+   filtered_def_blocks_states <-
+   def_blocks_states[def_blocks_states$n_snps > 1 &
+             def_blocks_states$group != "normal" &
+             !(def_blocks_states$seqnames %in% c("chrX", "X")), ]
+# 7 Calculate statistics parameters
+   if (nrow(filtered_def_blocks_states) > 0) {
+     blocks_list <- lapply(seq_len(nrow(filtered_def_blocks_states)), function(i)
+     {
+       add_or(
+         filtered_def_blocks_states = filtered_def_blocks_states[i, , drop = FALSE],
+         largecollapsedVcf = largecollapsedVcf,
+         hmm = hmm,
+         genotypes = genotypes)
+     })
+   }
+   else{
+
+     block_def<-data.frame()
+   }
+   # 8 Transform final output to data.frame
+   block_def <- data.table::rbindlist(blocks_list)
+
+# 8 Transform final output to data.frame
+  block_def <- data.table::rbindlist(blocks_list)
+  return(block_def)
 }
+
+

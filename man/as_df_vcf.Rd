@@ -2,18 +2,22 @@
 % Please edit documentation in R/as_df_vcf.R
 \name{as_df_vcf}
 \alias{as_df_vcf}
-\title{Function for transform a largecollapsedVcf into a dataframe with predicted
-states (only with chr,start,end and metadatacolumn)}
+\title{Function to transform a large collapsed VCF into a dataframe with
+predicted states, including chromosome, start position, end position
+and metadata.}
 \usage{
-as_df_vcf(largecollapsedVcf)
+as_df_vcf(largecollapsedVcf = NULL, genotypes = NULL)
 }
 \arguments{
-\item{largecollapsedVcf}{Vcf file}
+\item{largecollapsedVcf}{Name of the large collapsed VCF file.}
+
+\item{genotypes}{Possible GT formats and its correspondency with the hmm}
 }
 \value{
 dataframe
 }
 \description{
-Function for transform a largecollapsedVcf into a dataframe with predicted
-states (only with chr,start,end and metadatacolumn)
+Function to transform a large collapsed VCF into a dataframe with
+predicted states, including chromosome, start position, end position
+and metadata.
 }

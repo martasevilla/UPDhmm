@@ -1,36 +1,58 @@
-#' Function for transform a largecollapsedVcf into a dataframe with
-#' predicted states (only with chr,start,end and metadatacolumn)
+#' Function to transform a large collapsed VCF into a dataframe,
+#' incorporating predicted states along with the log-likelihood
+#' ratio and p-value.
 #'
-#' @param split_vcf_df input vcf file
-#' @param start_coord start chromosomal position of every block
-#' @param end_coord  end chromosomal position of every block
-#' @param seqnames name of the chromosome of the blocks (e.g. chr1 or 1)
-#' @param group hidden state assigned by  UPDHmm
-#' @return dataframe
+#' @param largecollapsedVcf Input VCF file
+#'
+#' @param filtered_def_blocks_states data.frame object containing the blocks
+#' @param hmm Hidden Markov Model used to infer the events
+#' @param genotypes Possible GT formats and its correspondency with the hmm
+#' @return data.frame containing the transformed information.
 
-add_or <- function(start_coord, end_coord, seqnames, group, split_vcf_df = NULL) {
-  if (is.null(split_vcf_df)) {
-    split_vcf_df <- split_vcf_df
-  }
 
-  # Extract relevant genotypes from as_vcf_df
-  genotypes <-
-    split_vcf_df[[seqnames]]$genotype[split_vcf_df[[seqnames]]$start >= start_coord &
-      split_vcf_df[[seqnames]]$end <= end_coord]
 
-  # Run forward algorithm for the block
-  utils::data("hmm")
-  hmm <- hmm
-  forward_matrix <- HMM::forward(hmm, genotypes)
+add_or <- function(filtered_def_blocks_states = NULL,
+                   largecollapsedVcf = NULL, hmm = NULL, genotypes = NULL) {
 
-  log_likelihood_normal <- utils::tail(forward_matrix["normal", ], 1)
-  log_likelihood_other <- utils::tail(forward_matrix[group, ], 1)
+  gRanges_block <-
+    GenomicRanges::makeGRangesFromDataFrame(filtered_def_blocks_states,
+                                            keep.extra.columns = TRUE,
+                                            ignore.strand = TRUE,
+                                            seqnames.field = c("seqnames"),
+                                            start.field = "start",
+                                            end.field = c("end"))
+
+  overlaps <- IRanges::subsetByOverlaps(largecollapsedVcf, gRanges_block)
+
+  genotypes_uncoded <- VariantAnnotation::geno(overlaps)$GT
+
+  genotypes_coded <- c(
+    paste0(genotypes[genotypes_uncoded[, "father"]],
+           genotypes[genotypes_uncoded[, "mother"]],
+           genotypes[genotypes_uncoded[, "proband"]])
+  )
+
+  forward_matrix <- HMM::forward(hmm, genotypes_coded)
+
+  log_likelihood_normal <-
+    utils::tail(forward_matrix["normal", ], 1)
+
+  log_likelihood_other <-
+    utils::tail(forward_matrix[S4Vectors::mcols(gRanges_block)$group, ], 1)
+
+
   overall_log_odds_ratio <- -2 * (log_likelihood_normal - log_likelihood_other)
+
   p_value <- stats::pchisq(overall_log_odds_ratio, 1, lower.tail = FALSE)
 
-  # Return a named vector with log_OR and p_value
-  result <- c(log_OR = overall_log_odds_ratio, p_value = p_value)
-  names(result) <- c("log_OR", "p_value")
+  S4Vectors::mcols(gRanges_block)$log_OR <- overall_log_odds_ratio
+  S4Vectors::mcols(gRanges_block)$p_value <- p_value
 
-  return(result)
+
+  df <- as.data.frame(gRanges_block)
+  df <- df[, !(names(df) %in% c("strand","width"))]
+  return(df)
 }
+
+
+

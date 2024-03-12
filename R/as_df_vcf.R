@@ -1,24 +1,25 @@
-#' Function for transform a largecollapsedVcf into a dataframe with predicted
-#' states (only with chr,start,end and metadatacolumn)
+#' Function to transform a large collapsed VCF into a dataframe with
+#' predicted states, including chromosome, start position, end position
+#' and metadata.
 #'
-#' @param largecollapsedVcf Vcf file
+#' @param largecollapsedVcf Name of the large collapsed VCF file.
+#' @param genotypes Possible GT formats and its correspondency with the hmm
 #'
 #' @return dataframe
-as_df_vcf <- function(largecollapsedVcf) {
-  genotypes <- c(
-    "0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
-    "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3"
+as_df_vcf <- function(largecollapsedVcf = NULL,genotypes = NULL) {
+
+
+  genotypes_coded <- paste0(
+  genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "father"]],
+  genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "mother"]],
+  genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "proband"]]
   )
   vcf <- data.frame(
-    start = GenomicRanges::start(largecollapsedVcf),
-    end = GenomicRanges::end(largecollapsedVcf),
-    group = GenomicRanges::elementMetadata(largecollapsedVcf)$metadata,
-    seqnames = as.character(GenomicRanges::seqnames(largecollapsedVcf)),
-    genotype =
-      paste0(
-        genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "father"]],
-        genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "mother"]],
-        genotypes[VariantAnnotation::geno(largecollapsedVcf)$GT[, "proband"]]
-      )
+  start = GenomicRanges::start(largecollapsedVcf),
+  end = GenomicRanges::end(largecollapsedVcf),
+  group = S4Vectors::mcols(largecollapsedVcf)$states,
+  seqnames = as.character(GenomicRanges::seqnames(largecollapsedVcf)),
+  genotype = genotypes_coded
+
   )
 }
