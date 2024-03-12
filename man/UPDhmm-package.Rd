@@ -4,7 +4,7 @@
 \name{UPDhmm-package}
 \alias{UPDhmm}
 \alias{UPDhmm-package}
-\title{UPDhmm: What the Package Does (One Line, Title Case)}
+\title{UPDhmm: Detecting Uniparental Disomy through NGS trio data}
 \description{
 Uniparental disomy (UPD) is a genetic condition where an individual inherits both copies of a chromosome or part of it from one parent, rather than one copy from each parent. This package contains a HMM for detecting UPDs throguh HTS (High Throughput Sequencing) data from trio assays. By analizing the genotypes in the trio, the model infers a hidden state (normal, father isodisomy, mother isodisomy, father heterodisomy and mother heterodisomy).
 }
@@ -12,6 +12,7 @@ Uniparental disomy (UPD) is a genetic condition where an individual inherits bot
 Useful links:
 \itemize{
   \item \url{https://github.com/martasevilla/UPDhmm}
+  \item Report bugs at \url{https://github.com/martasevilla/UPDhmm/issues}
 }
 
 }

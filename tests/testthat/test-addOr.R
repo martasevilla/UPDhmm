@@ -27,7 +27,7 @@ genotypes <-  c("0/0" = "1", "0/1" = "2","1/0" = "2", "1/1" = "3",
 
 
 test_that("Test if calculation of statistic parameters works", {
-  out <- add_or(filtered_def_blocks_states = position,
+  out <- addOr(filtered_def_blocks_states = position,
         largecollapsedVcf = input,
         genotypes = genotypes,
         hmm = hmm)

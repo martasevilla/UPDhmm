@@ -1,6 +1,7 @@
 Package: UPDhmm
-Title: What the Package Does (One Line, Title Case)
-Version: 0.9
+Title: Detecting Uniparental Disomy through NGS trio data
+Version: 0.99-1
+BugReports: https://github.com/martasevilla/UPDhmm/issues
 Authors@R: 
   c(person(given = "Marta",
      family = "Sevilla",
@@ -23,14 +24,14 @@ Description:
   infers a hidden state (normal, father isodisomy, 
   mother isodisomy, father heterodisomy and mother heterodisomy).
 biocViews: 
-  Workflow,
-  GenomicVariantsWorkflow
+  Software,
+  HiddenMarkovModel
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.3.1
 Depends: 
-  R (>= 4.3.0)
+  R (>= 4.4.0)
 Imports:
   HMM,
   utils,
@@ -39,7 +40,6 @@ Imports:
   S4Vectors,
   IRanges,
   stats,
-  base,
   methods
 Suggests: 
   knitr,
@@ -52,5 +52,4 @@ Suggests:
   dplyr
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
-Bugreports: https://github.com/martasevilla/UPDhmm/issues
 URL:https://github.com/martasevilla/UPDhmm

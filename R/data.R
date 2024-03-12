@@ -6,7 +6,7 @@
 #' This dataset provides Hidden Markov Model (HMM) parameters for predicting
 #' uniparental disomy (UPD) events in trio genomic data.
 #'
-#' \describe{
+#'\describe{
 #'   \item{states}{Five different possible states.}
 #'   \item{symbols}{Code symbols used for genotype combinations.}
 #'   \item{startProbs}{The initial probabilities of each state.}
@@ -14,8 +14,8 @@
 #'   to another.}
 #'   \item{emissionProbs}{Given a certain genotype combination, the odds
 #'   of each possible state.}
-#' }
-#' @source Created in-house based on basic Mendelian rules for calculating
+#'}
+#'@source Created in-house based on basic Mendelian rules for calculating
 #' UPD events.
-#' @examples data(hmm)
+#'@examples data(hmm)
 "hmm"

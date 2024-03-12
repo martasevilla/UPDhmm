@@ -16,7 +16,7 @@ input <- data.frame(
   seqnames = c("chr10", "chr10", "chr10")
 )
 test_that("Test if simplification into blocks works", {
-  out <- blocks_vcf(input)
+  out <- blocksVcf(input)
   out <- as.data.frame(out)
   expect_equal(out, expected_df)
   expect_s3_class(out, "data.frame")

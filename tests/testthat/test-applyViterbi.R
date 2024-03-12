@@ -20,7 +20,7 @@ genotypes <-  c("0/0" = "1", "0/1" = "2","1/0" = "2", "1/1" = "3",
 
 test_that("Test if viterbi algorithm works", {
 
-  out <- apply_viterbi(largecollapsedVcf = input,
+  out <- applyViterbi(largecollapsedVcf = input,
                        genotypes = genotypes,
                        hmm = hmm)
   expect_s4_class(out, "CollapsedVCF")
