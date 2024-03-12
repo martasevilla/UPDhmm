@@ -20,17 +20,19 @@
 #' calculate_events(def_vcf)
 
 calculate_events <- function(largecollapsedVcf = NULL,
-                             hmm,
-                             genotypes) {
+                             hmm = "hmm",
+                             genotypes = NULL) {
 
   if (!methods::is(hmm, "list")) {
+
     utils::data(hmm, package = "UPDhmm", envir = environment())
-    hmm<-get(hmm)
+
   }
 
-  genotypes <- if (base::is.null(genotypes)) {
-    c("0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
+  if (base::is.null(genotypes)) {
+    genotypes <- c("0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
       "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3")
+
   } else {
     genotypes
   }
@@ -82,10 +84,9 @@ calculate_events <- function(largecollapsedVcf = NULL,
      block_def<-data.frame()
    }
    # 8 Transform final output to data.frame
-   block_def <- data.table::rbindlist(blocks_list)
+   block_def <- base::Reduce(blocks_list)
 
-# 8 Transform final output to data.frame
-  block_def <- data.table::rbindlist(blocks_list)
+
   return(block_def)
 }
 
