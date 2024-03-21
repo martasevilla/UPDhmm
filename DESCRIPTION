@@ -1,6 +1,6 @@
 Package: UPDhmm
 Title: Detecting Uniparental Disomy through NGS trio data
-#Version: 0.99
+Version: 0.99.2
 BugReports: https://github.com/martasevilla/UPDhmm/issues
 Authors@R: 
   c(person(given = "Marta",
