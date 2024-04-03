@@ -4,7 +4,6 @@
 \alias{calculateEvents}
 \title{Calculate UPD events in trio VCFs.}
 \usage{
-<<<<<<< HEAD
 calculateEvents(largeCollapsedVcf, hmm = "hmm", genotypes)
 }
 \arguments{
@@ -23,17 +22,6 @@ observations in the "emissionProbs" matrix.
 
 \item{genotypes}{Possible GT formats and its correspondence with the hmm
 (largeCollapsedVcf) with VariantAnnotation package.}
-=======
-calculateEvents(largecollapsedVcf = NULL, hmm = "hmm", genotypes = NULL)
-}
-\arguments{
-\item{largecollapsedVcf}{The VCF file in the general format}
-
-\item{hmm}{hmm constructed for identifying hidden states}
-
-\item{genotypes}{Possible GT formats and its correspondency with the hmm
-(largecollapsedVcf) with VariantAnnotation package.}
->>>>>>> upstream/devel
 }
 \value{
 Dataframe object containing blocks of predicted events.
@@ -47,15 +35,10 @@ results into blocks.
 \examples{
 file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
 vcf <- VariantAnnotation::readVcf(file)
-<<<<<<< HEAD
 processedVcf <- vcfCheck(vcf,
     proband = "NA19675", mother = "NA19678",
     father = "NA19679"
 )
-=======
-processedVcf <- vcfCheck(vcf,proband = "NA19675",mother = "NA19678",
-father = "NA19679")
->>>>>>> upstream/devel
 
 calculateEvents(processedVcf)
 }

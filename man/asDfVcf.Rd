@@ -6,21 +6,12 @@
 predicted states, including chromosome, start position, end position
 and metadata.}
 \usage{
-<<<<<<< HEAD
 asDfVcf(largeCollapsedVcf, genotypes)
 }
 \arguments{
 \item{largeCollapsedVcf}{Name of the large collapsed VCF file.}
 
 \item{genotypes}{Possible GT formats and its correspondence with the hmm}
-=======
-asDfVcf(largecollapsedVcf = NULL, genotypes = NULL)
-}
-\arguments{
-\item{largecollapsedVcf}{Name of the large collapsed VCF file.}
-
-\item{genotypes}{Possible GT formats and its correspondency with the hmm}
->>>>>>> upstream/devel
 }
 \value{
 dataframe

@@ -18,25 +18,15 @@ Description:
   where an individual inherits both copies 
   of a chromosome or part of it from one parent, 
   rather than one copy from each parent. This package 
-<<<<<<< HEAD
   contains a HMM for detecting UPDs through HTS 
   (High Throughput Sequencing) data from trio assays. 
   By analyzing the genotypes in the trio, the model
-=======
-  contains a HMM for detecting UPDs throguh HTS 
-  (High Throughput Sequencing) data from trio assays. 
-  By analizing the genotypes in the trio, the model
->>>>>>> upstream/devel
   infers a hidden state (normal, father isodisomy, 
   mother isodisomy, father heterodisomy and mother heterodisomy).
 biocViews: 
   Software,
-<<<<<<< HEAD
   HiddenMarkovModel,
   Genetics
-=======
-  HiddenMarkovModel
->>>>>>> upstream/devel
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false
@@ -53,7 +43,6 @@ Imports:
   stats,
   methods
 Suggests: 
-<<<<<<< HEAD
     knitr,
     testthat (>= 2.1.0),
     BiocStyle,
@@ -66,16 +55,3 @@ VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/martasevilla/UPDhmm
 Language: en-US
-=======
-  knitr,
-  testthat (>= 2.1.0),
-  BiocStyle,
-  rmarkdown,
-  markdown,
-  karyoploteR,
-  regioneR,
-  dplyr
-VignetteBuilder: knitr
-Roxygen: list(markdown = TRUE)
-URL:https://github.com/martasevilla/UPDhmm
->>>>>>> upstream/devel

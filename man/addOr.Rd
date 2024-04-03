@@ -6,21 +6,11 @@
 incorporating predicted states along with the log-likelihood
 ratio and p-value.}
 \usage{
-<<<<<<< HEAD
 addOr(filtered_def_blocks_states, largeCollapsedVcf, hmm, genotypes)
-=======
-addOr(
-  filtered_def_blocks_states = NULL,
-  largecollapsedVcf = NULL,
-  hmm = NULL,
-  genotypes = NULL
-)
->>>>>>> upstream/devel
 }
 \arguments{
 \item{filtered_def_blocks_states}{data.frame object containing the blocks}
 
-<<<<<<< HEAD
 \item{largeCollapsedVcf}{Input VCF file}
 
 \item{hmm}{Hidden Markov Model used to infer the events. The format should
@@ -35,13 +25,6 @@ observations in the "emissionProbs" matrix.
 }}
 
 \item{genotypes}{Possible GT formats and its correspondence with the hmm}
-=======
-\item{largecollapsedVcf}{Input VCF file}
-
-\item{hmm}{Hidden Markov Model used to infer the events}
-
-\item{genotypes}{Possible GT formats and its correspondency with the hmm}
->>>>>>> upstream/devel
 }
 \value{
 data.frame containing the transformed information.
