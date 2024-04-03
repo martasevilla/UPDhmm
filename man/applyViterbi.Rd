@@ -4,6 +4,7 @@
 \alias{applyViterbi}
 \title{Apply the hidden Markov model using the Viterbi algorithm.}
 \usage{
+<<<<<<< HEAD
 applyViterbi(largeCollapsedVcf, hmm, genotypes)
 }
 \arguments{
@@ -15,6 +16,19 @@ applyViterbi(largeCollapsedVcf, hmm, genotypes)
 }
 \value{
 largeCollapsedVcf
+=======
+applyViterbi(largecollapsedVcf = NULL, hmm = NULL, genotypes = NULL)
+}
+\arguments{
+\item{largecollapsedVcf}{input vcf file}
+
+\item{hmm}{Hidden Markov Model used to infer the events}
+
+\item{genotypes}{Possible GT formats and its correspondency with the hmm}
+}
+\value{
+largecollapsedVcf
+>>>>>>> upstream/devel
 }
 \description{
 Apply the hidden Markov model using the Viterbi algorithm.

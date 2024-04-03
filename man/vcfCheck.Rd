@@ -4,10 +4,23 @@
 \alias{vcfCheck}
 \title{Check quality parameters (optional) and change IDs.}
 \usage{
+<<<<<<< HEAD
 vcfCheck(largeCollapsedVcf, check_quality = FALSE, father, mother, proband)
 }
 \arguments{
 \item{largeCollapsedVcf}{The file in largeCollapsedVcf format.}
+=======
+vcfCheck(
+  largecollapsedVcf,
+  check_quality = FALSE,
+  father = NULL,
+  mother = NULL,
+  proband = NULL
+)
+}
+\arguments{
+\item{largecollapsedVcf}{The file in largeCollapsed format.}
+>>>>>>> upstream/devel
 
 \item{check_quality}{TRUE/FALSE. If quality parameters want to be measured.
 Default = FALSE}
@@ -19,10 +32,17 @@ Default = FALSE}
 \item{proband}{Name of the proband's sample.}
 }
 \value{
+<<<<<<< HEAD
 largeCollapsedVcf (VariantAnnotation VCF format).
 }
 \description{
 This function takes a VCF file and converts it into a largeCollapsedVcf
+=======
+LargecollapsedVCF (VariantAnnotation VCF format).
+}
+\description{
+This function takes a VCF file and converts it into a large collapsedVcf
+>>>>>>> upstream/devel
 object using the VariantAnnotation package. It includes an optional
 parameter, quality_check, which issues warnings if positions lack good
 quality based on RD and GQ parameters in the input VCF.
@@ -30,7 +50,17 @@ quality based on RD and GQ parameters in the input VCF.
 \examples{
 fl <- system.file("extdata", "test_het_mat.vcf.gz", package = "UPDhmm")
 vcf <- VariantAnnotation::readVcf(fl)
+<<<<<<< HEAD
 processedVcf <-
    vcfCheck(vcf, proband = "Sample1", mother = "Sample3", father = "Sample2")
+=======
+processedVcf<-
+vcfCheck(vcf, proband = "Sample1", mother = "Sample3", father = "Sample2")
+
+
+
+
+
+>>>>>>> upstream/devel
 
 }

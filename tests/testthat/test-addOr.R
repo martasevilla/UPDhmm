@@ -1,4 +1,5 @@
 expected_result <- data.frame(
+<<<<<<< HEAD
     seqnames = "chr10",
     start = 100017453,
     end = 100144782,
@@ -11,10 +12,23 @@ expected_result <- data.frame(
 
 file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
 input <- VariantAnnotation::readVcf(file)
+=======
+  seqnames = "chr10",
+  start = 100017453,
+  end = 100144782,
+  group = "iso_fat",
+  n_snps = 3,
+  log_OR = 37.4,
+  p_value = 9e-10
+)
+
+input <- VariantAnnotation::readVcf("test.vcf.gz")
+>>>>>>> upstream/devel
 colnames(input) <- c("proband", "father", "mother")
 S4Vectors::mcols(input)$states <- c("het_fat", "het_fat", "het_fat")
 
 position <- data.frame(
+<<<<<<< HEAD
     start = 100017453,
     end = 100144782,
     group = "iso_fat",
@@ -28,10 +42,23 @@ genotypes <- c(
     "0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
     "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3"
 )
+=======
+            start = 100017453,
+            end = 100144782,
+            group = "iso_fat",
+            seqnames = "chr10",
+            n_snps = 3)
+
+utils::data("hmm")
+hmm <- hmm
+genotypes <-  c("0/0" = "1", "0/1" = "2","1/0" = "2", "1/1" = "3",
+        "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3" )
+>>>>>>> upstream/devel
 
 
 
 test_that("Test if calculation of statistic parameters works", {
+<<<<<<< HEAD
     out <- addOr(
         filtered_def_blocks_states = position,
         largeCollapsedVcf = input,
@@ -45,4 +72,17 @@ test_that("Test if calculation of statistic parameters works", {
     out$start <- as.numeric(out$start)
     out$end <- as.numeric(out$end)
     expect_equal(out, expected_result)
+=======
+  out <- addOr(filtered_def_blocks_states = position,
+        largecollapsedVcf = input,
+        genotypes = genotypes,
+        hmm = hmm)
+  # round for errors in expect_equal
+  out$log_OR <- floor(as.numeric(out$log_OR) * 10) / 10
+  out$p_value <- floor(as.numeric(out$p_value) * 10^10) / 10^10
+  out$seqnames <- as.character(out$seqnames)
+  out$start <- as.numeric(out$start)
+  out$end <- as.numeric(out$end)
+  expect_equal(out, expected_result)
+>>>>>>> upstream/devel
 })
