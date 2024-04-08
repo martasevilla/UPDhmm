@@ -5,7 +5,8 @@
 #' genotypes of the trio as input and includes a final step to simplify the
 #' results into blocks.
 #'
-#' @param largeCollapsedVcf The VCF file in the general format
+#' @param largeCollapsedVcf The VCF file in the general format 
+#' (largeCollapsedVcf) with VariantAnnotation package.
 #' @param hmm Optional argument. Hidden Markov Model used to infer the events. 
 #'The format should 
 #' adhere to the general HMM format with a series of elements:
@@ -15,10 +16,7 @@
 #' 4. Transition probabilities matrix of the hidden states in "transProbs".
 #' 5. Probabilities associated between every hidden state and all possible 
 #' observations in the "emissionProbs" matrix. #' If NULL, hmm applied would
-#' be the default model
-#' @param genotypes Optional argument. Possible GT formats and its 
-#'correspondence with the hmm
-#' (largeCollapsedVcf) with VariantAnnotation package.
+#' be the default model.
 #' @return Dataframe object containing blocks of predicted events.
 #' @export
 #' @examples
@@ -32,11 +30,8 @@
 #' calculateEvents(processedVcf)
 calculateEvents <-
     function(largeCollapsedVcf, 
-        hmm = NULL, 
-        genotypes=c(
-                "0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
-                "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3"
-            )) {
+        hmm = NULL 
+        ) {
         
        # Check if `largeCollapsedVcf` is provided
 
@@ -54,6 +49,11 @@ calculateEvents <-
             utils::data("hmm", package = "UPDhmm", envir = environment())
         }
 
+        # Create genotypes vector    
+        genotypes=c(
+                "0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
+                "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3"
+            )
 
         # 1 split the vcf into chromosomes
       split_vcf_raw <-
