@@ -4,12 +4,18 @@
 \alias{calculateEvents}
 \title{Calculate UPD events in trio VCFs.}
 \usage{
-calculateEvents(largeCollapsedVcf, hmm = "hmm", genotypes)
+calculateEvents(
+  largeCollapsedVcf,
+  hmm = NULL,
+  genotypes = c(`0/0` = "1", `0/1` = "2", `1/0` = "2", `1/1` = "3", `0|0` = "1", `0|1` =
+    "2", `1|0` = "2", `1|1` = "3")
+)
 }
 \arguments{
 \item{largeCollapsedVcf}{The VCF file in the general format}
 
-\item{hmm}{Hidden Markov Model used to infer the events. The format should
+\item{hmm}{Optional argument. Hidden Markov Model used to infer the events.
+The format should
 adhere to the general HMM format with a series of elements:
 \enumerate{
 \item The hidden states names in the "States" vector.
@@ -17,10 +23,12 @@ adhere to the general HMM format with a series of elements:
 \item Start probabilities of every hidden state in the "startProbs" vector.
 \item Transition probabilities matrix of the hidden states in "transProbs".
 \item Probabilities associated between every hidden state and all possible
-observations in the "emissionProbs" matrix.
+observations in the "emissionProbs" matrix. #' If NULL, hmm applied would
+be the default model
 }}
 
-\item{genotypes}{Possible GT formats and its correspondence with the hmm
+\item{genotypes}{Optional argument. Possible GT formats and its
+correspondence with the hmm
 (largeCollapsedVcf) with VariantAnnotation package.}
 }
 \value{

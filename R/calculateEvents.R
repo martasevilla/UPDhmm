@@ -6,15 +6,18 @@
 #' results into blocks.
 #'
 #' @param largeCollapsedVcf The VCF file in the general format
-#' @param hmm Hidden Markov Model used to infer the events. The format should 
+#' @param hmm Optional argument. Hidden Markov Model used to infer the events. 
+#'The format should 
 #' adhere to the general HMM format with a series of elements:
 #' 1. The hidden states names in the "States" vector.
 #' 2. All possible observations in the "Symbols" vector.
 #' 3. Start probabilities of every hidden state in the "startProbs" vector.
 #' 4. Transition probabilities matrix of the hidden states in "transProbs".
 #' 5. Probabilities associated between every hidden state and all possible 
-#' observations in the "emissionProbs" matrix.
-#' @param genotypes Possible GT formats and its correspondence with the hmm
+#' observations in the "emissionProbs" matrix. #' If NULL, hmm applied would
+#' be the default model
+#' @param genotypes Optional argument. Possible GT formats and its 
+#'correspondence with the hmm
 #' (largeCollapsedVcf) with VariantAnnotation package.
 #' @return Dataframe object containing blocks of predicted events.
 #' @export
@@ -28,25 +31,14 @@
 #'
 #' calculateEvents(processedVcf)
 calculateEvents <-
-    function(largeCollapsedVcf, hmm = "hmm", genotypes) {
-        # Check if `hmm` is a list or assign default hmm
-        if (!methods::is(hmm, "list")) {
-            utils::data("hmm", package = "UPDhmm", envir = environment())
-        }
-
-        # Check if `genotypes` is a missing argument
-        # to stablish a default vector
-
-        if (missing(genotypes)) {
-            genotypes <- c(
+    function(largeCollapsedVcf, 
+        hmm = NULL, 
+        genotypes=c(
                 "0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
                 "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3"
-            )
-        } else {
-            genotypes
-        }
-
-        # Check if `largeCollapsedVcf` is provided
+            )) {
+        
+       # Check if `largeCollapsedVcf` is provided
 
         if (missing(largeCollapsedVcf)) {
             stop("Argument 'largeCollapsedVcf' is missing.")
@@ -55,6 +47,11 @@ calculateEvents <-
         # Check if `largeCollapsedVcf` is a VCF object
         if (!inherits(largeCollapsedVcf, "CollapsedVCF")) {
             stop("Argument 'largeCollapsedVcf' must be a VCF object.")
+        }
+
+        # Check if `hmm` is a list or assign default hmm
+        if (!methods::is(hmm, "list")) {
+            utils::data("hmm", package = "UPDhmm", envir = environment())
         }
 
 

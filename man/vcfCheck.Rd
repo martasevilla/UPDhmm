@@ -9,7 +9,7 @@ vcfCheck(largeCollapsedVcf, check_quality = FALSE, father, mother, proband)
 \arguments{
 \item{largeCollapsedVcf}{The file in largeCollapsedVcf format.}
 
-\item{check_quality}{TRUE/FALSE. If quality parameters want to be measured.
+\item{check_quality}{Optional argument. TRUE/FALSE. If quality parameters want to be measured.
 Default = FALSE}
 
 \item{father}{Name of the father's sample.}

@@ -6,11 +6,11 @@
 #' quality based on RD and GQ parameters in the input VCF.
 #'
 #' @param largeCollapsedVcf The file in largeCollapsedVcf format.
-#' @param check_quality TRUE/FALSE. If quality parameters want to be measured.
-#' Default = FALSE
 #' @param father Name of the father's sample.
 #' @param mother Name of the mother's sample.
 #' @param proband Name of the proband's sample.
+#' @param check_quality Optional argument. TRUE/FALSE. If quality parameters want to be measured.
+#' Default = FALSE
 #'
 #' @return largeCollapsedVcf (VariantAnnotation VCF format).
 #' @export
