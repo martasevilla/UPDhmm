@@ -1,15 +1,17 @@
 #' Check quality parameters (optional) and change IDs.
 #'
 #' This function takes a VCF file and converts it into a largeCollapsedVcf
-#' object using the VariantAnnotation package. It includes an optional
-#' parameter, quality_check, which issues warnings if positions lack good
-#' quality based on RD and GQ parameters in the input VCF.
+#' object using the VariantAnnotation package. It also rename the sample for 
+#' subsequent steps needed in UPDhmm package.
+#' Additionally, it features an optional parameter, quality_check, which triggers warnings 
+#' when variants lack sufficient quality based on RD and GQ parameters in the input VCF.
 #'
 #' @param largeCollapsedVcf The file in largeCollapsedVcf format.
 #' @param father Name of the father's sample.
 #' @param mother Name of the mother's sample.
 #' @param proband Name of the proband's sample.
-#' @param check_quality Optional argument. TRUE/FALSE. If quality parameters want to be measured.
+#' @param check_quality Optional argument. TRUE/FALSE. If quality parameters 
+#' want to be measured.
 #' Default = FALSE
 #'
 #' @return largeCollapsedVcf (VariantAnnotation VCF format).
@@ -22,10 +24,10 @@
 #'
 vcfCheck <- function(
     largeCollapsedVcf,
-    check_quality = FALSE,
     father,
     mother,
-    proband) {
+    proband,
+    check_quality = FALSE) {
     # Check if `largeCollapsedVcf` is provided
 
     if (missing(largeCollapsedVcf)) {
