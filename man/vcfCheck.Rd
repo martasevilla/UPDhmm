@@ -4,28 +4,30 @@
 \alias{vcfCheck}
 \title{Check quality parameters (optional) and change IDs.}
 \usage{
-vcfCheck(largeCollapsedVcf, check_quality = FALSE, father, mother, proband)
+vcfCheck(largeCollapsedVcf, father, mother, proband, check_quality = FALSE)
 }
 \arguments{
 \item{largeCollapsedVcf}{The file in largeCollapsedVcf format.}
-
-\item{check_quality}{Optional argument. TRUE/FALSE. If quality parameters want to be measured.
-Default = FALSE}
 
 \item{father}{Name of the father's sample.}
 
 \item{mother}{Name of the mother's sample.}
 
 \item{proband}{Name of the proband's sample.}
+
+\item{check_quality}{Optional argument. TRUE/FALSE. If quality parameters
+want to be measured.
+Default = FALSE}
 }
 \value{
 largeCollapsedVcf (VariantAnnotation VCF format).
 }
 \description{
 This function takes a VCF file and converts it into a largeCollapsedVcf
-object using the VariantAnnotation package. It includes an optional
-parameter, quality_check, which issues warnings if positions lack good
-quality based on RD and GQ parameters in the input VCF.
+object using the VariantAnnotation package. It also rename the sample for
+subsequent steps needed in UPDhmm package.
+Additionally, it features an optional parameter, quality_check, which triggers warnings
+when variants lack sufficient quality based on RD and GQ parameters in the input VCF.
 }
 \examples{
 fl <- system.file("extdata", "test_het_mat.vcf.gz", package = "UPDhmm")

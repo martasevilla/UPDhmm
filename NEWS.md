@@ -13,3 +13,7 @@ Correction of reviewer's suggestions
 # UPDhmm 0.99.3
 
 2nd correction of reviewer's suggestions
+
+# UPDhmm 0.99.4
+
+Final corrections and final editing of vignette

@@ -12,7 +12,7 @@ blocksVcf <- function(df) {
         base::cumsum(c(TRUE, df$group[-1L] != df$group[-length(df$group)]))
     # Create a vector with unique ids
     unique_n_snps_raw <- base::unique(df$n_snps_raw)
-    # Iterate troguh data.frame to create the ultimate data.frame
+    # Iterate through data.frame to create the ultimate data.frame
     result_list <- lapply(unique_n_snps_raw, function(n) {
         subset_df <- df[df$n_snps_raw == n, ]
         data.frame(

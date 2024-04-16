@@ -4,8 +4,9 @@ expected_def_blocks <- data.frame(
     end = 32489876,
     group = "iso_mat",
     n_snps = 3,
-    log_OR = 21.1,
-    p_value = 4e-6
+    log_likelihood = 21.1,
+    p_value = 4e-6,
+    n_mendelian_error=2
 )
 
 file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
@@ -14,7 +15,7 @@ colnames(input) <- c("proband", "father", "mother")
 test_that("Test if the general function works", {
     out <- calculateEvents(input)
     out$seqnames <- as.character(out$seqnames)
-    out$log_OR <- floor(as.numeric(out$log_OR) * 10) / 10
+    out$log_likelihood <- floor(as.numeric(out$log_likelihood) * 10) / 10
     out$p_value <- floor(as.numeric(out$p_value) * 10^6) / 10^6
     out <- as.data.frame(out)
     expect_equal(expected_def_blocks, out)
@@ -81,8 +82,9 @@ expected_def_blocks <- data.frame(
   end = 32489876,
   group = "iso_mat",
   n_snps = 3,
-  log_OR = 22.7,
-  p_value = 1e-6
+  log_likelihood = 22.7,
+  p_value = 1e-6,
+  n_mendelian_error=2
 )
 
 
@@ -92,7 +94,7 @@ colnames(input) <- c("proband", "father", "mother")
 test_that("Test if the general function works with a different hmm", {
   out <- calculateEvents(input,hmm = new_hmm)
   out$seqnames <- as.character(out$seqnames)
-  out$log_OR <- floor(as.numeric(out$log_OR) * 10) / 10
+  out$log_likelihood <- floor(as.numeric(out$log_likelihood) * 10) / 10
   out$p_value <- floor(as.numeric(out$p_value) * 10^6) / 10^6
   out <- as.data.frame(out)
   expect_equal(expected_def_blocks, out)

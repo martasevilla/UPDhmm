@@ -8,23 +8,26 @@ calculateEvents(largeCollapsedVcf, hmm = NULL)
 }
 \arguments{
 \item{largeCollapsedVcf}{The VCF file in the general format
-(largeCollapsedVcf) with VariantAnnotation package.}
+(largeCollapsedVcf) with VariantAnnotation package. Previously edited with
+\code{vcfCheck()} function from UPDhmm package}
 
-\item{hmm}{Optional argument. Hidden Markov Model used to infer the events.
-The format should
-adhere to the general HMM format with a series of elements:
+\item{hmm}{Default = NULL. If no arguments are added, the package
+will use the default HMM already implemented, based on Mendelian
+inheritance. If an optional HMM is desired, it should adhere to the
+general HMM format from \code{HMM} package with the following elements inside
+a list:
 \enumerate{
-\item The hidden states names in the "States" vector.
+\item The hidden state names in the "States" vector.
 \item All possible observations in the "Symbols" vector.
 \item Start probabilities of every hidden state in the "startProbs" vector.
-\item Transition probabilities matrix of the hidden states in "transProbs".
+\item Transition probabilities matrix between states in "transProbs".
 \item Probabilities associated between every hidden state and all possible
-observations in the "emissionProbs" matrix. #' If NULL, hmm applied would
-be the default model.
+observations in the "emissionProbs" matrix.
 }}
 }
 \value{
-Dataframe object containing blocks of predicted events.
+A data.frame object containing all detected events in the provided trio.
+If no events are found, the function  will return an empty data.frame.
 }
 \description{
 This function predicts the hidden states by applying the Viterbi algorithm
@@ -40,5 +43,4 @@ processedVcf <- vcfCheck(vcf,
     father = "NA19679"
 )
 
-calculateEvents(processedVcf)
 }

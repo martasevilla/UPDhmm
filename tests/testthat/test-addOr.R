@@ -4,8 +4,9 @@ expected_result <- data.frame(
   end = 32489876,
   group = "iso_mat",
   n_snps = 3,
-  log_OR = 21.1,
-  p_value = 4e-6
+  log_likelihood = 21.1,
+  p_value = 4e-6,
+  n_mendelian_error=2
 )
 
 
@@ -39,7 +40,7 @@ test_that("Test if calculation of statistic parameters works", {
     hmm = hmm
   )
   # round for errors in expect_equal
-  out$log_OR <- floor(as.numeric(out$log_OR) * 10) / 10
+  out$log_likelihood <- floor(as.numeric(out$log_likelihood) * 10) / 10
   out$p_value <- floor(as.numeric(out$p_value) * 10^6) / 10^6
   out$seqnames <- as.character(out$seqnames)
   out$start <- as.numeric(out$start)

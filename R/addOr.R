@@ -21,6 +21,7 @@ addOr <- function(
     hmm,
     genotypes
 ) {
+  #Create a granges with the interval
   gRanges_block <- GenomicRanges::makeGRangesFromDataFrame(
     filtered_def_blocks_states,
     keep.extra.columns = TRUE,
@@ -29,8 +30,9 @@ addOr <- function(
     start.field = "start",
     end.field = c("end")
   )
-  
+  #Overlap it with the raw largeCollapsedVcf to extract the genotypes
   overlaps <- IRanges::subsetByOverlaps(largeCollapsedVcf, gRanges_block)
+  #Transform the gentoypes
   genotypes_uncoded <- VariantAnnotation::geno(overlaps)$GT
   genotypes_coded <- c(
     paste0(
@@ -42,8 +44,9 @@ addOr <- function(
   
   
   
-  
-  forward_algorithm_state <- function(state, observed_sequence, hmm_model) {
+  #Create a function to measure the cumulative probability of having that 
+  #state at given genotype in that chain of observations
+  prob_state_chain <- function(state, observed_sequence, hmm_model) {
     N <- length(hmm_model$States)
     Tn <- length(observed_sequence)
     
@@ -52,29 +55,50 @@ addOr <- function(
     
     # Initialization
     alpha <- numeric(Tn)
-    alpha[1] <- hmm_model$startProbs[state_index] * hmm_model$emissionProbs[state_index, observed_sequence[1]]
+    alpha[1] <- hmm_model$startProbs[state_index] * 
+      hmm_model$emissionProbs[state_index, observed_sequence[1]]
     
     # Recursion
     for (t in 2:Tn) {
-      alpha[t] <- hmm_model$transProbs[state_index, state_index] * hmm_model$emissionProbs[state_index, observed_sequence[t]]
+      alpha[t] <- hmm_model$transProbs[state_index, state_index] * 
+        hmm_model$emissionProbs[state_index, observed_sequence[t]]
     }
     
     # Probability of the observed sequence given the state
     return(alpha)
   }
   
-  forward_matrix_normal <- forward_algorithm_state("normal", genotypes_coded, hmm_model = hmm)
-  forward_matrix_other <- forward_algorithm_state(S4Vectors::mcols(gRanges_block)$group, genotypes_coded, hmm_model = hmm)
+  #Apply to a normal state
+  prob_matrix_normal <- prob_state_chain("normal", 
+                                         genotypes_coded, 
+                                         hmm_model = hmm)
+  #Apply to the predicted state
+  prob_matrix_other <- prob_state_chain(S4Vectors::mcols(gRanges_block)$group, 
+                                        genotypes_coded, hmm_model = hmm)
   
-  log_likelihood_normal <- sum(log(forward_matrix_normal))
-  log_likelihood_other <- sum(log(forward_matrix_other))
+  #Calculate the overal probability of the whole interval for normal state and 
+  #predicted state
+  log_likelihood_normal <- sum(log(prob_matrix_normal))
+  log_likelihood_other <- sum(log(prob_matrix_other))
   
+  #Calculate the likelihood ratio between the predicted state and normal state
+  #and its related p-value
   overall_log_odds_ratio <- -2 * (log_likelihood_normal - log_likelihood_other)
   p_value <- stats::pchisq(overall_log_odds_ratio, 1, lower.tail = FALSE)
   
-  S4Vectors::mcols(gRanges_block)$log_OR <- overall_log_odds_ratio
+  #Assign it into metadata columns
+  S4Vectors::mcols(gRanges_block)$log_likelihood <- overall_log_odds_ratio
   S4Vectors::mcols(gRanges_block)$p_value <- p_value
   
+  #Now, retrieve the count of Mendelian errors (genotypic combinations that 
+  #are inconsistent with Mendelian inheritance principles).
+  emission_probs <- hmm$emissionProbs["normal",]
+  mendelian_error_values<-names(emission_probs[emission_probs == 0.00001])
+  n_mendelian_error<-sum(genotypes_coded %in% mendelian_error_values)
+  
+  #Add it as a metadata column
+  S4Vectors::mcols(gRanges_block)$n_mendelian_error <- n_mendelian_error
+  #create a dataframe with the log_likelihood, p-value and n_mendelian errors
   df <- as.data.frame(gRanges_block)
   df <- df[, !(names(df) %in% c("strand", "width"))]
   return(df)
