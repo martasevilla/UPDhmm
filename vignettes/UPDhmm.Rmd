@@ -13,20 +13,20 @@ author:
 date: "`r Sys.Date()`"
 package: "`r BiocStyle::pkg_ver('UPDhmm')`"
 abstract: >
-  Uniparental disomy (UPD) is a genetic condition in which an individual 
-  inherits both copies or a segment of a chromosome or part of it from the same 
-  parent, instead of receiving one copy from each parent. This can result in 
-  homozygosity for specific alleles, potentially manifesting recessive traits
-  or contributing to genetic disorders through errors associated with genetic
-  imprinting.
+  This vignette provides an introductory guide to the UPDhmm package, 
+  developed for detecting uniparental disomies (UPDs) events on genetic 
+  data from trio experiments (i.e. involving a father, mother, and proband). 
+  UPDs are a genetic condition in which an individual inherits both copies 
+  from the same parent. UPDs can consist on a whole chromosome or a segment.
+  These events can result in disease by leading to homozygosity or specific 
+  alleles, potentially manifesting recessive traits or contributing to genetic
+  disorders through errors associated with genetic imprinting. The key topics 
+  covered in this document include: 
   
-  This vignette provides an introductory guide to the `UPDhmm` package, 
-  `UPDhmm` relies on a Hidden Markov Model to detect UPDs on genetic data 
-  from trio assays. The key topics covered in this document include:
-  
-  (1) Package installation
-  (2) Data loading and preprocessing
+  (1) Package installation 
+  (2) Data loading and pre-processing 
   (3) Identification of UPDs
+
 
 output: 
   BiocStyle::html_document:
@@ -69,15 +69,18 @@ of uniparental disomy events.
 
 ## Method overview
 
-"The UPDhmm package utilizes a Hidden Markov Model (HMM) to identify regions 
-indicative of Uniparental Disomy (UPD) events, employing genetic data from a 
-trio (mother, father, and proband). The HMM is constructed based on how the 
-probabilities of all possible genotype combinations within the trio differ 
-across potential hidden states (isodisomy, heterodisomy, or normal). By 
-employing the Viterbi algorithm, the UPDhmm package provides the most optimal 
-and probable inheritance pattern for a given genotype sequence. In essence, 
-UPDhmm deduces the most probable inheritance pattern for each genomic region, 
-facilitating the detection of UPD events in the proband."
+"`UPDhmm` relies on a Hidden Markov Model (HMM) to identify regions with UPD.  
+In our HMM model, observations are the combination of the genotypes from the 
+father, mother and proband for every genomic variant in the input data. The 
+hidden states of the model represent five inheritance patterns: normal 
+(mendelian inheritance), maternal isodisomy, paternal isodisomy, maternal 
+heterodisomy and paternal heterodisomy. Emission probabilities were defined 
+based on the inheritance patterns.
+Viterbi algorithm was employed to infer the most likely combination of hidden 
+states underlying a sequence of observations, thus defining the most likely 
+inheritance pattern for each genetic variant. `UPDhmm` reports segments in the 
+genome having an inheritance pattern different than normal, and thus, likely 
+harbouring a UPD."
 
 
 # Set-up the packages
