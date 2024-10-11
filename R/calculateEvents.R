@@ -52,6 +52,17 @@ calculateEvents <-
                 "0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
                 "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3"
             )
+ #Check for allowed genotypes
+
+    unique_genotypes <- unique(VariantAnnotation::geno(largeCollapsedVcf)$GT)
+
+    if (!all(unique_genotypes %in% names(genotypes))) {
+    invalid_genotypes <- unique_genotypes[!unique_genotypes %in% names(genotypes)]
+    stop(paste("Error: The following genotypes are not valid:", 
+               paste(unique(invalid_genotypes), collapse = ", ")))
+    }
+
+
 #################################################
 # 1 split the vcf into chromosomes
 #################################################
