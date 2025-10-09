@@ -1,0 +1,61 @@
+Package: UPDhmm
+Title: Detecting Uniparental Disomy through NGS trio data
+Version: 1.5.0
+BugReports: https://github.com/martasevilla/UPDhmm/issues
+Authors@R: 
+  c(person(given = "Marta",
+     family = "Sevilla",
+     role= c("aut", "cre"),
+     email = "marta.sevilla@upf.edu",
+     comment = c(ORCID = "0009-0005-0179-920X")),
+     person(given = "Carlos",
+     family = "Ruiz-Arenas",
+     role= c("aut"),
+     email = "cruizarenas@unav.es",
+     comment = c(ORCID = "0000-0002-6014-3498")))
+Description: 
+  Uniparental disomy (UPD) is a genetic condition
+  where an individual inherits both copies 
+  of a chromosome or part of it from one parent, 
+  rather than one copy from each parent. This package 
+  contains a HMM for detecting UPDs through HTS 
+  (High Throughput Sequencing) data from trio assays. 
+  By analyzing the genotypes in the trio, the model
+  infers a hidden state (normal, father isodisomy, 
+  mother isodisomy, father heterodisomy and mother heterodisomy).
+biocViews: 
+  Software,
+  HiddenMarkovModel,
+  Genetics
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: false
+RoxygenNote: 7.3.3
+Depends: 
+  R (>= 4.1.0)
+Imports:
+  HMM,
+  utils,
+  VariantAnnotation,
+  GenomicRanges,
+  S4Vectors,
+  IRanges,
+  SummarizedExperiment,
+  Biobase,
+  stats,
+  BiocParallel,
+  GenomeInfoDb
+Suggests: 
+    knitr,
+    testthat (>= 2.1.0),
+    BiocStyle,
+    rmarkdown,
+    markdown,
+    karyoploteR,
+    regioneR,
+    dplyr,
+    BiocManager
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+URL: https://github.com/martasevilla/UPDhmm
+Language: en-US

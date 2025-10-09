@@ -1,0 +1,33 @@
+/doc/
+/Meta/
+.Rhistory
+# --- R and RStudio junk ---
+.Rproj.user/
+.Rproj.user/*
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+
+
+# --- R package build artefacts ---
+*.Rcheck/
+*.tar.gz
+*.Rproj
+UPDhmm_*.tar.gz
+
+# --- Compiled docs and cache ---
+inst/doc/
+doc/
+vignettes/*.html
+vignettes/*.pdf
+vignettes/*.R
+vignettes/*.log
+vignettes/*.tex
+
+# --- Temporary or OS files ---
+*~
+*.tmp
+*.bak
+*.swp
+Thumbs.db

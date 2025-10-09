@@ -1,0 +1,190 @@
+---
+title: "VCF Preprocessing User Guide"
+author: 
+  - name: "Marta Sevilla Porras"
+    affiliation:
+      - "Universitat Pompeu Fabra (UPF)"
+      - "Centro de Investigación Biomédica en Red (CIBERER)"
+    email: "marta.sevilla@upf.edu"
+  - name: "Carlos Ruiz Arenas"
+    affiliation: 
+      - "Universidad de Navarra (UNAV)"
+    email: "cruizarenas@unav.es"
+output: 
+  BiocStyle::html_document:
+    number_sections: false
+    toc: true
+    fig_caption: true
+    toc_float: true
+vignette: >
+  %\VignetteIndexEntry{VCF Preprocessing User Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+This vignette shows how to preprocess **individual trio VCFs** (proband, father, mother) into a clean **trio VCF** suitable for UPDhmm.  
+
+
+
+## Inputs
+
+You should have one **VCF**  (e.g. oputput from GATK) per family member:
+
+- `proband.vcf.gz`
+- `mother.vcf.gz`
+- `father.vcf.gz`
+
+Each file should be bgzipped (`.vcf.gz`) and indexed with tabix (`.tbi`).  
+
+
+
+## 0. Normalize and Left-Align Variants (optional)
+For this step you will  need a **reference genome FASTA** indexed with `samtools faidx`.
+
+
+```{bash, eval=FALSE}
+bcftools norm -m-any -f reference.fa proband.vcf.gz -Oz -o proband.norm.vcf.gz
+bcftools norm -m-any -f reference.fa mother.vcf.gz  -Oz -o mother.norm.vcf.gz
+bcftools norm -m-any -f reference.fa father.vcf.gz  -Oz -o father.norm.vcf.gz
+
+tabix -p vcf proband.norm.vcf.gz
+tabix -p vcf mother.norm.vcf.gz
+tabix -p vcf father.norm.vcf.gz
+
+
+```
+
+
+
+## 1. Remove Extra Annotations
+Keep only essential fields (drop INFO/FORMAT annotations not required downstream). The resulting VCFs are lighter.
+
+```{bash, eval=FALSE}
+# Keep only GT, AD, DP, and GQ fields (remove all other INFO)
+bcftools annotate -x INFO,^FORMAT/GT,FORMAT/AD,FORMAT/DP,FORMAT/GQ \
+  proband.norm.vcf.gz -Oz -o proband.clean.vcf.gz
+
+bcftools annotate -x INFO,^FORMAT/GT,FORMAT/AD,FORMAT/DP,FORMAT/GQ \
+  mother.norm.vcf.gz  -Oz -o mother.clean.vcf.gz
+
+bcftools annotate -x INFO,^FORMAT/GT,FORMAT/AD,FORMAT/DP,FORMAT/GQ \
+  father.norm.vcf.gz  -Oz -o father.clean.vcf.gz
+
+# Index the cleaned VCFs
+tabix -p vcf proband.clean.vcf.gz
+tabix -p vcf mother.clean.vcf.gz
+tabix -p vcf father.clean.vcf.gz
+
+
+```
+
+
+## 2. Merge Trio into a Single VCF  
+
+**Goal:**
+
+ - Combine the proband, mother, and father into a single VCF.
+ - Retain only biallelic and informative variants.
+ - Remove positions where all trio members are homozygous for the reference (0/0).
+
+If the input files are **gVCFs**, you can directly merge them, as they already include all genomic positions.  
+If they are **standard VCFs**, merge the files first and then remove missing genotypes (`./.`) to keep only fully called variants.
+
+```{bash, eval=FALSE}
+
+#--------------------------------------------------------------
+# Option 1: For standard VCFs
+#--------------------------------------------------------------
+
+# Merge the three individuals
+bcftools merge \
+  proband.clean.vcf.gz \
+  mother.clean.vcf.gz \
+  father.clean.vcf.gz \
+ -Oz -o trio_merged_raw.vcf.gz
+
+# Retain only biallelic variants
+bcftools view -m2 -M2 trio_merged_raw.vcf.gz -Oz -o trio_merged_biallelic.vcf.gz
+
+# Remove sites where all genotypes are homozygous reference (0/0)
+bcftools view \
+  -i 'COUNT(FORMAT/GT="0/0") != 3' \
+  trio_merged_biallelic.vcf.gz -Oz -o trio_merged_nohom.vcf.gz
+
+# Remove missing genotypes (./.) to keep only fully called variants
+bcftools view \
+  -e 'GT="./."' \
+  trio_merged_nohom.vcf.gz -Oz -o trio_merged_clean.vcf.gz
+
+#--------------------------------------------------------------
+# Option 2: For gVCFs
+#--------------------------------------------------------------
+
+# gVCFs already include all genomic sites, so intersection is not needed
+bcftools merge \
+  proband.clean.vcf.gz \
+  mother.clean.vcf.gz \
+  father.clean.vcf.gz \
+  -Oz -o trio_merged_raw.vcf.gz
+
+# Retain only biallelic variants
+bcftools view -m2 -M2 trio_merged_raw.vcf.gz -Oz -o trio_merged_biallelic.vcf.gz
+
+# Remove sites where all are 0/0 (non-informative for UPD analysis)
+bcftools view \
+  -i 'COUNT(FORMAT/GT="0/0") != 3' \
+  trio_merged_biallelic.vcf.gz -Oz -o trio_merged_clean.vcf.gz
+
+#--------------------------------------------------------------
+# Normalize and index the merged VCF
+#--------------------------------------------------------------
+
+# Normalize (split multi-allelics if any remain and remove duplicates)
+bcftools norm -m -both -d all -Oz -o trio_merged_norm.vcf.gz trio_merged_clean.vcf.gz
+
+# Index for downstream tools
+tabix -p vcf trio_merged_norm.vcf.gz
+
+
+```
+
+
+## 3. Mask Structural Variant Regions  
+
+Before detecting UPD events, it is recommended to **exclude genomic regions** prone to alignment artifacts or abnormal variant density — such as centromeres, segmental duplications, and immune complex regions (e.g., HLA and KIR).  
+These regions can lead to false-positive signals due to mapping ambiguity or high polymorphism.
+
+To simplify this step, a curated set of BED masks is available in the following Zenodo repository:  
+🔗 [Zenodo – UPDhmm Excluded Regions](https://zenodo.org/records/17193905)
+
+The repository provides BED files for both reference genome builds:
+
+  - `hg19_excluded_regions.bed`  
+  - `hg38_excluded_regions.bed`
+
+These files include merged genomic intervals covering:
+
+  - Centromeric and telomeric regions  
+  - Segmental duplications  
+  - HLA and KIR loci  
+  - Low-mappability or highly repetitive regions  
+
+Download the appropriate BED file for your genome build and use it to mask excluded regions from the merged trio VCF:
+
+
+```{bash, eval=FALSE}
+# Mask problematic regions
+bcftools view -T ^merged_mask.bed \
+  trio_merged_norm.vcf.gz -Oz -o trio_masked.vcf.gz
+
+# Index the masked VCF
+tabix -p vcf trio_masked.vcf.gz
+```
+
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
