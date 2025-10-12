@@ -25,3 +25,5 @@ Final corrections and final editing of vignette
 - Update User Guide vignette
 - Add 3 new functions `markRecurentRegions()`, `identifyRecurrentRegions()` and `collapseEvents()`
 
+# UPDhmm 1.5.1
+- Update vignette
