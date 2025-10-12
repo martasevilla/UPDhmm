@@ -170,15 +170,15 @@ identifying Uniparental disomies (UPDs):
 (4) Create blocks of contiguous variants with the same state
 (5) Calculate the statistics (log-likelihood and p-value).
 
+In this example, we run the function in serial mode, but `calculateEvents()` now includes an optional argument, *BPPARAM*, which controls parallel execution settings and is passed to bplapply. By default, it uses BiocParallel::SerialParam() (serial execution). To enable parallelization, provide a BiocParallel backend, for example:
 
-In this example, we are not using but the function include an additional argument arguments BPPARAM	
-Parallelization settings, passed to bplapply. By default BiocParallel::SerialParam() (serial execution). To enable parallelization, provide a BiocParallel backend, e.g. BiocParallel::MulticoreParam(workers = min(2, parallel::detectCores())) or BiocParallel::SnowParam(workers = 2). Note: when running under R CMD check or Bioconductor build systems, the number of workers may be automatically limited (usually ≤ 2).
 
 ```{r}
 events_list <- lapply(vcf_list, calculateEvents)
 head(events_list[[1]])
 
 ```
+Note: when running under R CMD check or Bioconductor build systems, the number of workers may be automatically limited (usually ≤ 2).
 
 
 ## Results description
@@ -346,7 +346,13 @@ annotatedEvents <- markRecurrentRegions(
 head(annotatedEvents)
 ```
 
-Alternatively, recurrent regions can be provided directly as an external BED file (e.g., recurrentRegions.bed), converted into a GRanges object, and used in the same way:
+Alternatively, recurrent regions can be provided directly as an external BED file (e.g., `SFARI.bed`), 
+converted into a `GRanges` object, and used in the same way. 
+
+The `SFARI.bed` file was generated from our analysis of the **SFARI cohort**, 
+where recurrent genomic intervals were identified across trios using `UPDhmm`. 
+These regions represent loci frequently showing **artifactual or low-confidence UPD signals** 
+in the SFARI dataset and can be used as a **mask** to improve specificity in other analyses.
 
 ```{r}
 
