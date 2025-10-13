@@ -27,3 +27,6 @@ Final corrections and final editing of vignette
 
 # UPDhmm 1.5.1
 - Update vignette
+
+# UPDhmm 1.5.2
+- Fix vignette for LatEX error.
