@@ -178,7 +178,7 @@ events_list <- lapply(vcf_list, calculateEvents)
 head(events_list[[1]])
 
 ```
-Note: when running under R CMD check or Bioconductor build systems, the number of workers may be automatically limited (usually ≤ 2).
+Note: when running under R CMD check or Bioconductor build systems, the number of workers may be automatically limited (usually less than 2).
 
 
 ## Results description
