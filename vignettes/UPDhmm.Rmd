@@ -211,9 +211,11 @@ In this example, we run the function in serial mode, but `calculateEvents()` now
 
 
 ```{r, eval=FALSE}
+
 library(BiocParallel)
 BPPARAM <- MulticoreParam(workers = min(2, parallel::detectCores()))
-events <- calculateEvents(vcf, trio_info = trio_info, BPPARAM = BPPARAM)
+events_list <- lapply(vcf_list, calculateEvents, BPPARAM = BPPARAM)
+
 ```
 
 
