@@ -35,7 +35,7 @@
 #'   `BiocParallel::MulticoreParam(workers = min(2, parallel::detectCores()))`
 #'   or `BiocParallel::SnowParam(workers = 2)`.
 #'   Note: when running under R CMD check or Bioconductor build systems,
-#'   the number of workers may be automatically limited (usually ≤ 2).
+#'   the number of workers may be automatically limited (usually less or equal to 2).
 #'
 #' @param verbose Logical, default = `FALSE`. 
 #'   If `TRUE`, progress messages will be printed during processing.
