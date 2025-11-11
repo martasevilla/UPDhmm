@@ -1,10 +1,10 @@
-#' Check quality parameters (optional) and change IDs.
+#' Check variant quality (optional), rename samples, and numerically encode genotypes
 #'
-#' This function takes a VCF file and converts it into a largeCollapsedVcf
-#' object using the VariantAnnotation package. It also rename the sample for 
-#' subsequent steps needed in UPDhmm package.
-#' Additionally, it features an optional parameter, quality_check, which triggers warnings 
-#' when variants lack sufficient quality based on RD and GQ parameters in the input VCF.
+#' This function processes a VCF file by converting it into a `CollapsedVCF` object
+#' using the VariantAnnotation package. It renames the samples to standard names 
+#' ("father", "mother", "proband") for subsequent UPDhmm analysis, optionally 
+#' evaluates variant quality based on read depth (DP) and genotype quality (GQ), 
+#' and creates a numeric encoding of the trio genotypes in the metadata column `geno_coded`.
 #'
 #' @param largeCollapsedVcf The file in largeCollapsedVcf format.
 #' @param father Name of the father's sample.
@@ -28,89 +28,67 @@ vcfCheck <- function(
     mother,
     proband,
     check_quality = FALSE) {
-    # Check if `largeCollapsedVcf` is provided
+  
+    # ---------------------------
+    # Input validation
+    # ---------------------------
+    if (missing(largeCollapsedVcf)) stop("Argument 'largeCollapsedVcf' is missing.")
+    if (!inherits(largeCollapsedVcf, "CollapsedVCF")) stop("Argument 'largeCollapsedVcf' must be a VCF object.")
+    if (missing(proband)) stop("Argument 'proband' is missing.")
+    if (missing(father)) stop("Argument 'father' is missing.")
+    if (missing(mother)) stop("Argument 'mother' is missing.")
+    if (!inherits(proband, "character")) stop("Argument 'proband' must be a character vector")
+    if (!inherits(mother, "character")) stop("Argument 'mother' must be a character vector")
+    if (!inherits(father, "character")) stop("Argument 'father' must be a character vector")
+  
+    # Extract genotype data
+    geno_data <- VariantAnnotation::geno(largeCollapsedVcf)
 
-    if (missing(largeCollapsedVcf)) {
-        stop("Argument 'largeCollapsedVcf' is missing.")
-    }
-
-    # Check if `largeCollapsedVcf` is a VCF object
-    if (!inherits(largeCollapsedVcf, "CollapsedVCF")) {
-        stop("Argument 'largeCollapsedVcf' must be a VCF object.")
-    }
-
-    # Check if `proband`,`father` and `mother` is provided
-
-    if (missing(proband)) {
-        stop("Argument 'proband' is missing.")
-    }
-    if (missing(father)) {
-        stop("Argument 'father' is missing.")
-    }
-
-    if (missing(mother)) {
-        stop("Argument 'mother' is missing.")
-    }
-
-
-    # Check if `largeCollapsedVcf` is a VCF object
-    if (!inherits(largeCollapsedVcf, "CollapsedVCF")) {
-        stop("Argument 'largeCollapsedVcf' must be a VCF object.")
-    }
-
-    # Check if `proband` ,`father` and `mother` is a character vector
-    if (!inherits(proband, "character")) {
-        stop("Argument 'proband' must be a character vector")
-    }
-
-    if (!inherits(mother, "character")) {
-        stop("Argument 'mother' must be a character vector")
-    }
-
-    if (!inherits(father, "character")) {
-        stop("Argument 'father' must be a character vector")
-    }
-
-    # Quality parameters
+    # Optional quality checks
     if (isTRUE(check_quality)) {
-        if (any(VariantAnnotation::geno(largeCollapsedVcf)$GQ < 20 |
-            is.na(VariantAnnotation::geno(largeCollapsedVcf)$GQ)) == TRUE) {
+        if (any(geno_data$GQ < 20 | is.na(geno_data$GQ)) == TRUE) {
             message("No filter quality (GQ) parameter used")
         }
-        if (any(VariantAnnotation::geno(largeCollapsedVcf)$DP < 30 |
-            is.na(VariantAnnotation::geno(largeCollapsedVcf)$DP)) == TRUE) {
+        if (any(geno_data$DP < 30 | is.na(geno_data$DP)) == TRUE) {
             message("No filter quality (RD) parameter used")
         }
     }
 
-    #Check for allowed genotypes
+    # Define allowed genotypes and numeric codes
     genotypes <- c(
         "0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
         "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3"
     )
 
-    unique_genotypes <- unique(VariantAnnotation::geno(largeCollapsedVcf)$GT)
-
+    unique_genotypes <- unique(geno_data$GT)
+    
+    # Stop if any genotypes are not allowed
     if (!all(unique_genotypes %in% names(genotypes))) {
     invalid_genotypes <- unique_genotypes[!unique_genotypes %in% names(genotypes)]
     stop(paste("Error: The following genotypes are not valid:", 
                paste(unique(invalid_genotypes), collapse = ", ")))
     }
 
-    # Save original IDs in colData
+    # Save original sample IDs
+    SummarizedExperiment::colData(largeCollapsedVcf)$ID <- colnames(largeCollapsedVcf)
     
-  SummarizedExperiment::colData(largeCollapsedVcf)$ID <- colnames(largeCollapsedVcf)
-  
     # Change names in vcf for subsequent steps
+    colnames(largeCollapsedVcf)[colnames(largeCollapsedVcf) 
+                                == father] <- "father"
+    colnames(largeCollapsedVcf)[colnames(largeCollapsedVcf) 
+                                == mother] <- "mother"
+    colnames(largeCollapsedVcf)[colnames(largeCollapsedVcf) 
+                                == proband] <- "proband"
 
-  colnames(largeCollapsedVcf)[colnames(largeCollapsedVcf) 
-                              == father] <- "father"
-  colnames(largeCollapsedVcf)[colnames(largeCollapsedVcf) 
-                              == mother] <- "mother"
-  colnames(largeCollapsedVcf)[colnames(largeCollapsedVcf) 
-                              == proband] <- "proband"
-  
+    # Generate numeric encoding of trio genotypes
+    geno_uncoded <- VariantAnnotation::geno(largeCollapsedVcf)$GT
+    geno_coded <- paste0(
+        genotypes[geno_uncoded[, "father"]],
+        genotypes[geno_uncoded[, "mother"]],
+        genotypes[geno_uncoded[, "proband"]]
+    )
+    
+    S4Vectors::mcols(largeCollapsedVcf)$geno_coded <- geno_coded
   
     return(largeCollapsedVcf)
-  
 }
