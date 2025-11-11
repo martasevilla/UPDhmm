@@ -1,78 +1,119 @@
 #' Process a single chromosome for UPD detection
 #'
 #' Internal helper function to run the full pipeline on one chromosome:
-#' - applyViterbi
-#' - asDfVcf
-#' - blocksVcf
+#' It performs the following steps:
+#' 1. Applies the Viterbi algorithm to infer hidden states using the provided HMM.
+#' 2. Converts the VCF to a data.frame including optional read depth/quality metrics.
+#' 3. Collapses contiguous variants with the same inferred state into blocks.
+#' 4. Calculates Mendelian error counts per block.
+#' 5. Optionally computes per-block read depth ratios relative to the rest of the chromosome.
 #'
 #' @param vcf_chr CollapsedVCF object for one chromosome
 #' @param hmm Hidden Markov Model object
-#' @param genotypes Named vector mapping genotype strings to numeric states
+#' @param add_ratios Logical; if `TRUE`, read depth/quality ratios will be included in the analysis.
+#' @param field_DP Optional character specifying the FORMAT field in the VCF for depth metrics.
+#' @param total_sum Numeric vector of total read depths per sample for the chromosome.
+#' @param total_valid Numeric vector of total valid positions per sample for the chromosome.
 #'
-#' @return A data.frame of detected blocks for the chromosome, or NULL if error
-processChromosome <- function(vcf_chr, hmm, genotypes) {
+#' @return A data.table of detected blocks for the chromosome, or NULL if error
+
+processChromosome <- function(vcf_chr, hmm, add_ratios, field_DP, total_sum, total_valid) {
   tryCatch({
     
     chr_name <- as.character(GenomeInfoDb::seqnames(vcf_chr)[1])
     
     #################################################
-    # 1) Run Viterbi
+    # 1. Run Viterbi to infer hidden states
     #################################################
-    vcf_vit <- tryCatch(
-      applyViterbi(largeCollapsedVcf = vcf_chr,
-                   hmm = hmm, genotypes = genotypes),
-      error = function(e) {
-        stop(sprintf("[Chromosome %s] Error in applyViterbi: %s",
-                     chr_name, conditionMessage(e)))
-      }
-    )
+    vcf_vit <- applyViterbi(vcf_chr, hmm)
+      
     if (!inherits(vcf_vit, "CollapsedVCF")) {
       stop(sprintf("[Chromosome %s] applyViterbi did not return CollapsedVCF.", chr_name))
     }
     
     #################################################
-    # 2) Convert to dataframe
+    # 2. Convert VCF to data.table with optional depth/quality metrics
     #################################################
-    df_vit <- tryCatch(
-      asDfVcf(largeCollapsedVcf = vcf_vit, genotypes = genotypes),
-      error = function(e) {
-        stop(sprintf("[Chromosome %s] Error in asDfVcf: %s",
-                     chr_name, conditionMessage(e)))
-      }
-    )
-    if (!inherits(df_vit, "data.frame")) {
+    df_vit <- asDfVcf(vcf_vit, add_ratios, field_DP)
+
+    if (!inherits(df_vit, "data.table")) {
       stop(sprintf("[Chromosome %s] asDfVcf did not return a data.frame.", chr_name))
-    }
-    if (ncol(df_vit) != 6) {
-      stop(sprintf("[Chromosome %s] asDfVcf dataframe has %d columns, expected 6.",
-                   chr_name, ncol(df_vit)))
     }
     
     #################################################
-    # 3) Create blocks
+    # 3. Collapse contiguous variants into blocks
     #################################################
-    blk <- tryCatch(
-      blocksVcf(df_vit),
-      error = function(e) {
-        stop(sprintf("[Chromosome %s] Error in blocksVcf: %s",
-                     chr_name, conditionMessage(e)))
-      }
-    )
+    blk <- blocksVcf(df_vit)
+    
     if (!inherits(blk, "data.frame")) {
       stop(sprintf("[Chromosome %s] blocksVcf did not return a data.frame.", chr_name))
     }
-    if (ncol(blk) != 6) {
-      stop(sprintf("[Chromosome %s] blocksVcf dataframe has %d columns, expected 6.",
-                   chr_name, ncol(blk)))
+
+    #################################################
+    # 4. Calculate Mendelian error counts per block
+    #################################################
+    if (!is.null(hmm)) {
+      
+      # Identify genotype values considered Mendelian errors based on emission probabilities
+      emission_probs <- hmm$emissionProbs["normal", ]
+      mendelian_error_values <- names(emission_probs[emission_probs == min(emission_probs)])
+
+      # Use the pre-existing genotype codings from the VCF
+      geno_coded <- S4Vectors::mcols(vcf_chr)$geno_coded
+      positions <- GenomicRanges::start(vcf_chr)
+
+      # Count number of Mendelian-inconsistent genotypes within each block
+      blk$n_mendelian_error <- vapply(seq_len(nrow(blk)), function(i) {
+        idx <- positions >= blk$start[i] & positions <= blk$end[i]
+        sum(geno_coded[idx] %in% mendelian_error_values)
+      }, integer(1))
+
+      blk$geno_coded <- NULL
+
+    } else {
+      # If no HMM provided, fill with NA
+      blk$n_mendelian_error <- NA_integer_
     }
-    
+
     #################################################
-    # If everything worked, return blocks
+    # 5. Optional: compute per-block read depth ratios
     #################################################
+    quality_cols <- c("proband", "mother", "father")
+    if (!is.null(total_sum) & !is.null(total_valid)) {
+      
+      # Columns in blk with sum and count of quality/depth values per block
+      sum_cols   <- paste0("total_sum_quality_", quality_cols)
+      count_cols <- paste0("total_count_quality_", quality_cols)
+
+      # Extract inside-block sums and counts
+      inside_sum   <- as.matrix(blk[, sum_cols, with = FALSE])
+      inside_count <- as.matrix(blk[, count_cols, with = FALSE])
+
+      # Compute outside-block sums and counts: chromosome total minus inside-block values
+      outside_sum   <- matrix(total_sum, nrow = nrow(blk), ncol = length(quality_cols), byrow = TRUE) - inside_sum
+      outside_count <- matrix(total_valid, nrow = nrow(blk), ncol = length(quality_cols), byrow = TRUE) - inside_count
+
+      # Compute mean depth inside and outside blocks (avoid division by zero)
+      inside_mean  <- inside_sum / pmax(inside_count, 1)
+      outside_mean <- outside_sum / pmax(outside_count, 1)
+
+      # Compute ratio: inside / outside
+      ratio_mat <- inside_mean / outside_mean
+      colnames(ratio_mat) <- paste0("ratio_", quality_cols)
+
+      # Add ratios to blocks data.table
+      blk <- cbind(blk, data.table::as.data.table(ratio_mat))
+      
+      keep_cols <- setdiff(colnames(blk), c(sum_cols, count_cols))
+      blk <- data.table::as.data.table(blk[, keep_cols, drop = FALSE])
+
+    }
+
     return(blk)
-    
+   
   }, error = function(e) {
     message("processChromosome failed: ", conditionMessage(e))
     return(NULL)
   })
 }
+
