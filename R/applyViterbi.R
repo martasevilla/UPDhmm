@@ -1,26 +1,22 @@
 #' Apply the hidden Markov model using the Viterbi algorithm.
 #'
+#' This function takes a collapsed VCF object and a pre-defined Hidden Markov Model (HMM),
+#' applies the Viterbi algorithm to infer the most likely sequence of hidden states for 
+#' each sample, and stores the resulting states as a new metadata column in the VCF object.
 #'
 #' @param largeCollapsedVcf input vcf file
 #' @param hmm Hidden Markov Model used to infer the events
-#' @param genotypes Possible GT formats and its correspondence with the hmm
 #' @return largeCollapsedVcf
+#'
 
-applyViterbi <-
-  function(largeCollapsedVcf, hmm, genotypes) {
-  ## First, assign the names of the samples according to the trio.
-  ## It is crucial to maintain the order for applying the Viterbi algorithm.
-        vector_samples <- colnames(largeCollapsedVcf)
+applyViterbi <- function(largeCollapsedVcf, hmm) {
 
-  ## Now, transform genotypes into numerical codes and apply Viterbi algorithm.
-  ## The results will be stored as a metadata column in the object.
-        genotypes_coded <- c(paste0(
-          genotypes[VariantAnnotation::geno(largeCollapsedVcf)$GT[, "father"]],
-          genotypes[VariantAnnotation::geno(largeCollapsedVcf)$GT[, "mother"]],
-          genotypes[VariantAnnotation::geno(largeCollapsedVcf)$GT[, "proband"]]
-        ))
+  ## Extract the genotype matrix from the vcf object
+  geno_matrix <- S4Vectors::mcols(largeCollapsedVcf)$geno_coded
 
-        states <- HMM::viterbi(hmm, genotypes_coded)
-        S4Vectors::mcols(largeCollapsedVcf)$states <- states
-        return(largeCollapsedVcf)
-    }
+  ## Apply the Viterbi algorithm to infer the most likely hidden states and 
+  S4Vectors::mcols(largeCollapsedVcf)$states <- HMM::viterbi(hmm, geno_matrix)
+
+  ## Return the updated VCF object with the inferred states
+  return(largeCollapsedVcf)
+}
