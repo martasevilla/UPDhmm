@@ -80,38 +80,12 @@ calculateEvents <- function(largeCollapsedVcf,
   ## --------------------------------------------------------------
   ## 1. Optional: compute per-sample depth/quality ratios
   ## --------------------------------------------------------------
+  
   total_sum_per_individual <- total_valid_per_individual <- NULL
   if (add_ratios) {
-    geno_list <- VariantAnnotation::geno(largeCollapsedVcf)
-    expected_samples <- c("proband", "mother", "father")
-  
-    dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) { field_DP } 
-                else if ("DP" %in% names(geno_list)) { "DP" } 
-                else if ("AD" %in% names(geno_list)) { "AD" } 
-                else { NULL }
-
-    if (!is.null(dp_field)) {
-      # Handle AD separately (sum across alleles)
-      if (dp_field == "AD") {
-        quality_matrix <- apply(geno_list$AD, c(1,2), sum)
-      } else {
-        quality_matrix <- as.matrix(geno_list[[dp_field]])
-      }
-      # Keep only the expected trio samples if present
-      present <- intersect(expected_samples, colnames(quality_matrix))
-      if (length(present) > 0L) {
-
-        quality_matrix <- quality_matrix[, present, drop = FALSE]
-        total_sum_per_individual <- colSums(quality_matrix, na.rm = TRUE)
-        total_valid_per_individual <- colSums(!is.na(quality_matrix))
-
-        # Ensure order proband,mother,father
-        total_sum_per_individual <- total_sum_per_individual[expected_samples]
-        total_valid_per_individual <- total_valid_per_individual[expected_samples]
-      }
-    } else {
-      warning("No DP or AD field found in VCF.")
-    }
+    trio_totals <- computeTrioTotals(largeCollapsedVcf, field_DP = field_DP)
+    total_sum_per_individual <- trio_totals$total_sum
+    total_valid_per_individual <- trio_totals$total_valid
   }
 
   ## --------------------------------------------------------------
@@ -172,4 +146,41 @@ calculateEvents <- function(largeCollapsedVcf,
   }
 
   return(filtered_def_blocks_states[])
+}
+
+
+computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","father"), field_DP = NULL) {
+  total_sum <- total_valid <- NULL
+  geno_list <- VariantAnnotation::geno(vcf)
+
+  dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) { 
+    field_DP 
+  } else if ("DP" %in% names(geno_list)) { 
+    "DP" 
+  } else if ("AD" %in% names(geno_list)) { 
+    "AD" 
+  } else { 
+    NULL 
+  }
+
+  if (!is.null(dp_field)) {
+    # Sum AD across alleles if needed
+    quality_matrix <- if (dp_field == "AD") apply(geno_list$AD, c(1,2), sum) else as.matrix(geno_list[[dp_field]])
+
+    # Keep only the expected trio samples
+    present <- intersect(expected_samples, colnames(quality_matrix))
+    if (length(present) > 0L) {
+      quality_matrix <- quality_matrix[, present, drop = FALSE]
+      total_sum <- colSums(quality_matrix, na.rm = TRUE)
+      total_valid <- colSums(!is.na(quality_matrix))
+
+      # Ensure order proband, mother, father
+      total_sum <- total_sum[expected_samples]
+      total_valid <- total_valid[expected_samples]
+    }
+  } else {
+    warning("No DP or AD field found in VCF.")
+  }
+
+  list(total_sum = total_sum, total_valid = total_valid)
 }
