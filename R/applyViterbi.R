@@ -12,10 +12,10 @@
 applyViterbi <- function(largeCollapsedVcf, hmm) {
 
   ## Retrieve the precomputed numeric genotypes (observations) from the VCF metadata
-  geno_matrix <- S4Vectors::mcols(largeCollapsedVcf)$geno_coded
+  geno_coded_values <- S4Vectors::mcols(largeCollapsedVcf)$geno_coded
 
   ## Run the Viterbi algorithm to infer the most likely sequence of hidden states
-  S4Vectors::mcols(largeCollapsedVcf)$states <- HMM::viterbi(hmm, geno_matrix)
+  S4Vectors::mcols(largeCollapsedVcf)$states <- HMM::viterbi(hmm, geno_coded_values )
 
   ## Return the updated VCF object with inferred states stored in metadata
   return(largeCollapsedVcf)
