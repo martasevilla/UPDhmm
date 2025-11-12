@@ -117,7 +117,7 @@ calculateEvents <- function(largeCollapsedVcf,
   ## --------------------------------------------------------------
   ## 2. Split VCF by chromosome
   ## --------------------------------------------------------------
-  split_vcf_raw <- S4Vectors::splitAsList(
+  split_vcf_raw <- split(
     largeCollapsedVcf, GenomicRanges::seqnames(largeCollapsedVcf)
   )
   split_vcf_raw <- split_vcf_raw[lengths(split_vcf_raw) > 0L]
