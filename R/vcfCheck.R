@@ -81,7 +81,7 @@ vcfCheck <- function(
                                 == proband] <- "proband"
 
     # Generate numeric encoding of trio genotypes
-    geno_uncoded <- geno_data$GT
+    geno_uncoded <- VariantAnnotation::geno(largeCollapsedVcf)$GT
     geno_coded <- paste0(
         genotypes[geno_uncoded[, "father"]],
         genotypes[geno_uncoded[, "mother"]],
