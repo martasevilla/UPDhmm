@@ -1,6 +1,6 @@
-#' Convert a collapsed VCF into a structured data.table with inferred states
+#' Convert a collapsed VCF into a structured data.frame with inferred states
 #'
-#' This function transforms a large collapsed VCF object into a structured `data.table` 
+#' This function transforms a large collapsed VCF object into a structured `data.frame` 
 #' that contains predicted states for each variant, along with genomic coordinates, 
 #' genotype codings, and optional depth/quality metrics derived from DP or AD fields.
 #'
@@ -10,7 +10,7 @@
 #' @param field_DP Optional string specifying the name of an alternative DP-like field 
 #'   to use instead of the standard DP field.
 #'
-#' @return datatable
+#' @return data.frame
 
 asDfVcf <- function(largeCollapsedVcf, add_ratios, field_DP) {
 
@@ -25,9 +25,9 @@ asDfVcf <- function(largeCollapsedVcf, add_ratios, field_DP) {
   geno_coded <- mcols_vcf$geno_coded
 
   ## --------------------------------------------------------------
-  ## Build the base data.table with variant info and inferred states
+  ## Build the base data.frame with variant info and inferred states
   ## --------------------------------------------------------------
-  dt <- data.table::data.table(
+  dt <- data.frame(
     ID         = colData_vcf$ID[1],
     start      = start_pos,
     end        = end_pos,
@@ -74,11 +74,12 @@ asDfVcf <- function(largeCollapsedVcf, add_ratios, field_DP) {
       warning("No DP or AD field found in VCF. Quality columns set to NA.")
     }
     
-    ## Convert quality matrix to data.table and merge with base table
-    quality_dt <- data.table::data.table(
+    ## Convert quality matrix to data.frame and merge with base 
+    quality_dt <- data.frame(
       quality_proband = as.numeric(quality_matrix[, "proband"]),
       quality_mother  = as.numeric(quality_matrix[, "mother"]),
-      quality_father  = as.numeric(quality_matrix[, "father"])
+      quality_father  = as.numeric(quality_matrix[, "father"]),
+      stringsAsFactors = FALSE
     )
 
     dt <- cbind(dt, quality_dt)

@@ -15,7 +15,7 @@
 #' @param total_sum Numeric vector of total read depths per sample for the chromosome.
 #' @param total_valid Numeric vector of total valid positions per sample for the chromosome.
 #'
-#' @return A data.table of detected blocks for the chromosome, or NULL if error
+#' @return A data.frame of detected blocks for the chromosome, or NULL if error
 
 processChromosome <- function(vcf_chr, hmm, add_ratios, field_DP, total_sum, total_valid) {
   tryCatch({
@@ -32,11 +32,11 @@ processChromosome <- function(vcf_chr, hmm, add_ratios, field_DP, total_sum, tot
     }
     
     #################################################
-    # 2. Convert VCF to data.table with optional depth/quality metrics
+    # 2. Convert VCF to data.frame with optional depth/quality metrics
     #################################################
     df_vit <- asDfVcf(vcf_vit, add_ratios, field_DP)
 
-    if (!inherits(df_vit, "data.table")) {
+    if (!inherits(df_vit, "data.frame")) {
       stop(sprintf("[Chromosome %s] asDfVcf did not return a data.frame.", chr_name))
     }
     
@@ -86,8 +86,8 @@ processChromosome <- function(vcf_chr, hmm, add_ratios, field_DP, total_sum, tot
       count_cols <- paste0("total_count_quality_", quality_cols)
 
       # Extract inside-block sums and counts
-      inside_sum   <- as.matrix(blk[, sum_cols, with = FALSE])
-      inside_count <- as.matrix(blk[, count_cols, with = FALSE])
+      inside_sum   <- as.matrix(blk[, sum_cols, drop = FALSE])
+      inside_count <- as.matrix(blk[, count_cols, drop = FALSE])
 
       # Compute outside-block sums and counts: chromosome total minus inside-block values
       outside_sum   <- matrix(total_sum, nrow = nrow(blk), ncol = length(quality_cols), byrow = TRUE) - inside_sum
@@ -101,12 +101,11 @@ processChromosome <- function(vcf_chr, hmm, add_ratios, field_DP, total_sum, tot
       ratio_mat <- inside_mean / outside_mean
       colnames(ratio_mat) <- paste0("ratio_", quality_cols)
 
-      # Add ratios to blocks data.table
-      blk <- cbind(blk, data.table::as.data.table(ratio_mat))
+      # Add ratios to blocks data.frame
+      blk <- cbind(blk, as.data.frame(ratio_mat))
       
       keep_cols <- setdiff(colnames(blk), c(sum_cols, count_cols))
-      blk <- data.table::as.data.table(blk[, keep_cols, drop = FALSE])
-
+      blk <- blk[, keep_cols, drop = FALSE]
     }
 
     return(blk)

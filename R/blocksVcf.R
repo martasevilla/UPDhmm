@@ -1,13 +1,13 @@
 #' Collapse contiguous variants with the same state into blocks
 #'
-#' This function takes a data.table produced by `asDfVcf` and
+#' This function takes a data.frame produced by `asDfVcf` and
 #' identifies contiguous variants that share the same inferred state (`group`). 
 #' These contiguous variants are then merged into "blocks", summarizing their start
 #' and end positions, number of variants, genotype codings, and optionally 
 #' summed quality/depth metrics.
 #'
-#' @param df data.table resulting from the `as_df_vcf` function.
-#' @return data.table containing one row per block
+#' @param df data.frame resulting from the `as_df_vcf` function.
+#' @return data.frame containing one row per block
 #' 
 
 blocksVcf <- function(df) {
@@ -40,29 +40,30 @@ blocksVcf <- function(df) {
     quality_matrix <- as.matrix(df[, quality_cols, drop = FALSE])
 
     # Sum quality values per block, ignoring NA
-    sum_matrix <- data.table::as.data.table(rowsum(quality_matrix, group = block_idx, na.rm = TRUE))
+    sum_matrix <- as.data.frame(rowsum(quality_matrix, group = block_idx, na.rm = TRUE))
     
     # Count non-NA values per block
-    count_matrix <- data.table::as.data.table(rowsum(1L * (!is.na(quality_matrix)), group = block_idx))
+    count_matrix <- as.data.frame(rowsum(1L * (!is.na(quality_matrix)), group = block_idx))
     
     # Rename columns for clarity
     colnames(sum_matrix)   <- paste0("total_sum_", quality_cols)
     colnames(count_matrix) <- paste0("total_count_", quality_cols)
+
   }
 
   ## --------------------------------------------------------------
-  ## Build the resulting data.table
+  ## Build the resulting data.frame
   ## --------------------------------------------------------------
-  result <- data.table::data.table(
+  result <- data.frame(
     ID         = sample_ID,
     seqnames   = seqnames_block,
     start      = start_block,
     end        = end_block,
     group      = r$values,
     n_snps     = r$lengths,
-    geno_coded = geno_lists
+    geno_coded = I(geno_lists)
   )
-
+  
   ## Attach quality metrics if present
   if (!is.null(sum_matrix)) {
     result <- cbind(result, sum_matrix, count_matrix)

@@ -39,8 +39,8 @@
 #' @param verbose Logical, default = `FALSE`. 
 #'   If `TRUE`, progress messages will be printed during processing.
 #'
-#' @return A `data.table` object containing all detected events in the provided trio. 
-#' If no events are found, the function will return an empty `data.table`.
+#' @return A `data.frame` object containing all detected events in the provided trio. 
+#' If no events are found, the function will return an empty `data.frame`.
 #'
 #' @export
 #'
@@ -124,7 +124,7 @@ calculateEvents <- function(largeCollapsedVcf,
 
   if (length(split_vcf_raw) == 0L) {
     if (verbose) message("No chromosomes found in VCF.")
-    return(data.table::data.table())
+    return(data.frame())
   }
 
   if (verbose) message("Processing ", length(split_vcf_raw), " chromosomes...")
@@ -158,13 +158,13 @@ calculateEvents <- function(largeCollapsedVcf,
   ## --------------------------------------------------------------
   ## 4. Merge chromosome-level results and filter events
   ## --------------------------------------------------------------
-  def_blocks_states <- data.table::rbindlist(blocks_state, use.names = TRUE, fill = TRUE)
+  def_blocks_states <- do.call(rbind, blocks_state)
 
   filtered_def_blocks_states <- def_blocks_states[def_blocks_states$n_snps > 1 & def_blocks_states$group != "normal" & !(def_blocks_states$seqnames %in% c("chrX","X")),]
 
   if (nrow(filtered_def_blocks_states) == 0L) {
     if (verbose) message("No non-normal events found.")
-    return(data.table::data.table())
+    return(data.frame())
   }
 
   if (verbose) {
