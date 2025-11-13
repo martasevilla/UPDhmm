@@ -17,7 +17,7 @@
 #'
 #' @return A data.frame of detected blocks for the chromosome, or NULL if error
 
-processChromosome <- function(vcf_chr, hmm, add_ratios, field_DP, total_sum, total_valid) {
+processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL, total_sum = NULL, total_valid = NULL) {
   tryCatch({
     
     chr_name <- as.character(GenomeInfoDb::seqnames(vcf_chr)[1])
@@ -107,7 +107,7 @@ processChromosome <- function(vcf_chr, hmm, add_ratios, field_DP, total_sum, tot
       keep_cols <- setdiff(colnames(blk), c(sum_cols, count_cols))
       blk <- blk[, keep_cols, drop = FALSE]
     }
-
+    rownames(blk) <- NULL
     return(blk)
    
   }, error = function(e) {
