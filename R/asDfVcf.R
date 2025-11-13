@@ -43,47 +43,67 @@ asDfVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL) {
     geno_list <- VariantAnnotation::geno(largeCollapsedVcf)
     expected_samples <- c("proband", "mother", "father")
     
-    ## Preferentially use user-specified DP-like field if present
-    if (!is.null(field_DP) && field_DP %in% names(geno_list)) {
-      quality_matrix <- as.matrix(geno_list[[field_DP]])[, expected_samples, drop = FALSE]
-
-    ## Otherwise fallback to DP if available
-    } else if ("DP" %in% names(geno_list)) {
-      quality_matrix <- as.matrix(geno_list$DP)[, expected_samples, drop = FALSE]
-    
-    ## If no DP is present, reconstruct per-sample depth from AD
-    } else if ("AD" %in% names(geno_list)) {
-      ad_array <- geno_list$AD
-      n_variants <- dim(ad_array)[1]
-      n_samples  <- dim(ad_array)[2]
-
-      ## Collapse allele depths across alleles for each sample
-      quality_matrix <- matrix(
-        colSums(matrix(ad_array, nrow = n_variants * dim(ad_array)[3])), 
-        nrow = n_variants, ncol = n_samples
-      )[, expected_samples, drop = FALSE]
-
-    ## No suitable quality metric found → fill with NA
-    } else {
-      quality_matrix <- matrix(
-        NA_real_, 
-        nrow = length(start_pos), 
-        ncol = length(expected_samples),
-        dimnames = list(NULL, expected_samples)
-      )
-      warning("No DP or AD field found in VCF. Quality columns set to NA.")
+    ## Decide which field to use
+    dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) { 
+      field_DP 
+    } else if ("DP" %in% names(geno_list)) { 
+      "DP" 
+    } else if ("AD" %in% names(geno_list)) { 
+      "AD" 
+    } else { 
+      NULL 
     }
     
-    ## Convert quality matrix to data.frame and merge with base 
-    quality_dt <- data.frame(
-      quality_proband = as.numeric(quality_matrix[, "proband"]),
-      quality_mother  = as.numeric(quality_matrix[, "mother"]),
-      quality_father  = as.numeric(quality_matrix[, "father"]),
-      stringsAsFactors = FALSE
-    )
-
-    dt <- cbind(dt, quality_dt)
+    if (!is.null(dp_field)) {
+      if (dp_field == "AD") {
+        ## AD is a matrix of lists (each cell: vector of allele depths)
+        quality_matrix <- matrix(NA, nrow = nrow(geno_list$AD), ncol = ncol(geno_list$AD))
+        rownames(quality_matrix) <- rownames(geno_list$AD)
+        colnames(quality_matrix) <- colnames(geno_list$AD)
+        
+        for (i in seq_len(nrow(geno_list$AD))) {
+          for (j in seq_len(ncol(geno_list$AD))) {
+            val <- geno_list$AD[i, j][[1]]  # extract vector
+            
+            # Handle NA correctly — if all alleles are NA, leave NA
+            if (is.null(val) || all(is.na(val))) {
+              quality_matrix[i, j] <- NA
+            } else {
+              quality_matrix[i, j] <- sum(val, na.rm = TRUE)
+            }
+          }
+        }
+        
+      } else {
+        ## DP or another numeric field
+        quality_matrix <- as.matrix(geno_list[[dp_field]])
+      }
+      
+      ## Keep only expected trio samples
+      present <- intersect(expected_samples, colnames(quality_matrix))
+      if (length(present) > 0L) {
+        quality_matrix <- quality_matrix[, present, drop = FALSE]
+        
+        ## Ensure order proband, mother, father
+        quality_matrix <- quality_matrix[, expected_samples, drop = FALSE]
+        
+        ## Convert to numeric safely
+        quality_dt <- data.frame(
+          quality_proband = as.numeric(quality_matrix[, "proband"]),
+          quality_mother  = as.numeric(quality_matrix[, "mother"]),
+          quality_father  = as.numeric(quality_matrix[, "father"]),
+          stringsAsFactors = FALSE
+        )
+        
+        ## Bind to base dataframe
+        dt <- cbind(dt, quality_dt)
+      }
+    } else {
+      ## No DP or AD field
+      warning("No DP or AD field found in VCF. Quality columns set to NA.")
+      dt$quality_proband <- dt$quality_mother <- dt$quality_father <- NA_real_
+    }
   }
-
+  
   return(dt)
 }
