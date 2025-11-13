@@ -63,7 +63,7 @@
 calculateEvents <- function(largeCollapsedVcf,
                             hmm = NULL,
                             field_DP = NULL,
-                            add_ratios = TRUE,
+                            add_ratios = FALSE,
                             BPPARAM = BiocParallel::SerialParam(),
                             verbose = FALSE) {
   ## --------------------------------------------------------------
