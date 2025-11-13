@@ -152,7 +152,8 @@ calculateEvents <- function(largeCollapsedVcf,
 computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","father"), field_DP = NULL) {
   total_sum <- total_valid <- NULL
   geno_list <- VariantAnnotation::geno(vcf)
-
+  
+  # Decide which field to use
   dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) { 
     field_DP 
   } else if ("DP" %in% names(geno_list)) { 
@@ -162,18 +163,40 @@ computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","fath
   } else { 
     NULL 
   }
-
+  
   if (!is.null(dp_field)) {
-    # Sum AD across alleles if needed
-    quality_matrix <- if (dp_field == "AD") apply(geno_list$AD, c(1,2), sum) else as.matrix(geno_list[[dp_field]])
-
+    if (dp_field == "AD") {
+      # AD is a matrix of lists (each cell: vector of allele depths)
+      quality_matrix <- matrix(NA, nrow = nrow(geno_list$AD), ncol = ncol(geno_list$AD))
+      rownames(quality_matrix) <- rownames(geno_list$AD)
+      colnames(quality_matrix) <- colnames(geno_list$AD)
+      
+      for (i in seq_len(nrow(geno_list$AD))) {
+        for (j in seq_len(ncol(geno_list$AD))) {
+          val <- geno_list$AD[i, j][[1]]  # extract vector
+          
+          # If all alleles are NA, keep NA to mark as invalid
+          if (all(is.na(val))) {
+            quality_matrix[i, j] <- NA
+          } else {
+            # Otherwise, sum across alleles
+            quality_matrix[i, j] <- sum(val, na.rm = TRUE)
+          }
+        }
+      }
+      
+    } else {
+      # If field is DP or another numeric matrix, just coerce to matrix
+      quality_matrix <- as.matrix(geno_list[[dp_field]])
+    }
+    
     # Keep only the expected trio samples
     present <- intersect(expected_samples, colnames(quality_matrix))
     if (length(present) > 0L) {
       quality_matrix <- quality_matrix[, present, drop = FALSE]
       total_sum <- colSums(quality_matrix, na.rm = TRUE)
       total_valid <- colSums(!is.na(quality_matrix))
-
+      
       # Ensure order proband, mother, father
       total_sum <- total_sum[expected_samples]
       total_valid <- total_valid[expected_samples]
@@ -181,6 +204,6 @@ computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","fath
   } else {
     warning("No DP or AD field found in VCF.")
   }
-
+  
   list(total_sum = total_sum, total_valid = total_valid)
 }
