@@ -144,8 +144,8 @@ calculateEvents <- function(largeCollapsedVcf,
   if (verbose) {
     message("Found ", nrow(filtered_def_blocks_states), " candidate events.")
   }
-
-  return(filtered_def_blocks_states[])
+  rownames(filtered_def_blocks_states) <- NULL
+  return(filtered_def_blocks_states)
 }
 
 
