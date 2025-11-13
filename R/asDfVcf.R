@@ -12,7 +12,7 @@
 #'
 #' @return data.frame
 
-asDfVcf <- function(largeCollapsedVcf, add_ratios, field_DP) {
+asDfVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL) {
 
   ## Extract column metadata and variant metadata
   colData_vcf <- SummarizedExperiment::colData(largeCollapsedVcf)
@@ -23,7 +23,7 @@ asDfVcf <- function(largeCollapsedVcf, add_ratios, field_DP) {
   end_pos <- GenomicRanges::end(largeCollapsedVcf)
   seqnames_chr <- as.character(GenomicRanges::seqnames(largeCollapsedVcf))
   geno_coded <- mcols_vcf$geno_coded
-
+  
   ## --------------------------------------------------------------
   ## Build the base data.frame with variant info and inferred states
   ## --------------------------------------------------------------
