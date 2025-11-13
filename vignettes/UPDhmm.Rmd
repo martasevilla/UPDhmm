@@ -190,7 +190,7 @@ will return an empty `data.frame`.
 By default, this function only calculates the number of Mendelian errors as a block-level statistic. Sequencing depth ratios can be included by enabling the optional parameter `add_ratios = TRUE`, which defaults to `FALSE`.
 
 
-| Column name         | Description                                                                                                                                                                                                                           |
+| Column name         | Description                                                                                                                                                                                                                          |
 |--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `ID`               | Identifier of the proband (child sample)                                                                                                                                                                                              |
 | `seqnames`         | Chromosome name                                                                                                                                                                                                                       |
@@ -199,7 +199,7 @@ By default, this function only calculates the number of Mendelian errors as a bl
 | `group`            | Predicted inheritance state (`iso_mat`, `iso_fat`, `het_mat`, `het_fat`)                                                                                                                                                              |
 | `n_snps`           | Number of informative SNPs within the event                                                                                                                                                                                           |
 | `n_mendelian_error`| Number of Mendelian inconsistencies detected within the region                                                                                                                                                                        |
-| `ratio_proband`    | *Optional*. Ratio between the average sequencing depth inside the event and the depth outside it for the proband. A value close to 1 indicates balanced coverage; significant deviations may suggest copy-number changes.            |
+| `ratio_proband`    | *Optional*. Ratio between the average sequencing depth inside the event and the depth outside it for the proband. A value close to 1 indicates balanced coverage; significant deviations may suggest copy-number changes.             |
 | `ratio_mother`     | *Optional*. Same ratio computed for the maternal sample                                                                                                                                                                               |
 | `ratio_father`     | *Optional*. Same ratio computed for the paternal sample                                                                                                                                                                               |
 
