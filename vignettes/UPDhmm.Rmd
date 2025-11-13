@@ -205,8 +205,8 @@ By default, this function only calculates the number of Mendelian errors as a bl
 
 In this example, we run the function in serial mode, but `calculateEvents()` now includes an optional argument `BPPARAM` that controls parallel execution.
 
-| Argument  | Description                                                                                                                                                                                                                           |
-|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Argument  | Description                                                                                                                                                                                                                               |
+|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `BPPARAM` | Parallelization settings, passed to **`BiocParallel::bplapply()`**. By default, the function uses `BiocParallel::SerialParam()` (serial execution). To enable parallel computation, a BiocParallel backend can be specified — for example: |
 
 
