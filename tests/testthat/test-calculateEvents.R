@@ -29,7 +29,7 @@ expected_mean <- c(proband = 904/15, mother = 886/15, father = 902/15)
 # Test computeTrioTotals using DP explicitly
 # ------------------------------------------------------------------------- #
 test_that("computeTrioTotals calculates mean read depths correctly with DP", {
-  mean_dp <- computeTrioTotals(input, field_DP = "DP")
+  mean_dp <- computeTrioTotals(vcf = input, field_DP = "DP")
 
   expect_true(is.numeric(mean_dp))
   expect_named(mean_dp, c("proband", "mother", "father"))
@@ -40,7 +40,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with DP", {
 # Test computeTrioTotals using AD explicitly
 # ------------------------------------------------------------------------- #
 test_that("computeTrioTotals calculates mean read depths correctly with AD", {
-  mean_dp <- computeTrioTotals(input, field_DP = "AD")
+  mean_dp <- computeTrioTotals(vcf = input, field_DP = "AD")
 
   expect_true(is.numeric(mean_dp))
   expect_named(mean_dp, c("proband", "mother", "father"))
@@ -52,7 +52,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with AD", {
 # The function should automatically fall back to DP → AD
 # ------------------------------------------------------------------------- #
 test_that("computeTrioTotals calculates mean read depths correctly with default field", {
-  mean_dp <- computeTrioTotals(input)
+  mean_dp <- computeTrioTotals(vcf = input)
 
   expect_true(is.numeric(mean_dp))
   expect_named(mean_dp, c("proband", "mother", "father"))
@@ -82,7 +82,7 @@ expected_mean <- c(proband = 844/14, mother = 886/15, father = 902/15)
 # Repeat the three tests under conditions where NA values are present
 # ------------------------------------------------------------------------- #
 test_that("computeTrioTotals calculates mean read depths correctly with DP", {
-  mean_dp <- computeTrioTotals(input, field_DP = "DP")
+  mean_dp <- computeTrioTotals(vcf = input, field_DP = "DP")
 
   expect_true(is.numeric(mean_dp))
   expect_named(mean_dp, c("proband", "mother", "father"))
@@ -90,7 +90,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with DP", {
 })
 
 test_that("computeTrioTotals calculates mean read depths correctly with AD", {
-  mean_dp <- computeTrioTotals(input, field_DP = "AD")
+  mean_dp <- computeTrioTotals(vcf = input, field_DP = "AD")
 
   expect_true(is.numeric(mean_dp))
   expect_named(mean_dp, c("proband", "mother", "father"))
@@ -98,7 +98,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with AD", {
 })
 
 test_that("computeTrioTotals calculates mean read depths correctly with default field", {
-  mean_dp <- computeTrioTotals(input)
+  mean_dp <- computeTrioTotals(vcf = input)
 
   expect_true(is.numeric(mean_dp))
   expect_named(mean_dp, c("proband", "mother", "father"))
@@ -109,7 +109,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with default 
 # Test calculateEvents() using default HMM (add_ratios = FALSE)
 # ------------------------------------------------------------------------- #
 test_that("Test if the general function works (default HMM, add_ratios = FALSE)", {
-  out <- calculateEvents(input)
+  out <- calculateEvents(largeCollapsedVcf = input)
   
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
@@ -127,7 +127,7 @@ test_that("Test if the general function works (default HMM, add_ratios = FALSE)"
 # Test calculateEvents() with default HMM and add_ratios = TRUE
 # ------------------------------------------------------------------------- #
 test_that("Test if the general function works (default HMM, add_ratios = TRUE)", {
-    out <- calculateEvents(input, add_ratios = TRUE, field_DP = "DP")
+    out <- calculateEvents(largeCollapsedVcf = input, add_ratios = TRUE, field_DP = "DP")
     
     out$seqnames <- as.character(out$seqnames)
     out$ratio_proband <- round(out$ratio_proband, 6)
@@ -211,7 +211,7 @@ input <- vcfCheck(
 # ------------------------------------------------------------------------- #
 
 test_that("Test if the general function works (custom HMM, add_ratios = FALSE)", {
-  out <- calculateEvents(input,hmm = new_hmm, field_DP = "DP")
+  out <- calculateEvents(largeCollapsedVcf = input, hmm = new_hmm, field_DP = "DP")
   out$seqnames <- as.character(out$seqnames)
   
   expect_false(any(c("ratio_proband", "ratio_mother", "ratio_father") %in% names(out)))
@@ -227,7 +227,7 @@ test_that("Test if the general function works (custom HMM, add_ratios = FALSE)",
 # ------------------------------------------------------------------------- #
 
 test_that("Test if the general function works (custom HMM, add_ratios = TRUE)", {
-  out <- calculateEvents(input,hmm = new_hmm, field_DP = "DP", add_ratios = TRUE)
+  out <- calculateEvents(largeCollapsedVcf = input, hmm = new_hmm, field_DP = "DP", add_ratios = TRUE)
   out$seqnames <- as.character(out$seqnames)
   
   out$ratio_proband <- round(out$ratio_proband, 6)
