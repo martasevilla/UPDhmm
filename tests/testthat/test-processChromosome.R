@@ -13,7 +13,7 @@ input <- vcfCheck(
 split_vcf <- split(input, f = GenomicRanges::seqnames(input))
 chr6 <- split_vcf[[6]]
 
-# Expected total depth sums and valid counts for chr6
+# Expected mean sequencing depth per individual for chromosome 6
 total_mean_per_individual <- c(proband = 904/15, mother = 886/15, father = 902/15)
 
 # Load the default HMM
@@ -44,7 +44,7 @@ expected_df <- data.frame(
 
 test_that("processChromosome works with valid chromosome input", {
   
-  out <- processChromosome(chr6, hmm = hmm, mendelian_error_values = mendelian_error_values)
+  out <- processChromosome(vcf_chr = chr6, hmm = hmm, mendelian_error_values = mendelian_error_values)
   
   out$seqnames <- as.character(out$seqnames)  
   out <- as.data.frame(out)
@@ -62,7 +62,7 @@ test_that("processChromosome works with valid chromosome input", {
 # ------------------------------------------------------------------------- #
 test_that("processChromosome works with valid chromosome input", {
   
-  out <- processChromosome(chr6, hmm = hmm, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
+  out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
@@ -81,7 +81,7 @@ test_that("processChromosome works with valid chromosome input", {
 # ------------------------------------------------------------------------- #
 test_that("processChromosome works with valid chromosome input", {
   
-  out <- processChromosome(chr6, hmm = hmm, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
+  out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
@@ -100,7 +100,7 @@ test_that("processChromosome works with valid chromosome input", {
 # ------------------------------------------------------------------------- #
 test_that("processChromosome works with valid chromosome input", {
   
-  out <- processChromosome(chr6, hmm = hmm, add_ratios = TRUE, total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
+  out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   out$ratio_proband <- round(out$ratio_proband, 6)
@@ -130,14 +130,13 @@ expected_df$ratio_proband <- 0.974526
 
 total_mean_per_individual <- c(proband = 844/14, mother = 886/15, father = 902/15)
 
-
 # ------------------------------------------------------------------------- #
 # Repeat the three tests under conditions where NA values are present
 # ------------------------------------------------------------------------- #
 
 test_that("processChromosome works with valid chromosome input", {
   
-  out <- processChromosome(chr6, hmm = hmm, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
+  out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
@@ -154,7 +153,7 @@ test_that("processChromosome works with valid chromosome input", {
 
 test_that("processChromosome works with valid chromosome input", {
   
-  out <- processChromosome(chr6, hmm = hmm, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
+  out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
@@ -170,7 +169,7 @@ test_that("processChromosome works with valid chromosome input", {
 
 test_that("processChromosome works with valid chromosome input", {
   
-  out <- processChromosome(chr6, hmm = hmm, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
+  out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
