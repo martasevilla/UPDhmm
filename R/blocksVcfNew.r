@@ -14,7 +14,7 @@
 #'   HMM state, number of SNPs, genotype encodings, and (optionally) mean depth/quality.
 #'
 
-blocksVcfNew <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL) {
+blocksVcfNew <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father")) {
   
   mcol <- S4Vectors::mcols(largeCollapsedVcf)
   coldata <- SummarizedExperiment::colData(largeCollapsedVcf)
@@ -69,8 +69,12 @@ blocksVcfNew <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL)
       means <- sums / pmax(counts, 1)
       means[counts == 0] <- NA
 
-      colnames(means) <- paste0("mean_quality_", c("proband","mother","father"))
-      df <- cbind(df, as.data.frame(means))
+      if (!is.null(total_mean)) {
+        # Compute ratios block / total
+        ratio_matrix <- means / total_mean
+        colnames(ratio_matrix) <- ratio_cols
+        df <- cbind(df, as.data.frame(ratio_matrix))
+      } 
     }
   }
 
