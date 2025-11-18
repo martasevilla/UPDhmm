@@ -19,7 +19,6 @@ input <- vcfCheck(
 utils::data("hmm", package = "UPDhmm")
 hmm <- hmm
 
-
 test_that("Test if viterbi algorithm works", {
     out <- applyViterbi(
         largeCollapsedVcf = input,
