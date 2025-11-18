@@ -86,13 +86,11 @@ calculateEvents <- function(largeCollapsedVcf,
   ## 1. Optional: compute per-sample depth/quality ratios
   ## --------------------------------------------------------------
   
-  total_sum_per_individual <- total_valid_per_individual <- NULL
+  mean_depth_per_individual <- NULL
   if (add_ratios) {
-    trio_totals <- computeTrioTotals(largeCollapsedVcf, field_DP = field_DP)
-    total_sum_per_individual <- trio_totals$total_sum
-    total_valid_per_individual <- trio_totals$total_valid
+    mean_depth_per_individual <- computeTrioTotals(vcf = largeCollapsedVcf, field_DP = field_DP)
   }
-
+  
   ## --------------------------------------------------------------
   ## 2. Split VCF by chromosome
   ## --------------------------------------------------------------
@@ -117,16 +115,14 @@ calculateEvents <- function(largeCollapsedVcf,
   ## --------------------------------------------------------------
   blocks_state <- if (inherits(BPPARAM, "SerialParam")) {
     lapply(split_vcf_raw, processChromosome,
-           total_sum = total_sum_per_individual,
-           total_valid = total_valid_per_individual,
+           total_mean = mean_depth_per_individual,
            field_DP = field_DP,
            add_ratios = add_ratios,
            hmm = hmm, 
            mendelian_error_values = mendelian_error_values)
   } else {
     BiocParallel::bplapply(split_vcf_raw, processChromosome,
-                           total_sum = total_sum_per_individual,
-                           total_valid = total_valid_per_individual,
+                           total_mean = mean_depth_per_individual,
                            field_DP = field_DP,
                            add_ratios = add_ratios,
                            hmm = hmm, BPPARAM = BPPARAM, 
@@ -162,7 +158,7 @@ calculateEvents <- function(largeCollapsedVcf,
 
 
 computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","father"), field_DP = NULL) {
-  total_sum <- total_valid <- NULL
+  mean_depth <- NULL
   geno_list <- VariantAnnotation::geno(vcf)
   
   # ---------------------------------------------------------------
@@ -174,36 +170,36 @@ computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","fath
   # 4) Otherwise, no depth field available
   # ---------------------------------------------------------------
   
-  dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) { field_DP 
-              } else if ("DP" %in% names(geno_list)) { "DP" 
-              } else if ("AD" %in% names(geno_list)) { "AD" 
-              } else { NULL }
+  dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) {
+    field_DP 
+  } else if ("DP" %in% names(geno_list)) {
+    "DP" 
+  } else if ("AD" %in% names(geno_list)) {
+    "AD" 
+  } else {
+    NULL
+  }
   
   if (!is.null(dp_field)) {
     if (dp_field == "AD") {
       # If using allele depths (AD), sum across all alleles for each sample
       # Handle cases where all values are NA by returning NA
-      quality_matrix <- apply(geno_list$AD, 2, function(col) {
+      depth_matrix <- apply(geno_list$AD, 2, function(col) {
         vapply(col, function(x) {if (all(is.na(x))) NA_real_ else sum(x, na.rm = TRUE)}, numeric(1))
       })
-      
     } else {
-      quality_matrix <- as.matrix(geno_list[[dp_field]])
+      depth_matrix <- as.matrix(geno_list[[dp_field]])
     }
-      
-    # Compute total read depth per individual, ignoring NAs
-    total_sum <- colSums(quality_matrix, na.rm = TRUE)
     
-    # Compute number of valid (non-NA) calls per individual
-    total_valid <- colSums(!is.na(quality_matrix))
+    # Compute mean depth per individual, ignoring NA values
+    mean_depth <- colMeans(depth_matrix, na.rm = TRUE)
     
-    # Ensure order proband, mother, father
-    total_sum <- total_sum[expected_samples]
-    total_valid <- total_valid[expected_samples]
+    # Ensure the order proband, mother, father
+    mean_depth <- mean_depth[expected_samples]
     
   } else {
     warning("No DP or AD field found in VCF.")
   }
-  
-  list(total_sum = total_sum, total_valid = total_valid)
+
+  return(mean_depth)
 }
