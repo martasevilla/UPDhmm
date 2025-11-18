@@ -8,7 +8,6 @@
 #' @param hmm Hidden Markov Model used to infer the events
 #' @return largeCollapsedVcf
 #'
-
 applyViterbi <- function(largeCollapsedVcf, hmm) {
 
   ## Retrieve the precomputed numeric genotypes (observations) from the VCF metadata
