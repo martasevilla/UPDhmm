@@ -75,10 +75,10 @@ blocksVcfNew <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL,
       # Compute means per block
       means <- sums / pmax(counts, 1)
       means[counts == 0] <- NA
-
+      
       if (!is.null(total_mean)) {
         # Compute ratios relative to total_mean
-        ratio_matrix <- means / total_mean
+        ratio_matrix <- sweep(means, 2, total_mean, FUN = "/")
         colnames(ratio_matrix) <- ratio_cols
         df <- cbind(df, as.data.frame(ratio_matrix))
       } 
