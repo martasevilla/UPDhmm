@@ -170,15 +170,10 @@ computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","fath
   # 4) Otherwise, no depth field available
   # ---------------------------------------------------------------
   
-  dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) {
-    field_DP 
-  } else if ("DP" %in% names(geno_list)) {
-    "DP" 
-  } else if ("AD" %in% names(geno_list)) {
-    "AD" 
-  } else {
-    NULL
-  }
+  dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) { field_DP } 
+              else if ("DP" %in% names(geno_list)) { "DP" } 
+              else if ("AD" %in% names(geno_list)) { "AD" } 
+              else { NULL }
   
   if (!is.null(dp_field)) {
     if (dp_field == "AD") {
@@ -200,6 +195,5 @@ computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","fath
   } else {
     warning("No DP or AD field found in VCF.")
   }
-
   return(mean_depth)
 }
