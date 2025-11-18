@@ -21,9 +21,8 @@
 #' @return A data.frame of detected blocks for the chromosome, or NULL if error
 
 processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, 
-                              quality_cols = c("proband", "mother", "father"), mean_cols = c("mean_quality_proband", "mean_quality_mother", "mean_quality_father"), 
-                              ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father"), 
-                              mendelian_error_values) {
+                              ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father"),  mendelian_error_values) {
+  
   tryCatch({
     
     chr_name <- as.character(GenomeInfoDb::seqnames(vcf_chr)[1])
@@ -38,16 +37,16 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
     }
     
     #################################################
-    # 2. Convert VCF to data.frame with optional depth/quality metrics
+    # 2. Convert VCF to blocks and optionally compute ratios directly
     #################################################
-    blk <- blocksVcfNew(vcf_vit, add_ratios, field_DP)
+    blk <- blocksVcfNew(vcf_vit, add_ratios, field_DP, total_mean)
 
     if (!inherits(blk, "data.frame")) {
       stop(sprintf("[Chromosome %s] blocksVcfNew did not return a data.frame.", chr_name))
     }
     
     #################################################
-    # 4. Count Mendelian-inconsistent genotypes per block
+    # 3. Count Mendelian-inconsistent genotypes per block
     #################################################
     if (!is.null(hmm)) {
       
@@ -74,19 +73,6 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
       blk$n_mendelian_error <- NA_integer_
     }
 
-    #################################################
-    # 5. Optional: compute per-block read depth ratios
-    #################################################
-    if (!is.null(total_mean) ) {
-
-      inside_mean <- blk[, mean_cols, drop = FALSE]
-      ratio_mat <- inside_mean / total_mean 
-      colnames(ratio_mat) <- ratio_cols
-
-      blk[ratio_cols] <- as.data.frame(ratio_mat)
-      
-      blk <- blk[, setdiff(colnames(blk), mean_cols), drop = FALSE]
-    }
     rownames(blk) <- NULL
     return(blk)
    
@@ -95,4 +81,3 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
     return(NULL)
   })
 }
-
