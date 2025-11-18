@@ -14,6 +14,10 @@
 #' want to be measured.
 #' Default = FALSE
 #'
+#' @details The numeric genotype encoding `geno_coded` is a 3-character string per variant, 
+#' representing the genotypes of father, mother, and proband respectively, where:
+#' 1 = homozygous reference, 2 = heterozygous, 3 = homozygous alternate.
+#' 
 #' @return largeCollapsedVcf (VariantAnnotation VCF format).
 #' @export
 #' @examples
@@ -87,7 +91,9 @@ vcfCheck <- function(
         genotypes[geno_uncoded[, "mother"]],
         genotypes[geno_uncoded[, "proband"]]
     )
+    # Each string is 3 characters: father + mother + proband; values: 1=hom_ref, 2=het, 3=hom_alt
     
+    # Store the numeric genotype string in the VCF metadata column 'geno_coded'
     S4Vectors::mcols(largeCollapsedVcf)$geno_coded <- geno_coded
   
     return(largeCollapsedVcf)
