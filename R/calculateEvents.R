@@ -27,6 +27,10 @@
 #'   or `"AD"` (allele depths summed across alleles). Use this if your VCF uses a 
 #'   non-standard depth field, e.g., `"NR"`.
 #'
+#' @param add_ratios Logical, default = `FALSE`. If `TRUE`, the function computes 
+#'   per-sample totals of read depth and counts of valid calls for the trio, which 
+#'   can be used for normalization or downstream metrics.
+#'   
 #' @param BPPARAM Parallelization settings, passed to
 #'   \link[BiocParallel]{bplapply}.
 #'   By default `BiocParallel::SerialParam()` (serial execution).
@@ -73,6 +77,7 @@ calculateEvents <- function(largeCollapsedVcf,
     stop("Argument 'largeCollapsedVcf' must be a CollapsedVCF object.")
   }
 
+  # Load the default HMM from the UPDhmm package if no custom HMM is provided
   if (is.null(hmm)) {
     utils::data("hmm", package = "UPDhmm", envir = environment())
   }
@@ -102,6 +107,10 @@ calculateEvents <- function(largeCollapsedVcf,
   }
 
   if (verbose) message("Processing ", length(split_vcf_raw), " chromosomes...")
+  
+  # Determine which genotype codes correspond to Mendelian errors (lowest emission probability for 'normal' state)
+  emission_probs <- hmm$emissionProbs["normal", ]
+  mendelian_error_values <- names(emission_probs[emission_probs == min(emission_probs)])
 
   ## --------------------------------------------------------------
   ## 3. Run HMM pipeline per chromosome
@@ -112,14 +121,16 @@ calculateEvents <- function(largeCollapsedVcf,
            total_valid = total_valid_per_individual,
            field_DP = field_DP,
            add_ratios = add_ratios,
-           hmm = hmm)
+           hmm = hmm, 
+           mendelian_error_values = mendelian_error_values)
   } else {
     BiocParallel::bplapply(split_vcf_raw, processChromosome,
                            total_sum = total_sum_per_individual,
                            total_valid = total_valid_per_individual,
                            field_DP = field_DP,
                            add_ratios = add_ratios,
-                           hmm = hmm, BPPARAM = BPPARAM)
+                           hmm = hmm, BPPARAM = BPPARAM, 
+                           mendelian_error_values = mendelian_error_values)
   }
 
   blocks_state <- Filter(Negate(is.null), blocks_state)
@@ -133,8 +144,9 @@ calculateEvents <- function(largeCollapsedVcf,
   ## 4. Merge chromosome-level results and filter events
   ## --------------------------------------------------------------
   def_blocks_states <- do.call(rbind, blocks_state)
-
-  filtered_def_blocks_states <- def_blocks_states[def_blocks_states$n_snps > 1 & def_blocks_states$group != "normal" & !(def_blocks_states$seqnames %in% c("chrX","X")),]
+  
+  # Keep only blocks with >1 SNP, non-normal state, and autosomal chromosomes
+  filtered_def_blocks_states <- def_blocks_states[def_blocks_states$n_snps > 1 & def_blocks_states$group != "normal" & !(def_blocks_states$seqnames %in% c("chrX","X","chrY","Y")),]
 
   if (nrow(filtered_def_blocks_states) == 0L) {
     if (verbose) message("No non-normal events found.")
@@ -153,54 +165,42 @@ computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","fath
   total_sum <- total_valid <- NULL
   geno_list <- VariantAnnotation::geno(vcf)
   
-  # Decide which field to use
-  dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) { 
-    field_DP 
-  } else if ("DP" %in% names(geno_list)) { 
-    "DP" 
-  } else if ("AD" %in% names(geno_list)) { 
-    "AD" 
-  } else { 
-    NULL 
-  }
+  # ---------------------------------------------------------------
+  # Determine which depth/coverage field to use for calculations
+  # Priority:
+  # 1) Use 'field_DP' if specified and exists in VCF
+  # 2) Use standard 'DP' field if present
+  # 3) Use 'AD' (allele depths) if present
+  # 4) Otherwise, no depth field available
+  # ---------------------------------------------------------------
+  
+  dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) { field_DP 
+              } else if ("DP" %in% names(geno_list)) { "DP" 
+              } else if ("AD" %in% names(geno_list)) { "AD" 
+              } else { NULL }
   
   if (!is.null(dp_field)) {
     if (dp_field == "AD") {
-      # AD is a matrix of lists (each cell: vector of allele depths)
-      quality_matrix <- matrix(NA, nrow = nrow(geno_list$AD), ncol = ncol(geno_list$AD))
-      rownames(quality_matrix) <- rownames(geno_list$AD)
-      colnames(quality_matrix) <- colnames(geno_list$AD)
-      
-      for (i in seq_len(nrow(geno_list$AD))) {
-        for (j in seq_len(ncol(geno_list$AD))) {
-          val <- geno_list$AD[i, j][[1]]  # extract vector
-          
-          # If all alleles are NA, keep NA to mark as invalid
-          if (all(is.na(val))) {
-            quality_matrix[i, j] <- NA
-          } else {
-            # Otherwise, sum across alleles
-            quality_matrix[i, j] <- sum(val, na.rm = TRUE)
-          }
-        }
-      }
+      # If using allele depths (AD), sum across all alleles for each sample
+      # Handle cases where all values are NA by returning NA
+      quality_matrix <- apply(geno_list$AD, 2, function(col) {
+        vapply(col, function(x) {if (all(is.na(x))) NA_real_ else sum(x, na.rm = TRUE)}, numeric(1))
+      })
       
     } else {
-      # If field is DP or another numeric matrix, just coerce to matrix
       quality_matrix <- as.matrix(geno_list[[dp_field]])
     }
-    
-    # Keep only the expected trio samples
-    present <- intersect(expected_samples, colnames(quality_matrix))
-    if (length(present) > 0L) {
-      quality_matrix <- quality_matrix[, present, drop = FALSE]
-      total_sum <- colSums(quality_matrix, na.rm = TRUE)
-      total_valid <- colSums(!is.na(quality_matrix))
       
-      # Ensure order proband, mother, father
-      total_sum <- total_sum[expected_samples]
-      total_valid <- total_valid[expected_samples]
-    }
+    # Compute total read depth per individual, ignoring NAs
+    total_sum <- colSums(quality_matrix, na.rm = TRUE)
+    
+    # Compute number of valid (non-NA) calls per individual
+    total_valid <- colSums(!is.na(quality_matrix))
+    
+    # Ensure order proband, mother, father
+    total_sum <- total_sum[expected_samples]
+    total_valid <- total_valid[expected_samples]
+    
   } else {
     warning("No DP or AD field found in VCF.")
   }
