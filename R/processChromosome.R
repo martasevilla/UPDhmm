@@ -4,8 +4,7 @@
 #' It performs the following steps:
 #' 1. Runs the Viterbi algorithm to assign inferred hidden states to all variants.
 #' 2. Converts the Viterbi-annotated VCF into a block-level data.frame, optionally adding depth-based ratios.
-#' 3. Collapses consecutive variants sharing the same inferred state into contiguous genomic blocks.
-#' 4. Counts Mendelian-inconsistent genotypes within each block using the pre-computed `geno_coded` values.
+#' 3. Counts Mendelian-inconsistent genotypes within each block using the pre-computed `geno_coded` values.
 #' 
 #' @param vcf_chr CollapsedVCF object for one chromosome
 #' @param hmm Hidden Markov Model object
