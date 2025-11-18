@@ -14,10 +14,18 @@
 #' @param field_DP Optional character specifying the FORMAT field in the VCF for depth metrics.
 #' @param total_sum Numeric vector of total read depths per sample for the chromosome.
 #' @param total_valid Numeric vector of total valid positions per sample for the chromosome.
-#'
+#' @param quality_cols Character vector of sample names corresponding to columns used for read depth/quality metrics (default `c("proband", "mother", "father")`).
+#' @param sum_cols Character vector of column names in `blk` containing per-block summed depth/quality.
+#' @param count_cols Character vector of column names in `blk` containing per-block counts of valid positions.
+#' @param ratio_cols Character vector of column names to store inside/outside block ratios.
+#' @param mendelian_error_values Character vector of genotype codes considered Mendelian errors, based on the HMM emissions.
+#' 
 #' @return A data.frame of detected blocks for the chromosome, or NULL if error
 
-processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL, total_sum = NULL, total_valid = NULL) {
+processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL, total_sum = NULL, total_valid = NULL,
+                              quality_cols = c("proband", "mother", "father"), sum_cols = c("total_sum_quality_proband", "total_sum_quality_mother", "total_sum_quality_father"), 
+                              count_cols = c("total_count_quality_proband", "total_count_quality_mother", "total_count_quality_father") , ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father"), 
+                              mendelian_error_values) {
   tryCatch({
     
     chr_name <- as.character(GenomeInfoDb::seqnames(vcf_chr)[1])
@@ -41,7 +49,7 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
     }
     
     #################################################
-    # 3. Collapse contiguous variants into blocks
+    # 3. Collapse contiguous variants with the same inferred state into blocks
     #################################################
     blk <- blocksVcf(df_vit)
     
@@ -50,26 +58,28 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
     }
 
     #################################################
-    # 4. Calculate Mendelian error counts per block
+    # 4. Count Mendelian-inconsistent genotypes per block
     #################################################
     if (!is.null(hmm)) {
       
-      # Identify genotype values considered Mendelian errors based on emission probabilities
-      emission_probs <- hmm$emissionProbs["normal", ]
-      mendelian_error_values <- names(emission_probs[emission_probs == min(emission_probs)])
-
-      # Use the pre-existing genotype codings from the VCF
+      # Extract the pre-computed numeric genotype strings from the VCF
       geno_coded <- S4Vectors::mcols(vcf_chr)$geno_coded
       positions <- GenomicRanges::start(vcf_chr)
 
-      # Count number of Mendelian-inconsistent genotypes within each block
-      blk$n_mendelian_error <- vapply(seq_len(nrow(blk)), function(i) {
-        idx <- positions >= blk$start[i] & positions <= blk$end[i]
-        sum(geno_coded[idx] %in% mendelian_error_values)
-      }, integer(1))
-
+      # Create IRanges for positions with Mendelian errors
+      snp_error_gr <- IRanges::IRanges(
+        start = positions[geno_coded %in% mendelian_error_values],
+        end   = positions[geno_coded %in% mendelian_error_values]
+      )
+      
+      # Create IRanges for block boundaries
+      blk_gr <- IRanges::IRanges(start = blk$start, end = blk$end)
+      
+      # Count number of Mendelian errors overlapping each block
+      blk$n_mendelian_error <- IRanges::countOverlaps(blk_gr, snp_error_gr)
+      
       blk$geno_coded <- NULL
-
+      
     } else {
       # If no HMM provided, fill with NA
       blk$n_mendelian_error <- NA_integer_
@@ -78,12 +88,7 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
     #################################################
     # 5. Optional: compute per-block read depth ratios
     #################################################
-    quality_cols <- c("proband", "mother", "father")
     if (!is.null(total_sum) & !is.null(total_valid)) {
-      
-      # Columns in blk with sum and count of quality/depth values per block
-      sum_cols   <- paste0("total_sum_quality_", quality_cols)
-      count_cols <- paste0("total_count_quality_", quality_cols)
 
       # Extract inside-block sums and counts
       inside_sum   <- as.matrix(blk[, sum_cols, drop = FALSE])
@@ -99,13 +104,12 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
 
       # Compute ratio: inside / outside
       ratio_mat <- inside_mean / outside_mean
-      colnames(ratio_mat) <- paste0("ratio_", quality_cols)
+      colnames(ratio_mat) <- ratio_cols
 
       # Add ratios to blocks data.frame
-      blk <- cbind(blk, as.data.frame(ratio_mat))
+      blk[ratio_cols] <- as.data.frame(ratio_mat)
       
-      keep_cols <- setdiff(colnames(blk), c(sum_cols, count_cols))
-      blk <- blk[, keep_cols, drop = FALSE]
+      blk <- blk[, setdiff(colnames(blk), c(sum_cols, count_cols)), drop = FALSE]
     }
     rownames(blk) <- NULL
     return(blk)
