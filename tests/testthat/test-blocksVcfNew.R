@@ -1,6 +1,6 @@
 # test-blocksVcfNew.R
 
-## Utilizar otros datos de prueba (Los test están bien solo hay que cambiar los datos para poder verificar que funciona)
+# Expected output block 
 expected_df <- data.frame(
   ID = "NA19685",
   seqnames = "6",
@@ -14,8 +14,6 @@ expected_df <- data.frame(
   ratio_father = 0.951220
 )
 
-
-#####################################################################
 file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
 input <- VariantAnnotation::readVcf(file)
 
@@ -25,16 +23,24 @@ input <- vcfCheck(
   proband = "NA19685", check_quality = TRUE
 )
 
+# Load the default HMM
+utils::data("hmm", package = "UPDhmm")
+hmm <- hmm
+input <- applyViterbi(input, hmm)
 
-input <- applyViterbi(input, hmm) 
-
+# Split processed VCF by chromosome and select chromosome 6
 split_vcf <- split(input, f = GenomicRanges::seqnames(input))
 chr6 <- split_vcf[[6]]
 
+# Expected mean sequencing depth per individual for chromosome 6
 total_mean <- c(proband = 904/15, mother = 886/15, father = 902/15)
 
+# ------------------------------------------------------------------------- #
+# Test blocksVcfNew() with add_ratios = FALSE
+# ------------------------------------------------------------------------- #
+
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(chr6)
+    out <- blocksVcfNew(largeCollapsedVcf = chr6)
 
     out <- as.data.frame(out)
     
@@ -44,9 +50,12 @@ test_that("Test if simplification into blocks works", {
     expect_s3_class(out, "data.frame")
 })
 
+# ------------------------------------------------------------------------- #
+# Test blocksVcfNew() with add_ratios = TRUE using DP field
+# ------------------------------------------------------------------------- #
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(chr6, TRUE, "DP", total_mean)
+    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean)
 
     out <- as.data.frame(out)
     
@@ -58,9 +67,12 @@ test_that("Test if simplification into blocks works", {
     expect_s3_class(out, "data.frame")
 })
 
+# ------------------------------------------------------------------------- #
+# Test blocksVcfNew() with add_ratios = TRUE using AD field
+# ------------------------------------------------------------------------- #
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(chr6, TRUE, "AD", total_mean)
+    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean)
 
     out <- as.data.frame(out)
     
@@ -72,8 +84,12 @@ test_that("Test if simplification into blocks works", {
     expect_s3_class(out, "data.frame")
 })
 
+# ------------------------------------------------------------------------- #
+# Test blocksVcfNew() with add_ratios = TRUE and no field_DP defined
+# ------------------------------------------------------------------------- #
+
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(chr6, TRUE, "", total_mean)
+    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, total_mean = total_mean)
 
     out <- as.data.frame(out)
     
@@ -102,12 +118,18 @@ VariantAnnotation::geno(input)$AD <- g_ad
 split_vcf <- split(input, f = GenomicRanges::seqnames(input))
 chr6 <- split_vcf[[6]]
 
+# Expected proband ratio after introducing NA values
 expected_df$ratio_proband <- 0.974526
 
 total_mean <- c(proband = 844/14, mother = 886/15, father = 902/15)
 
+
+# ------------------------------------------------------------------------- #
+# Repeat the three tests under conditions where NA values are present
+# ------------------------------------------------------------------------- #
+
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(chr6, TRUE, "DP", total_mean)
+    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean)
 
     out <- as.data.frame(out)
     
@@ -121,7 +143,7 @@ test_that("Test if simplification into blocks works", {
 
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(chr6, TRUE, "AD", total_mean)
+    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean)
 
     out <- as.data.frame(out)
     
@@ -134,7 +156,7 @@ test_that("Test if simplification into blocks works", {
 })
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(chr6, TRUE, "", total_mean)
+    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, total_mean = total_mean)
 
     out <- as.data.frame(out)
     
