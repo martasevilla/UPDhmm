@@ -13,15 +13,11 @@
 #' @param add_ratios Logical; if `TRUE`, read depth/quality ratios will be included in the analysis.
 #' @param field_DP Optional character specifying the FORMAT field in the VCF for depth metrics.
 #' @param total_mean   
-#' @param sum_cols Character vector of column names in `blk` containing per-block summed depth/quality.
-#' @param count_cols Character vector of column names in `blk` containing per-block counts of valid positions.
-#' @param ratio_cols Character vector of column names to store inside/outside block ratios.
 #' @param mendelian_error_values Character vector of genotype codes considered Mendelian errors, based on the HMM emissions.
 #' 
 #' @return A data.frame of detected blocks for the chromosome, or NULL if error
 
-processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, 
-                              ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father"),  mendelian_error_values) {
+processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, mendelian_error_values) {
   
   tryCatch({
     
