@@ -20,7 +20,7 @@ processChromosome(
 
 \item{add_ratios}{Logical; default = FALSE.
 
-If \code{TRUE}, computes normalized per-block read depth ratios for each individual based on total mean depth.}
+If TRUE, computes normalized per-block read depth ratios for each individual based on total mean depth.}
 
 \item{field_DP}{Optional character string specifying which VCF FORMAT field to use for depth metrics (e.g., DP, AD, or a custom field).}
 
