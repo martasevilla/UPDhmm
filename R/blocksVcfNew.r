@@ -1,46 +1,36 @@
 #' Collapse contiguous variants into genomic blocks based on HMM states
 #'
-#' This internal helper function creates block-level representations from a 
-#' \code{CollapsedVCF} object. It identifies consecutive variants sharing the 
-#' same inferred HMM state (\code{states}) and groups them into contiguous blocks.
-#' For each block, it summarizes genomic coordinates, number of variants, HMM state, 
-#' genotype encodings (\code{geno_coded}), and optionally computes per-block depth 
-#' ratios relative to a chromosome-wide mean.
+#' This function constructs block-level representations from a CollapsedVCF object. 
+#' Consecutive variants sharing the same inferred HMM state are grouped into blocks. 
+#' For each block, the function summarizes genomic coordinates, number of variants, 
+#' HMM state, genotype codes and optionally computes per-block depth ratios normalized 
+#' by per-sample mean read depth across the entire VCF.
 #'
-#' @param largeCollapsedVcf A \code{CollapsedVCF} object containing \code{states} 
-#'   and \code{geno_coded} in \code{mcols()}.
-#' @param add_ratios Logical; default \code{FALSE}. If \code{TRUE}, per-block ratios
-#'   are computed from a DP-like field.
-#' @param field_DP Optional character specifying the FORMAT field to use for depth 
-#'   (e.g., \code{"DP"} or \code{"AD"}). If \code{NULL}, the function auto-selects.
-#' @param total_mean Optional numeric vector with chromosome-wide mean depth per 
-#'   sample, used to compute block-level ratios.
+#' @param largeCollapsedVcf A CollapsedVCF object containing the metadata 
+#'   columns *states* (inferred HMM states) and *geno_coded*
+#'   (numeric genotype codes). This object should be the result of first applying
+#'   \code{vcfCheck()} and then \code{applyViterbi()}.
+#'   
+#' @param add_ratios Logical; default = FALSE.
+#' 
+#' If TRUE, computes normalized per-block read depth ratios for each individual based on total mean depth.
+#'
+#' @param field_DP Optional character string specifying which VCF FORMAT field to use for depth metrics (e.g., DP, AD, or a custom field). 
+#'
+#' @param total_mean Optional numeric vector of per-sample mean read depths across the entire VCF, used to normalize per-block depth ratios computed via \code{computeTrioTotals()} in \code{calculateEvents()}.
+#'
 #' @param ratio_cols Character vector of column names to assign to the ratio output 
-#'   when \code{total_mean} is provided. Default: \code{c("ratio_proband", "ratio_mother", "ratio_father")}.
+#'   when total_mean is provided. Default: \code{c("ratio_proband", "ratio_mother", "ratio_father")}.
 #'
-#' @details
-#' The function performs the following steps:
-#' \enumerate{
-#'   \item Identifies consecutive variants with the same \code{states} using run-length encoding.
-#'   \item Constructs a block-level \code{data.frame} containing:
-#'         \itemize{
-#'           \item \code{seqnames}, \code{start}, \code{end} – genomic coordinates
-#'           \item \code{group} – HMM state of the block
-#'           \item \code{n_snps} – number of variants in the block
-#'           \item \code{geno_coded} – list of numeric genotype codes for the block
-#'         }
-#'   \item Optionally computes per-block depth ratios relative to \code{total_mean} 
-#'         if \code{add_ratios = TRUE} and a valid depth field is present.
-#' }
 #'
-#' @return A \code{data.frame} with one row per block, containing:
+#' @return A data.frame with one row per block, containing:
 #'   \itemize{
 #'     \item \code{ID} – sample identifier
-#'     \item \code{seqnames}, \code{start}, \code{end} – genomic coordinates
+#'     \item \code{seqnames}, start, end – genomic coordinates
 #'     \item \code{group} – HMM state of the block
 #'     \item \code{n_snps} – number of variants in the block
 #'     \item \code{geno_coded} – list of numeric genotype codes per block
-#'     \item Optional ratio columns relative to \code{total_mean}
+#'     \item Optional ratio columns relative to total_mean
 #'   }
 #'
 blocksVcfNew <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father")) {

@@ -6,102 +6,35 @@
 #' states into blocks, counts Mendelian-inconsistent sites per block, and
 #' optionally computes block-level read-depth ratios.
 #'
-#' This function is designed for internal use by \code{\link{calculateEvents}} 
-#' and is not intended to be called directly by end users.
 #'
-#' @param vcf_chr A `CollapsedVCF` object representing a single chromosome.
+#' @param vcf_chr A CollapsedVCF object representing a single chromosome.
 #'
-#' @param hmm A Hidden Markov Model object following the HMM format used by the
-#'   HMM package. Must include elements \code{States}, \code{Symbols},
-#'   \code{startProbs}, \code{transProbs}, and \code{emissionProbs}.  
-#'   Typically provided by \code{calculateEvents()}.
+#' @param hmm A Hidden Markov Model object.
+#' 
+#' @param add_ratios Logical; default = FALSE.
+#' 
+#' If TRUE, computes normalized per-block read depth ratios for each individual based on total mean depth.
 #'
-#' @param add_ratios Logical; default `FALSE`.  
-#'   If `TRUE`, the function computes per-block read depth ratios
-#'   (inside vs. outside block) for each trio member.
+#' @param field_DP Optional character string specifying which VCF FORMAT field to use for depth metrics (e.g., DP, AD, or a custom field). 
 #'
-#' @param field_DP Optional character string specifying the VCF FORMAT field
-#'   used for depth metrics (e.g., `"DP"`, `"AD"`, or a non-standard field).  
-#'   Passed to downstream helper functions such as `asDfVcf()`.
-#'
-#' @param total_sum Numeric vector of total read depths per sample for the entire
-#'   chromosome. Required when computing block-level ratios.  
-#'   Typically computed by \code{computeTrioTotals()}.
-#'
-#' @param total_valid Numeric vector of total valid (non-NA) depth positions per
-#'   sample for the chromosome. Required when computing ratios.
-#'
-#' @param quality_cols Character vector with sample identifiers used for depth/
-#'   quality metrics. Default:  
-#'   \code{c("proband", "mother", "father")}.
-#'
-#' @param sum_cols Character vector with names of columns in the block data.frame
-#'   that store the sum of depth metrics inside each block.  
-#'   Must match the order of \code{quality_cols}.  
-#'   Default:  
-#'   \code{c("total_sum_quality_proband", "total_sum_quality_mother", "total_sum_quality_father")}.
-#'
-#' @param count_cols Character vector with names of columns in the block 
-#'   data.frame storing the count of valid depth positions inside each block.  
-#'   Must match \code{quality_cols}.  
-#'   Default:  
-#'   \code{c("total_count_quality_proband", "total_count_quality_mother", "total_count_quality_father")}.
-#'
-#' @param ratio_cols Character vector containing the names of the output columns
-#'   in which to store block-level inside/outside depth ratios.  
-#'   Length must match \code{quality_cols}.  
-#'   Default:  
-#'   \code{c("ratio_proband", "ratio_mother", "ratio_father")}.
+#' @param total_mean Optional numeric vector of per-sample mean read depths across the entire VCF, used to normalize per-block depth ratios computed via \code{computeTrioTotals()} in \code{calculateEvents()}.
 #'
 #' @param mendelian_error_values Character vector of genotype codes considered
 #'   Mendelian errors (i.e., observations with minimal emission probability in 
 #'   the "normal" state).  
 #'   Provided by \code{calculateEvents()}.
 #'
-#' @details
-#'
-#' The function executes the following steps:
-#'
-#' **1. Viterbi state inference**  
-#' The function calls \code{applyViterbi()} on the chromosome-specific VCF to 
-#' infer the most probable hidden state for each variant.
-#'
-#' **2. VCF-to-data.frame conversion**  
-#' Using \code{asDfVcf()}, the VCF is converted to a data.frame.  
-#' This may include optional depth and quality metrics depending on \code{add_ratios}.
-#'
-#' **3. Block creation**  
-#' Consecutive variants with the same inferred state are merged using 
-#' \code{blocksVcf()} to create per-chromosome segments (blocks).
-#'
-#' **4. Mendelian error counting**  
-#' Using the per-variant numeric genotype encoding stored in 
-#' \code{mcols(vcf_chr)$geno_coded}, the function counts how many sites within
-#' each block match the pre-defined set of Mendelian-inconsistent genotype codes.
-#'
-#' **5. Optional read-depth ratios**  
-#' If \code{total_sum} and \code{total_valid} are provided:
+#' @return A data.frame summarizing blocks detected on the chromosome. Columns include:
 #' \itemize{
-#'   \item Mean depth inside the block is computed.  
-#'   \item Mean depth outside the block is computed as the chromosome total minus 
-#'         the block contribution.  
-#'   \item Ratios are calculated as \code{inside_mean / outside_mean}.  
-#' }
-#' Columns specified in \code{sum_cols} and \code{count_cols} are removed from 
-#' the final output to avoid redundancy.
-#'
-#' @return  
-#' A `data.frame` containing block-level UPD-relevant information for the 
-#' chromosome, including:
-#' \itemize{
-#'   \item genomic coordinates  
-#'   \item inferred HMM state  
-#'   \item number of SNPs per block  
-#'   \item Mendelian error count  
-#'   \item depth ratios (if enabled)  
+#'   \item `seqnames` – chromosome name
+#'   \item `start`, `end` – genomic coordinates of the block
+#'   \item `group` – inferred HMM state
+#'   \item `n_snps` – number of SNPs in the block
+#'   \item `n_mendelian_error` – number of Mendelian-inconsistent genotypes in the block
+#'   \item depth-ratio metrics (if add_ratios = TRUE)
 #' }
 #'
-#' Returns `NULL` if any error occurs during processing.
+#' If an error occurs during processing, a message is printed and `NULL` is returned.
 #'
 processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, mendelian_error_values) {
   

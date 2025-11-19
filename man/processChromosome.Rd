@@ -14,28 +14,40 @@ processChromosome(
 )
 }
 \arguments{
-\item{vcf_chr}{CollapsedVCF object for one chromosome}
+\item{vcf_chr}{A CollapsedVCF object representing a single chromosome.}
 
-\item{hmm}{Hidden Markov Model object}
+\item{hmm}{A Hidden Markov Model object.}
 
-\item{add_ratios}{Logical; if \code{TRUE}, read depth/quality ratios will be included in the analysis.}
+\item{add_ratios}{Logical; default = FALSE.
 
-\item{field_DP}{Optional character specifying the FORMAT field in the VCF for depth metrics.}
+If \code{TRUE}, computes normalized per-block read depth ratios for each individual based on total mean depth.}
 
-\item{total_mean}{Optional numeric value representing the chromosome-wide mean depth for ratio calculations.}
+\item{field_DP}{Optional character string specifying which VCF FORMAT field to use for depth metrics (e.g., DP, AD, or a custom field).}
 
-\item{mendelian_error_values}{Character vector of genotype codes considered Mendelian errors, based on the HMM emissions.}
+\item{total_mean}{Optional numeric vector of per-sample mean read depths across the entire VCF, used to normalize per-block depth ratios computed via \code{computeTrioTotals()} in \code{calculateEvents()}.}
+
+\item{mendelian_error_values}{Character vector of genotype codes considered
+Mendelian errors (i.e., observations with minimal emission probability in
+the "normal" state).
+Provided by \code{calculateEvents()}.}
 }
 \value{
-A data.frame containing the inferred blocks and associated metrics for the chromosome,
-or \code{NULL} if any processing step fails.
+A data.frame summarizing blocks detected on the chromosome. Columns include:
+\itemize{
+\item \code{seqnames} – chromosome name
+\item \code{start}, \code{end} – genomic coordinates of the block
+\item \code{group} – inferred HMM state
+\item \code{n_snps} – number of SNPs in the block
+\item \code{n_mendelian_error} – number of Mendelian-inconsistent genotypes in the block
+\item depth-ratio metrics (if add_ratios = TRUE)
+}
+
+If an error occurs during processing, a message is printed and \code{NULL} is returned.
 }
 \description{
-Internal helper function to run the full pipeline on one chromosome:
-It performs the following steps:
-\enumerate{
-\item Runs the Viterbi algorithm to assign inferred hidden states to all variants.
-\item Converts the Viterbi-annotated VCF into a block-level data.frame, optionally adding depth-based ratios.
-\item Counts Mendelian-inconsistent genotypes within each block using the pre-computed \code{geno_coded} values.
-}
+This internal helper function runs the full UPD-calling pipeline for a single
+chromosome. It applies the Viterbi algorithm to infer hidden states from trio
+genotype observations, summarizes consecutive variants with identical inferred
+states into blocks, counts Mendelian-inconsistent sites per block, and
+optionally computes block-level read-depth ratios.
 }

@@ -13,26 +13,52 @@ blocksVcfNew(
 )
 }
 \arguments{
-\item{largeCollapsedVcf}{A \code{CollapsedVCF} containing \code{states} and \code{geno_coded} in \code{mcols()}.}
+\item{largeCollapsedVcf}{A \code{CollapsedVCF} object containing \code{states}
+and \code{geno_coded} in \code{mcols()}.}
 
-\item{add_ratios}{Logical; if \code{TRUE}, per-block ratios are computed and added to the output.}
+\item{add_ratios}{Logical; default \code{FALSE}. If \code{TRUE}, per-block ratios
+are computed from a DP-like field.}
 
-\item{field_DP}{Optional character specifying the FORMAT depth field to use (e.g., \code{"DP"} or \code{"AD"}). Auto-selected if \code{NULL}.}
+\item{field_DP}{Optional character specifying the FORMAT field to use for depth
+(e.g., \code{"DP"} or \code{"AD"}). If \code{NULL}, the function auto-selects.}
 
-\item{total_mean}{Optional numeric vector containing chromosome-wide mean depth per sample, used to compute ratios.}
+\item{total_mean}{Optional numeric vector with chromosome-wide mean depth per
+sample, used to compute block-level ratios.}
 
-\item{ratio_cols}{Character vector of column names to assign to the ratio output when \code{total_mean} is provided.}
+\item{ratio_cols}{Character vector of column names to assign to the ratio output
+when \code{total_mean} is provided. Default: \code{c("ratio_proband", "ratio_mother", "ratio_father")}.}
 }
 \value{
-A \code{data.frame} with one row per block, containing chromosome, start, end, HMM state, number of SNPs,
-genotype encodings, and optionally per-block ratios relative to \code{total_mean}.
+A \code{data.frame} with one row per block, containing:
+\itemize{
+\item \code{ID} – sample identifier
+\item \code{seqnames}, \code{start}, \code{end} – genomic coordinates
+\item \code{group} – HMM state of the block
+\item \code{n_snps} – number of variants in the block
+\item \code{geno_coded} – list of numeric genotype codes per block
+\item Optional ratio columns relative to \code{total_mean}
+}
 }
 \description{
-This function creates block-level representations from a \code{CollapsedVCF}.
-It performs the following steps:
+This internal helper function creates block-level representations from a
+\code{CollapsedVCF} object. It identifies consecutive variants sharing the
+same inferred HMM state (\code{states}) and groups them into contiguous blocks.
+For each block, it summarizes genomic coordinates, number of variants, HMM state,
+genotype encodings (\code{geno_coded}), and optionally computes per-block depth
+ratios relative to a chromosome-wide mean.
+}
+\details{
+The function performs the following steps:
 \enumerate{
-\item Identifies consecutive variants sharing the same inferred HMM state (\code{states}) and groups them into blocks.
-\item Extracts genomic coordinates, number of variants, HMM state, and genotype encodings (\code{geno_coded}) for each block.
-\item Optionally computes per-block depth ratios relative to a chromosome-wide mean (\code{total_mean}) from a specified FORMAT field (e.g., \code{DP} or \code{AD}) if provided.
+\item Identifies consecutive variants with the same \code{states} using run-length encoding.
+\item Constructs a block-level \code{data.frame} containing:
+\itemize{
+\item \code{seqnames}, \code{start}, \code{end} – genomic coordinates
+\item \code{group} – HMM state of the block
+\item \code{n_snps} – number of variants in the block
+\item \code{geno_coded} – list of numeric genotype codes for the block
+}
+\item Optionally computes per-block depth ratios relative to \code{total_mean}
+if \code{add_ratios = TRUE} and a valid depth field is present.
 }
 }
