@@ -4,23 +4,38 @@
 \alias{processChromosome}
 \title{Process a single chromosome for UPD detection}
 \usage{
-processChromosome(vcf_chr, hmm, genotypes)
+processChromosome(
+  vcf_chr,
+  hmm,
+  add_ratios = FALSE,
+  field_DP = NULL,
+  total_mean = NULL,
+  mendelian_error_values
+)
 }
 \arguments{
 \item{vcf_chr}{CollapsedVCF object for one chromosome}
 
 \item{hmm}{Hidden Markov Model object}
 
-\item{genotypes}{Named vector mapping genotype strings to numeric states}
+\item{add_ratios}{Logical; if \code{TRUE}, read depth/quality ratios will be included in the analysis.}
+
+\item{field_DP}{Optional character specifying the FORMAT field in the VCF for depth metrics.}
+
+\item{total_mean}{Optional numeric value representing the chromosome-wide mean depth for ratio calculations.}
+
+\item{mendelian_error_values}{Character vector of genotype codes considered Mendelian errors, based on the HMM emissions.}
 }
 \value{
-A data.frame of detected blocks for the chromosome, or NULL if error
+A data.frame containing the inferred blocks and associated metrics for the chromosome,
+or \code{NULL} if any processing step fails.
 }
 \description{
 Internal helper function to run the full pipeline on one chromosome:
-\itemize{
-\item applyViterbi
-\item asDfVcf
-\item blocksVcf
+It performs the following steps:
+\enumerate{
+\item Runs the Viterbi algorithm to assign inferred hidden states to all variants.
+\item Converts the Viterbi-annotated VCF into a block-level data.frame, optionally adding depth-based ratios.
+\item Counts Mendelian-inconsistent genotypes within each block using the pre-computed \code{geno_coded} values.
 }
 }
