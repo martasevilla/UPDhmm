@@ -25,7 +25,7 @@ test_that("Test if the vcf loading works", {
   
   # Split the VCF by chromosome and extract chromosome 6
   split_input <- split(input, f = GenomicRanges::seqnames(input))
-  chr6 <- split_input[[6]]
+  chr6 <- split_input[["6"]]
   
   # Retrieve the computed genotype encoding
   geno_coded <- S4Vectors::mcols(chr6)$geno_coded
