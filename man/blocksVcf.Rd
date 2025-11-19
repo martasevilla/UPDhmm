@@ -2,8 +2,7 @@
 % Please edit documentation in R/blocksVcf.R
 \name{blocksVcf}
 \alias{blocksVcf}
-\title{Function to simplify contiguous variants with the same state into
-blocks.}
+\title{Collapse contiguous variants with the same state into blocks}
 \usage{
 blocksVcf(df)
 }
@@ -11,10 +10,12 @@ blocksVcf(df)
 \item{df}{data.frame resulting from the \code{as_df_vcf} function.}
 }
 \value{
-data.frame containing information on the chromosome, start
-#' position of the block, end position of the block, and predicted state.
+data.frame containing one row per block
 }
 \description{
-Function to simplify contiguous variants with the same state into
-blocks.
+This function takes a data.frame produced by \code{asDfVcf} and
+identifies contiguous variants that share the same inferred state (\code{group}).
+These contiguous variants are then merged into "blocks", summarizing their start
+and end positions, number of variants, genotype codings, and optionally
+summed quality/depth metrics.
 }
