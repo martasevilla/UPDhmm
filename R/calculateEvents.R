@@ -1,60 +1,115 @@
-#' Calculate UPD events in trio VCFs.
+#' Detect and summarize UPD events in trio VCFs using a HMM
 #'
-#' This function predicts hidden states for a trio (proband, mother, father) VCF by 
-#' applying the Viterbi algorithm using a Hidden Markov Model (HMM) from the UPDhmm 
-#' package. It optionally computes per-sample read depth ratios and summarizes 
-#' contiguous variants with the same inferred state into blocks suitable for 
-#' downstream analysis.
+#' This function applies a Hidden Markov Model (HMM) to trio genotypes 
+#' to infer regions of uniparental disomy (UPD). It runs the Viterbi
+#' algorithm per chromosome, optionally computes per-sample read depth 
+#' ratios, identifies contiguous genomic regions with consistent inferred
+#' states, and returns the resulting blocks as a table suitable for downstream
+#' interpretation.
 #'
-#' @param largeCollapsedVcf The VCF file in the general format 
-#' (largeCollapsedVcf) with VariantAnnotation package. Previously edited with 
-#' `vcfCheck()` function from UPDhmm package.
+#' @param largeCollapsedVcf A `CollapsedVCF` object previously processed 
+#'   with [vcfCheck()]. Must contain genotype codes in `mcols(vcf)$geno_coded` 
+#'   and standardized sample names `"proband"`, `"mother"`, and `"father"`.
 #'
-#' @param hmm Default = `NULL`. If no arguments are added, the package 
-#' will use the default HMM already implemented, based on Mendelian 
-#' inheritance. If an optional HMM is desired, it should adhere to the 
-#' general HMM format from `HMM` package with the following elements inside 
-#' a list:
-#'   1. The hidden state names in the "States" vector.
-#'   2. All possible observations in the "Symbols" vector.
-#'   3. Start probabilities of every hidden state in the "startProbs" vector.
-#'   4. Transition probabilities matrix between states in "transProbs".
-#'   5. Probabilities associated between every hidden state and all possible 
-#'      observations in the "emissionProbs" matrix.
+#' @param hmm A custom HMM object (optional).  
+#'   If `NULL` (default), the function loads the default Mendelian HMM 
+#'   included in the UPDhmm package.
 #'
-#' @param field_DP Optional character specifying the FORMAT field in the VCF to use 
-#'   for read depth metrics. If `NULL` (default), the function will try `"DP"` (standard depth) 
-#'   or `"AD"` (allele depths summed across alleles). Use this if your VCF uses a 
-#'   non-standard depth field, e.g., `"NR"`.
+#'   A valid custom HMM must follow the structure used in the HMM package 
+#'   and contain:
+#'   \itemize{
+#'     \item `States`: character vector with hidden state names.
+#'     \item `Symbols`: vector with allowed observation symbols 
+#'       (i.e., possible genotype codes).
+#'     \item `startProbs`: named vector of initial state probabilities.
+#'     \item `transProbs`: state transition probability matrix.
+#'     \item `emissionProbs`: matrix of emission probabilities for each 
+#'       state × symbol.
+#'   }
 #'
-#' @param add_ratios Logical, default = `FALSE`. If `TRUE`, the function computes 
-#'   per-sample totals of read depth and counts of valid calls for the trio, which 
-#'   can be used for normalization or downstream metrics.
-#'   
-#' @param BPPARAM Parallelization settings, passed to
-#'   \link[BiocParallel]{bplapply}.
-#'   By default `BiocParallel::SerialParam()` (serial execution).
-#'   To enable parallelization, provide a BiocParallel backend, e.g.
-#'   `BiocParallel::MulticoreParam(workers = min(2, parallel::detectCores()))`
-#'   or `BiocParallel::SnowParam(workers = 2)`.
-#'   Note: when running under R CMD check or Bioconductor build systems,
-#'   the number of workers may be automatically limited (usually less or equal to 2).
+#' @param field_DP Optional character string specifying the VCF FORMAT field 
+#'   to use for read depth.  
+#'   Priority:
+#'   \enumerate{
+#'     \item `field_DP` (if provided and present)
+#'     \item `"DP"` (standard total depth)
+#'     \item `"AD"` (allele depths, summed across alleles)
+#'   }
+#'   If no suitable field is found, depth-based ratios are not computed.
 #'
-#' @param verbose Logical, default = `FALSE`. 
-#'   If `TRUE`, progress messages will be printed during processing.
+#' @param add_ratios Logical; default `FALSE`.  
+#'   If `TRUE`, per-sample read depth totals and counts of valid calls are 
+#'   computed, producing normalization ratios used by some downstream analyses.
 #'
-#' @return A `data.frame` object containing all detected events in the provided trio. 
-#' If no events are found, the function will return an empty `data.frame`.
+#' @param BPPARAM Parallelization backend for 
+#'   \code{\link[BiocParallel]{bplapply}}.  
+#'   Default: `BiocParallel::SerialParam()` (serial execution).  
 #'
-#' @export
+#'   To enable parallel processing, pass e.g.:
+#'   \itemize{
+#'     \item `BiocParallel::MulticoreParam(workers = 2)`
+#'     \item `BiocParallel::SnowParam(workers = 2)`
+#'   }
+#'   Note: On Bioconductor build servers, worker count may be capped (≤ 2).
+#'
+#' @param verbose Logical; default `FALSE`.  
+#'   If `TRUE`, progress updates are printed during preprocessing 
+#'   and chromosome-level HMM processing.
+#'
+#' @details
+#'
+#' The function performs the following major steps:
+#'
+#' **1. Optional computation of trio depth ratios**  
+#' If `add_ratios = TRUE`, per-sample total depth and call counts are computed 
+#' using:
+#' \itemize{
+#'   \item the field specified in `field_DP`, or  
+#'   \item `"DP"` or `"AD"` if available.
+#' }
+#'
+#' **2. Chromosomal splitting**  
+#' The VCF is split by chromosome. Chromosomes containing zero 
+#' variants are ignored.
+#'
+#' **3. Per-chromosome HMM inference**  
+#' For each chromosome:
+#' \enumerate{
+#'   \item Genotype codes are extracted.
+#'   \item Viterbi inference is performed using the supplied or default HMM.
+#'   \item Consecutive variants sharing the same inferred state are grouped 
+#'         into blocks.
+#' }
+#'
+#' **4. Event filtering**  
+#' Only blocks meeting all of the following criteria are retained:
+#' \itemize{
+#'   \item > 1 SNP
+#'   \item State ≠ normal
+#'   \item Chromosome not in {X, Y, chrX, chrY}
+#' }
+#'
+#' @return A `data.frame` summarizing all detected UPD-like events.  
+#' Columns include (depending on implementation of `processChromosome()`):
+#' \itemize{
+#'   \item seqnames – chromosome name  
+#'   \item start, end – genomic coordinates  
+#'   \item group – inferred HMM state  
+#'   \item n_snps – number of SNPs in the block  
+#'   \item depth-ratio metrics (if `add_ratios = TRUE`)  
+#' }
+#'
+#' If no events are detected, returns an empty `data.frame`.
 #'
 #' @examples
 #' file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
 #' vcf <- VariantAnnotation::readVcf(file)
-#' processedVcf <- vcfCheck(vcf,
-#'     proband = "NA19675", 
-#'     mother = "NA19678",
-#'     father = "NA19679"
+#'
+#' processedVcf <- vcfCheck(
+#'     vcf,
+#'     proband = "NA19675",
+#'     mother  = "NA19678",
+#'     father  = "NA19679"
 #' )
 #'
 #' # Run in serial mode (default)
@@ -64,6 +119,9 @@
 #' library(BiocParallel)
 #' param <- MulticoreParam(workers = 2)
 #' res_parallel <- calculateEvents(processedVcf, BPPARAM = param)
+#'
+#' @export
+#' 
 calculateEvents <- function(largeCollapsedVcf,
                             hmm = NULL,
                             field_DP = NULL,

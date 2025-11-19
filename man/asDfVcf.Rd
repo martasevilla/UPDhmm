@@ -7,19 +7,43 @@
 asDfVcf(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL)
 }
 \arguments{
-\item{largeCollapsedVcf}{Name of the large collapsed VCF file.}
+\item{largeCollapsedVcf}{A \code{CollapsedVCF} object containing variants
+already processed with \code{vcfCheck()} and annotated with inferred states
+(e.g., via \code{applyViterbi()}).}
 
-\item{add_ratios}{Logical; if \code{TRUE}, the function extracts depth/quality information
-for the proband, mother, and father, using DP or AD fields from the VCF.}
+\item{add_ratios}{Logical; default \code{FALSE}.
+If \code{TRUE}, the function extracts depth or allele-depth–derived metrics
+for the trio (proband, mother, father), using fields \code{DP} or \code{AD}
+from the VCF.}
 
-\item{field_DP}{Optional string specifying the name of an alternative DP-like field
-to use instead of the standard DP field.}
+\item{field_DP}{Optional character string specifying the name of a non-standard
+depth field in the VCF to use instead of \code{DP} or \code{AD}.}
 }
 \value{
-data.frame
+A \code{data.frame} with one row per variant and columns as described above.
 }
 \description{
-This function transforms a large collapsed VCF object into a structured \code{data.frame}
-that contains predicted states for each variant, along with genomic coordinates,
-genotype codings, and optional depth/quality metrics derived from DP or AD fields.
+This internal helper function transforms a \code{CollapsedVCF} object into a
+structured \code{data.frame} containing genomic coordinates, inferred hidden
+states, genotype codings, and optional read depth or allele depth metrics.
+}
+\details{
+The output is suitable for downstream processing, such as collapsing contiguous
+variants into blocks or calculating per-block metrics.
+
+The resulting data.frame includes the following columns:
+\itemize{
+\item \code{ID}: original sample ID
+\item \code{start}, \code{end}: genomic coordinates of the variant
+\item \code{seqnames}: chromosome
+\item \code{group}: inferred hidden state from the HMM
+\item \code{geno_coded}: numeric genotype coding for the trio
+}
+
+If \code{add_ratios = TRUE}, additional columns are added:
+\itemize{
+\item \code{quality_proband}, \code{quality_mother}, \code{quality_father}:
+per-variant depth or summed allele depth metrics.
+}
+If the requested depth field is not found, these columns are filled with \code{NA}.
 }

@@ -1,33 +1,36 @@
-#' Check variant quality (optional), rename samples, and numerically encode genotypes
+#' Check variant quality, rename trio samples, and encode genotypes numerically
 #'
-#' This function processes a VCF file by converting it into a `CollapsedVCF` object
-#' using the VariantAnnotation package. It renames the samples to standard names 
-#' ("father", "mother", "proband") for subsequent UPDhmm analysis, optionally 
-#' evaluates variant quality based on read depth (DP) and genotype quality (GQ), 
-#' and creates a numeric encoding of the trio genotypes in the metadata column `geno_coded`.
+#' This function processes a `CollapsedVCF` object by standardizing trio sample 
+#' names ("father", "mother", "proband"), optionally checking variant quality 
+#' metrics, and generating a numeric encoding of the trio genotypes for each 
+#' variant. The encoded genotypes are stored in the metadata column `geno_coded`.
 #'
-#' @param largeCollapsedVcf The file in largeCollapsedVcf format.
-#' @param father Name of the father's sample.
-#' @param mother Name of the mother's sample.
-#' @param proband Name of the proband's sample.
-#' @param check_quality Optional argument. TRUE/FALSE. If quality parameters 
-#' want to be measured.
-#' Default = FALSE
+#' @param largeCollapsedVcf A VCF object of class `CollapsedVCF`.
+#' @param father Character string with the sample ID corresponding to the father.
+#' @param mother Character string with the sample ID corresponding to the mother.
+#' @param proband Character string with the sample ID corresponding to the proband.
+#' @param check_quality Logical; if `TRUE`, basic quality warnings based on 
+#' read depth (DP) and genotype quality (GQ) are displayed. 
+#' Default: `FALSE`.
 #'
-#' @details The numeric genotype encoding `geno_coded` is a 3-character string per variant, 
-#' representing the genotypes of father, mother, and proband respectively, where:
-#' 1 = homozygous reference, 2 = heterozygous, 3 = homozygous alternate.
-#' 
-#' @return largeCollapsedVcf (VariantAnnotation VCF format).
-#' @export
+#'
+#' @return A `CollapsedVCF` object identical to the input but with:
+#' - standardized sample names,
+#' - `colData(vcf)$ID` storing original sample names,
+#' - `mcols(vcf)$geno_coded` containing the trio genotype encoding.
+#'
 #' @examples
 #' file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
-#' vcf <- VariantAnnotation::readVcf(file)
-#' processedVcf <- vcfCheck(vcf,
-#'     proband = "NA19675", 
-#'     mother = "NA19678",
-#'     father = "NA19679"
+#' vcf  <- VariantAnnotation::readVcf(file)
+#'
+#' processedVcf <- vcfCheck(
+#'     vcf,
+#'     proband = "NA19675",
+#'     mother  = "NA19678",
+#'     father  = "NA19679"
 #' )
+#'
+#' @export
 #'
 vcfCheck <- function(
     largeCollapsedVcf,

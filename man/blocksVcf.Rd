@@ -2,20 +2,48 @@
 % Please edit documentation in R/blocksVcf.R
 \name{blocksVcf}
 \alias{blocksVcf}
-\title{Collapse contiguous variants with the same state into blocks}
+\title{Collapse contiguous variants with the same inferred state into blocks}
 \usage{
 blocksVcf(df)
 }
 \arguments{
-\item{df}{data.frame resulting from the \code{as_df_vcf} function.}
+\item{df}{A \code{data.frame} produced by \code{asDfVcf()}, containing at
+least the columns \code{seqnames}, \code{start}, \code{end},
+\code{group}, and \code{geno_coded}. Optionally may include depth/quality
+metrics for the trio (\code{quality_proband}, \code{quality_mother},
+\code{quality_father}).}
 }
 \value{
-data.frame containing one row per block
+A \code{data.frame} with one row per block. Columns include:
+\itemize{
+\item \code{ID} – sample identifier
+\item \code{seqnames}, \code{start}, \code{end} – genomic coordinates
+\item \code{group} – inferred state of the block
+\item \code{n_snps} – number of variants in the block
+\item \code{geno_coded} – list of numeric genotype codes per block
+\item summed and counted quality/depth metrics per block (if present)
+}
 }
 \description{
-This function takes a data.frame produced by \code{asDfVcf} and
-identifies contiguous variants that share the same inferred state (\code{group}).
-These contiguous variants are then merged into "blocks", summarizing their start
-and end positions, number of variants, genotype codings, and optionally
-summed quality/depth metrics.
+This internal helper function identifies consecutive variants in a data.frame
+(produced by \code{asDfVcf()}) that share the same inferred state (\code{group})
+and merges them into contiguous "blocks". Each block summarizes its start
+and end positions, the number of variants it contains, genotype codings, and
+optionally summed quality or depth metrics.
+}
+\details{
+The function performs the following steps:
+\enumerate{
+\item Uses run-length encoding to detect contiguous variants with identical
+states.
+\item Summarizes each block with:
+\itemize{
+\item \code{seqnames}, \code{start}, \code{end}
+\item \code{group}: the inferred state
+\item \code{n_snps}: number of variants in the block
+\item \code{geno_coded}: a list of numeric genotype codes for the block
+}
+\item Optionally computes per-block sums and counts for trio depth/quality
+metrics if the columns exist in the input.
+}
 }
