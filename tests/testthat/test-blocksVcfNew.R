@@ -30,7 +30,7 @@ input <- applyViterbi(input, hmm)
 
 # Split processed VCF by chromosome and select chromosome 6
 split_vcf <- split(input, f = GenomicRanges::seqnames(input))
-chr6 <- split_vcf[[6]]
+chr6 <- split_vcf[["6"]]
 
 # Expected mean sequencing depth per individual for chromosome 6
 total_mean <- c(proband = 904/15, mother = 886/15, father = 902/15)
@@ -116,7 +116,7 @@ g_ad[1, "proband"][[1]] <- c(NA,NA)
 VariantAnnotation::geno(input)$AD <- g_ad
 
 split_vcf <- split(input, f = GenomicRanges::seqnames(input))
-chr6 <- split_vcf[[6]]
+chr6 <- split_vcf[["6"]]
 
 # Expected proband ratio after introducing NA values
 expected_df$ratio_proband <- 0.974526
