@@ -11,7 +11,7 @@ input <- vcfCheck(
 
 # Split processed VCF by chromosome and select chromosome 6
 split_vcf <- split(input, f = GenomicRanges::seqnames(input))
-chr6 <- split_vcf[[6]]
+chr6 <- split_vcf[["6"]]
 
 # Expected mean sequencing depth per individual for chromosome 6
 total_mean_per_individual <- c(proband = 904/15, mother = 886/15, father = 902/15)
