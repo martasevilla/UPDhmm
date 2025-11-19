@@ -2,7 +2,7 @@
 % Please edit documentation in R/vcfCheck.R
 \name{vcfCheck}
 \alias{vcfCheck}
-\title{Check quality parameters (optional) and change IDs.}
+\title{Check variant quality (optional), rename samples, and numerically encode genotypes}
 \usage{
 vcfCheck(largeCollapsedVcf, father, mother, proband, check_quality = FALSE)
 }
@@ -23,16 +23,24 @@ Default = FALSE}
 largeCollapsedVcf (VariantAnnotation VCF format).
 }
 \description{
-This function takes a VCF file and converts it into a largeCollapsedVcf
-object using the VariantAnnotation package. It also rename the sample for
-subsequent steps needed in UPDhmm package.
-Additionally, it features an optional parameter, quality_check, which triggers warnings
-when variants lack sufficient quality based on RD and GQ parameters in the input VCF.
+This function processes a VCF file by converting it into a \code{CollapsedVCF} object
+using the VariantAnnotation package. It renames the samples to standard names
+("father", "mother", "proband") for subsequent UPDhmm analysis, optionally
+evaluates variant quality based on read depth (DP) and genotype quality (GQ),
+and creates a numeric encoding of the trio genotypes in the metadata column \code{geno_coded}.
+}
+\details{
+The numeric genotype encoding \code{geno_coded} is a 3-character string per variant,
+representing the genotypes of father, mother, and proband respectively, where:
+1 = homozygous reference, 2 = heterozygous, 3 = homozygous alternate.
 }
 \examples{
-fl <- system.file("extdata", "test_het_mat.vcf.gz", package = "UPDhmm")
-vcf <- VariantAnnotation::readVcf(fl)
-processedVcf <-
-   vcfCheck(vcf, proband = "Sample1", mother = "Sample3", father = "Sample2")
+file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
+vcf <- VariantAnnotation::readVcf(file)
+processedVcf <- vcfCheck(vcf,
+    proband = "NA19675", 
+    mother = "NA19678",
+    father = "NA19679"
+)
 
 }
