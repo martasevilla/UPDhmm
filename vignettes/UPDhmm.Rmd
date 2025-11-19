@@ -173,7 +173,8 @@ In this example, we run the function in serial mode, but `calculateEvents()` now
 
 
 ```{r}
-events_list <- lapply(vcf_list, calculateEvents)
+events_list <- lapply(vcf_list, calculateEvents, add_ratios = TRUE)
+
 head(events_list[[1]])
 
 ```
