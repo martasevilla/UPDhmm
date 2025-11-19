@@ -21,10 +21,13 @@
 #' @return largeCollapsedVcf (VariantAnnotation VCF format).
 #' @export
 #' @examples
-#' fl <- system.file("extdata", "test_het_mat.vcf.gz", package = "UPDhmm")
-#' vcf <- VariantAnnotation::readVcf(fl)
-#' processedVcf <-
-#'    vcfCheck(vcf, proband = "Sample1", mother = "Sample3", father = "Sample2")
+#' file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
+#' vcf <- VariantAnnotation::readVcf(file)
+#' processedVcf <- vcfCheck(vcf,
+#'     proband = "NA19675", 
+#'     mother = "NA19678",
+#'     father = "NA19679"
+#' )
 #'
 vcfCheck <- function(
     largeCollapsedVcf,
