@@ -4,18 +4,18 @@
 \alias{applyViterbi}
 \title{Apply the hidden Markov model using the Viterbi algorithm.}
 \usage{
-applyViterbi(largeCollapsedVcf, hmm, genotypes)
+applyViterbi(largeCollapsedVcf, hmm)
 }
 \arguments{
 \item{largeCollapsedVcf}{input vcf file}
 
 \item{hmm}{Hidden Markov Model used to infer the events}
-
-\item{genotypes}{Possible GT formats and its correspondence with the hmm}
 }
 \value{
 largeCollapsedVcf
 }
 \description{
-Apply the hidden Markov model using the Viterbi algorithm.
+This function takes a collapsed VCF object and a pre-defined Hidden Markov Model (HMM),
+applies the Viterbi algorithm to infer the most likely sequence of hidden states for
+each sample, and stores the resulting states as a new metadata column in the VCF object.
 }
