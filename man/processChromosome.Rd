@@ -4,23 +4,56 @@
 \alias{processChromosome}
 \title{Process a single chromosome for UPD detection}
 \usage{
-processChromosome(vcf_chr, hmm, genotypes)
+processChromosome(
+  vcf_chr,
+  hmm,
+  add_ratios = FALSE,
+  field_DP = NULL,
+  total_sum = NULL,
+  total_valid = NULL,
+  quality_cols = c("proband", "mother", "father"),
+  sum_cols = c("total_sum_quality_proband", "total_sum_quality_mother",
+    "total_sum_quality_father"),
+  count_cols = c("total_count_quality_proband", "total_count_quality_mother",
+    "total_count_quality_father"),
+  ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father"),
+  mendelian_error_values
+)
 }
 \arguments{
 \item{vcf_chr}{CollapsedVCF object for one chromosome}
 
 \item{hmm}{Hidden Markov Model object}
 
-\item{genotypes}{Named vector mapping genotype strings to numeric states}
+\item{add_ratios}{Logical; if \code{TRUE}, read depth/quality ratios will be included in the analysis.}
+
+\item{field_DP}{Optional character specifying the FORMAT field in the VCF for depth metrics.}
+
+\item{total_sum}{Numeric vector of total read depths per sample for the chromosome.}
+
+\item{total_valid}{Numeric vector of total valid positions per sample for the chromosome.}
+
+\item{quality_cols}{Character vector of sample names corresponding to columns used for read depth/quality metrics (default \code{c("proband", "mother", "father")}).}
+
+\item{sum_cols}{Character vector of column names in \code{blk} containing per-block summed depth/quality.}
+
+\item{count_cols}{Character vector of column names in \code{blk} containing per-block counts of valid positions.}
+
+\item{ratio_cols}{Character vector of column names to store inside/outside block ratios.}
+
+\item{mendelian_error_values}{Character vector of genotype codes considered Mendelian errors, based on the HMM emissions.}
 }
 \value{
 A data.frame of detected blocks for the chromosome, or NULL if error
 }
 \description{
 Internal helper function to run the full pipeline on one chromosome:
-\itemize{
-\item applyViterbi
-\item asDfVcf
-\item blocksVcf
+It performs the following steps:
+\enumerate{
+\item Applies the Viterbi algorithm to infer hidden states using the provided HMM.
+\item Converts the VCF to a data.frame including optional read depth/quality metrics.
+\item Collapses contiguous variants with the same inferred state into blocks.
+\item Calculates Mendelian error counts per block.
+\item Optionally computes per-block read depth ratios relative to the rest of the chromosome.
 }
 }
