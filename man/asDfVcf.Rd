@@ -2,22 +2,24 @@
 % Please edit documentation in R/asDfVcf.R
 \name{asDfVcf}
 \alias{asDfVcf}
-\title{Function to transform a large collapsed VCF into a dataframe with
-predicted states, including chromosome, start position, end position
-and metadata.}
+\title{Convert a collapsed VCF into a structured data.frame with inferred states}
 \usage{
-asDfVcf(largeCollapsedVcf, genotypes)
+asDfVcf(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL)
 }
 \arguments{
 \item{largeCollapsedVcf}{Name of the large collapsed VCF file.}
 
-\item{genotypes}{Possible GT formats and its correspondence with the hmm}
+\item{add_ratios}{Logical; if \code{TRUE}, the function extracts depth/quality information
+for the proband, mother, and father, using DP or AD fields from the VCF.}
+
+\item{field_DP}{Optional string specifying the name of an alternative DP-like field
+to use instead of the standard DP field.}
 }
 \value{
-dataframe
+data.frame
 }
 \description{
-Function to transform a large collapsed VCF into a dataframe with
-predicted states, including chromosome, start position, end position
-and metadata.
+This function transforms a large collapsed VCF object into a structured \code{data.frame}
+that contains predicted states for each variant, along with genomic coordinates,
+genotype codings, and optional depth/quality metrics derived from DP or AD fields.
 }
