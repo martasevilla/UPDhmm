@@ -8,6 +8,7 @@ calculateEvents(
   largeCollapsedVcf,
   hmm = NULL,
   field_DP = NULL,
+  add_ratios = FALSE,
   BPPARAM = BiocParallel::SerialParam(),
   verbose = FALSE
 )
@@ -31,12 +32,14 @@ a list:
 observations in the "emissionProbs" matrix.
 }}
 
-\item{field_DP}{Default = \code{NULL}. Character string specifying which FORMAT field in the VCF
-contains the read depth information to use in \code{addRatioDepth()}.
-If \code{NULL} (default), the function will automatically try \code{"DP"} (standard depth)
-or \code{"AD"} (allelic depths, summed across alleles).
-Use this parameter if your VCF uses a non-standard field name for depth,
-e.g. \code{field = "NR"} or \code{"field_DP"}.}
+\item{field_DP}{Optional character specifying the FORMAT field in the VCF to use
+for read depth metrics. If \code{NULL} (default), the function will try \code{"DP"} (standard depth)
+or \code{"AD"} (allele depths summed across alleles). Use this if your VCF uses a
+non-standard depth field, e.g., \code{"NR"}.}
+
+\item{add_ratios}{Logical, default = \code{FALSE}. If \code{TRUE}, the function computes
+per-sample totals of read depth and counts of valid calls for the trio, which
+can be used for normalization or downstream metrics.}
 
 \item{BPPARAM}{Parallelization settings, passed to
 \link[BiocParallel]{bplapply}.
@@ -55,10 +58,11 @@ A \code{data.frame} object containing all detected events in the provided trio.
 If no events are found, the function will return an empty \code{data.frame}.
 }
 \description{
-This function predicts the hidden states by applying the Viterbi algorithm
-using the Hidden Markov Model (HMM) from the UPDhmm package. It takes the
-genotypes of the trio as input and includes a final step to simplify the
-results into blocks.
+This function predicts hidden states for a trio (proband, mother, father) VCF by
+applying the Viterbi algorithm using a Hidden Markov Model (HMM) from the UPDhmm
+package. It optionally computes per-sample read depth ratios and summarizes
+contiguous variants with the same inferred state into blocks suitable for
+downstream analysis.
 }
 \examples{
 file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
