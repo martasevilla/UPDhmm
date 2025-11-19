@@ -11,7 +11,7 @@ input <- vcfCheck(
 
 # Split processed VCF by chromosome and select chromosome 6
 split_vcf <- split(input, f = GenomicRanges::seqnames(input))
-chr6 <- split_vcf[[6]]
+chr6 <- split_vcf[["6"]]
 
 # Expected total depth sums and valid counts for chr6
 total_sum_per_individual <- c(proband = 904, mother = 886, father = 902)
