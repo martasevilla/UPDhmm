@@ -75,7 +75,7 @@ calculateEvents <- function(largeCollapsedVcf,
   if (is.null(hmm)) {
     utils::data("hmm", package = "UPDhmm", envir = environment())
   }
-
+  
   # 1. Optional: compute per-sample depth/quality ratios
   mean_depth_per_individual <- NULL
   if (add_ratios) {
@@ -97,17 +97,17 @@ calculateEvents <- function(largeCollapsedVcf,
   # Determine which genotype codes correspond to Mendelian errors (lowest emission probability for 'normal' state)
   emission_probs <- hmm$emissionProbs["normal", ]
   mendelian_error_values <- names(emission_probs[emission_probs == min(emission_probs)])
-
+  
   # 3. Run pipeline per chromosome (serial or parallel)
-  blocks_state <- if (inherits(BPPARAM, "SerialParam")) {
-    lapply(split_vcf_raw, processChromosome,
-           total_mean = mean_depth_per_individual,
-           field_DP = field_DP,
-           add_ratios = add_ratios,
-           hmm = hmm, 
-           mendelian_error_values = mendelian_error_values)
+  if (inherits(BPPARAM, "SerialParam")) {
+    blocks_state <- lapply(split_vcf_raw, processChromosome,
+                           total_mean = mean_depth_per_individual,
+                           field_DP = field_DP,
+                           add_ratios = add_ratios,
+                           hmm = hmm, 
+                           mendelian_error_values = mendelian_error_values)
   } else {
-    BiocParallel::bplapply(split_vcf_raw, processChromosome,
+    blocks_state <- BiocParallel::bplapply(split_vcf_raw, processChromosome,
                            total_mean = mean_depth_per_individual,
                            field_DP = field_DP,
                            add_ratios = add_ratios,
@@ -126,7 +126,7 @@ calculateEvents <- function(largeCollapsedVcf,
   }
   
   
- 
+  
   # 4. Clean results
   def_blocks_states <- do.call(rbind, blocks_state)
   
@@ -179,9 +179,9 @@ computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","fath
   
   # Determine which depth/coverage field to use for calculations
   dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) { field_DP } 
-              else if ("DP" %in% names(geno_list)) { "DP" } 
-              else if ("AD" %in% names(geno_list)) { "AD" } 
-              else { NULL }
+  else if ("DP" %in% names(geno_list)) { "DP" } 
+  else if ("AD" %in% names(geno_list)) { "AD" } 
+  else { NULL }
   
   if (!is.null(dp_field)) {
     if (dp_field == "AD") {

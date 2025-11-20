@@ -55,7 +55,7 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
       
       # Genomic positions of all variants
       positions <- GenomicRanges::start(vcf_chr)
-
+      
       # IRanges marking each variant that is a Mendelian error
       snp_error_gr <- IRanges::IRanges(
         start = positions[geno_coded %in% mendelian_error_values],
@@ -75,10 +75,10 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
       # No HMM provided → no Mendelian error model available
       blk$n_mendelian_error <- NA_integer_
     }
-
+    
     rownames(blk) <- NULL
     return(blk)
-   
+    
   }, error = function(e) {
     message("processChromosome failed: ", conditionMessage(e))
     return(NULL)
