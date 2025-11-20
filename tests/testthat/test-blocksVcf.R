@@ -58,12 +58,8 @@ test_that("Test if simplification into blocks works", {
     out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean)
 
     out <- as.data.frame(out)
-    
-    out$ratio_proband <- round(out$ratio_proband, 6)
-    out$ratio_mother <- round(out$ratio_mother, 6)
-    out$ratio_father <- round(out$ratio_father, 6)
 
-    expect_equal(out, expected_df)
+    expect_equal(out, expected_df, tolerance = 1e-6)
     expect_s3_class(out, "data.frame")
 })
 
@@ -75,12 +71,8 @@ test_that("Test if simplification into blocks works", {
     out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean)
 
     out <- as.data.frame(out)
-    
-    out$ratio_proband <- round(out$ratio_proband, 6)
-    out$ratio_mother <- round(out$ratio_mother, 6)
-    out$ratio_father <- round(out$ratio_father, 6)
 
-    expect_equal(out, expected_df)
+    expect_equal(out, expected_df, tolerance = 1e-6)
     expect_s3_class(out, "data.frame")
 })
 
@@ -92,12 +84,8 @@ test_that("Test if simplification into blocks works", {
     out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, total_mean = total_mean)
 
     out <- as.data.frame(out)
-    
-    out$ratio_proband <- round(out$ratio_proband, 6)
-    out$ratio_mother <- round(out$ratio_mother, 6)
-    out$ratio_father <- round(out$ratio_father, 6)
 
-    expect_equal(out, expected_df)
+    expect_equal(out, expected_df, tolerance = 1e-6)
     expect_s3_class(out, "data.frame")
 })
 
@@ -132,12 +120,8 @@ test_that("Test if simplification into blocks works", {
     out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean)
 
     out <- as.data.frame(out)
-    
-    out$ratio_proband <- round(out$ratio_proband, 6)
-    out$ratio_mother <- round(out$ratio_mother, 6)
-    out$ratio_father <- round(out$ratio_father, 6)
 
-    expect_equal(out, expected_df)
+    expect_equal(out, expected_df, tolerance = 1e-6)
     expect_s3_class(out, "data.frame")
 })
 
@@ -146,12 +130,8 @@ test_that("Test if simplification into blocks works", {
     out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean)
 
     out <- as.data.frame(out)
-    
-    out$ratio_proband <- round(out$ratio_proband, 6)
-    out$ratio_mother <- round(out$ratio_mother, 6)
-    out$ratio_father <- round(out$ratio_father, 6)
 
-    expect_equal(out, expected_df)
+    expect_equal(out, expected_df, tolerance = 1e-6)
     expect_s3_class(out, "data.frame")
 })
 
@@ -159,11 +139,7 @@ test_that("Test if simplification into blocks works", {
     out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, total_mean = total_mean)
 
     out <- as.data.frame(out)
-    
-    out$ratio_proband <- round(out$ratio_proband, 6)
-    out$ratio_mother <- round(out$ratio_mother, 6)
-    out$ratio_father <- round(out$ratio_father, 6)
 
-    expect_equal(out, expected_df)
+    expect_equal(out, expected_df, tolerance = 1e-6)
     expect_s3_class(out, "data.frame")
 })

@@ -130,12 +130,9 @@ test_that("Test if the general function works (default HMM, add_ratios = TRUE)",
     out <- calculateEvents(largeCollapsedVcf = input, add_ratios = TRUE, field_DP = "DP")
     
     out$seqnames <- as.character(out$seqnames)
-    out$ratio_proband <- round(out$ratio_proband, 6)
-    out$ratio_mother <- round(out$ratio_mother, 6)
-    out$ratio_father <- round(out$ratio_father, 6)
     
     out <- as.data.frame(out)
-    expect_equal(expected_def_blocks, out)
+    expect_equal(expected_def_blocks, out, tolerance = 1e-6)
     expect_s3_class(out, "data.frame")
 })
 
@@ -230,11 +227,7 @@ test_that("Test if the general function works (custom HMM, add_ratios = TRUE)", 
   out <- calculateEvents(largeCollapsedVcf = input, hmm = new_hmm, field_DP = "DP", add_ratios = TRUE)
   out$seqnames <- as.character(out$seqnames)
   
-  out$ratio_proband <- round(out$ratio_proband, 6)
-  out$ratio_mother <- round(out$ratio_mother, 6)
-  out$ratio_father <- round(out$ratio_father, 6)
-  
   out <- as.data.frame(out)
-  expect_equal(expected_def_blocks, out)
+  expect_equal(expected_def_blocks, out, tolerance = 1e-6)
   expect_s3_class(out, "data.frame")
 })

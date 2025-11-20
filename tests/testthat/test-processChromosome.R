@@ -67,11 +67,7 @@ test_that("processChromosome works with valid chromosome input", {
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   
-  out$ratio_proband <- round(out$ratio_proband, 6)
-  out$ratio_mother  <- round(out$ratio_mother, 6)
-  out$ratio_father  <- round(out$ratio_father, 6)
-  
-  expect_equal(out, expected_df)
+  expect_equal(out, expected_df, tolerance = 1e-6)
   expect_s3_class(out, "data.frame")
   
 })
@@ -86,11 +82,7 @@ test_that("processChromosome works with valid chromosome input", {
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   
-  out$ratio_proband <- round(out$ratio_proband, 6)
-  out$ratio_mother  <- round(out$ratio_mother, 6)
-  out$ratio_father  <- round(out$ratio_father, 6)
-  
-  expect_equal(out, expected_df)
+  expect_equal(out, expected_df, tolerance = 1e-6)
   expect_s3_class(out, "data.frame")
   
 })
@@ -103,10 +95,8 @@ test_that("processChromosome works with valid chromosome input", {
   out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
-  out$ratio_proband <- round(out$ratio_proband, 6)
-  out$ratio_mother  <- round(out$ratio_mother, 6)
-  out$ratio_father  <- round(out$ratio_father, 6)
-  expect_equal(out, expected_df)
+  
+  expect_equal(out, expected_df, tolerance = 1e-6)
   expect_s3_class(out, "data.frame")
   
 })
@@ -141,11 +131,7 @@ test_that("processChromosome works with valid chromosome input", {
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   
-  out$ratio_proband <- round(out$ratio_proband, 6)
-  out$ratio_mother  <- round(out$ratio_mother, 6)
-  out$ratio_father  <- round(out$ratio_father, 6)
-  
-  expect_equal(out, expected_df)
+  expect_equal(out, expected_df, tolerance = 1e-6)
   expect_s3_class(out, "data.frame")
   
 })
@@ -158,11 +144,7 @@ test_that("processChromosome works with valid chromosome input", {
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   
-  out$ratio_proband <- round(out$ratio_proband, 6)
-  out$ratio_mother  <- round(out$ratio_mother, 6)
-  out$ratio_father  <- round(out$ratio_father, 6)
-  
-  expect_equal(out, expected_df)
+  expect_equal(out, expected_df, tolerance = 1e-6)
   expect_s3_class(out, "data.frame")
   
 })
@@ -174,11 +156,7 @@ test_that("processChromosome works with valid chromosome input", {
   out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   
-  out$ratio_proband <- round(out$ratio_proband, 6)
-  out$ratio_mother  <- round(out$ratio_mother, 6)
-  out$ratio_father  <- round(out$ratio_father, 6)
-  
-  expect_equal(out, expected_df)
+  expect_equal(out, expected_df, tolerance = 1e-6)
   expect_s3_class(out, "data.frame")
   
 })
