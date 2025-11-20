@@ -7,7 +7,7 @@
 vcfCheck(largeCollapsedVcf, father, mother, proband, check_quality = FALSE)
 }
 \arguments{
-\item{largeCollapsedVcf}{A VCF object of class \code{CollapsedVCF}.}
+\item{largeCollapsedVcf}{A VCF object of class \emph{CollapsedVCF}.}
 
 \item{father}{Character string with the sample ID corresponding to the father.}
 
@@ -15,23 +15,27 @@ vcfCheck(largeCollapsedVcf, father, mother, proband, check_quality = FALSE)
 
 \item{proband}{Character string with the sample ID corresponding to the proband.}
 
-\item{check_quality}{Logical; if \code{TRUE}, basic quality warnings based on
-read depth (DP) and genotype quality (GQ) are displayed.
-Default: \code{FALSE}.}
+\item{check_quality}{Optional argument. TRUE/FALSE. If quality parameters
+want to be measured.
+Default = FALSE}
 }
 \value{
-A \code{CollapsedVCF} object identical to the input but with:
-\itemize{
-\item standardized sample names,
-\item \code{colData(vcf)$ID} storing original sample names,
-\item \code{mcols(vcf)$geno_coded} containing the trio genotype encoding.
-}
+A \emph{largeCollapsedVcf} object identical to the input with samples renamed
+to standard names for the trio and a new metadata column \emph{geno_coded} containing
+the numeric encoding of the trio genotypes for each variant.
 }
 \description{
-This function processes a \code{CollapsedVCF} object by standardizing trio sample
-names ("father", "mother", "proband"), optionally checking variant quality
-metrics, and generating a numeric encoding of the trio genotypes for each
-variant. The encoded genotypes are stored in the metadata column \code{geno_coded}.
+This function processes a VCF file and converts it into a \emph{largeCollapsedVcf}
+object using the \emph{VariantAnnotation} package. It renames the samples to standard
+names for subsequent analyses within the UPDhmm package and generates a numeric
+encoding of the trio genotypes for each variant, which is stored in the metadata
+column \emph{geno_coded}.
+}
+\details{
+Additionally, the function includes an optional \emph{quality_check} parameter. When
+enabled, it triggers warnings for variants that do not meet minimum quality
+thresholds based on read depth (RD) and genotype quality (GQ) values in the
+input VCF.
 }
 \examples{
 file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")

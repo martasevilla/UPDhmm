@@ -7,24 +7,21 @@
 applyViterbi(largeCollapsedVcf, hmm)
 }
 \arguments{
-\item{largeCollapsedVcf}{A \code{CollapsedVCF} object containing the variants
-for a chromosome.}
+\item{largeCollapsedVcf}{A CollapsedVCF object.}
 
-\item{hmm}{A Hidden Markov Model (HMM) object used to infer hidden states
-through the Viterbi algorithm.}
+\item{hmm}{A Hidden Markov Model object.}
 }
 \value{
-The input \code{CollapsedVCF} object with an additional metadata
-column \code{states} containing the inferred hidden state at each variant.
+The input CollapsedVCF object updated with a new metadata column \emph{states},
+which contains the inferred hidden state for each variant.
 }
 \description{
-This internal helper function takes a \code{CollapsedVCF} object and a
-pre-defined Hidden Markov Model (HMM), applies the Viterbi algorithm to infer
-the most likely sequence of hidden states for each variant, and stores the
-resulting state sequence inside the VCF metadata (\code{mcols}).
+This function takes a VCF object and a pre-defined Hidden Markov Model (HMM),
+applies the Viterbi algorithm to infer the most likely sequence of hidden states
+for each variant, and stores the resulting state sequence inside the VCF metadata.
 }
 \details{
-The function assumes that a pre-computed numeric vector of genotype codes
-(\code{geno_coded}) is already present in the metadata columns of the VCF,
-typically generated during earlier preprocessing steps.
+It expects that the metadata column \emph{geno_coded} exists, containing a numeric
+encoding of the genotypes. This column is automatically generated when the VCF
+is processed with \code{vcfCheck()} from the UPDhmm package.
 }

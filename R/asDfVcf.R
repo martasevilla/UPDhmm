@@ -1,45 +1,36 @@
 #' Convert a collapsed VCF into a structured data.frame with inferred states
 #'
-#' This internal helper function transforms a \code{CollapsedVCF} object into a
-#' structured \code{data.frame} containing genomic coordinates, inferred hidden
-#' states, genotype codings, and optional read depth or allele depth metrics.
+#' This function transforms a CollapsedVCF object into a
+#' structured data.frame containing genomic coordinates, inferred hidden
+#' states, genotype codings, and optional read depth metrics.
 #'
-#' The output is suitable for downstream processing, such as collapsing contiguous
-#' variants into blocks or calculating per-block metrics.
 #'
-#' @param largeCollapsedVcf A \code{CollapsedVCF} object containing variants
+#' @param largeCollapsedVcf A CollapsedVCF object containing variants
 #'   already processed with \code{vcfCheck()} and annotated with inferred states
-#'   (e.g., via \code{applyViterbi()}).
+#'   via \code{applyViterbi()}.
 #'
-#' @param add_ratios Logical; default \code{FALSE}.  
+#' @param add_ratios Logical; default FALSE.  
 #'   If \code{TRUE}, the function extracts depth or allele-depth–derived metrics
-#'   for the trio (proband, mother, father), using fields \code{DP} or \code{AD} 
-#'   from the VCF.
+#'   for the trio using the field specified in field_DP
 #'
-#' @param field_DP Optional character string specifying the name of a non-standard
-#'   depth field in the VCF to use instead of \code{DP} or \code{AD}.
+#' @param field_DP Optional character string specifying which VCF FORMAT field to use for depth metrics (e.g., DP, AD, or a custom field). 
 #'
-#' @details
-#'
-#' The resulting data.frame includes the following columns:
+#' @return A data.frame with one row per variant, including:
 #' \itemize{
-#'   \item \code{ID}: original sample ID
-#'   \item \code{start}, \code{end}: genomic coordinates of the variant
-#'   \item \code{seqnames}: chromosome
-#'   \item \code{group}: inferred hidden state from the HMM
-#'   \item \code{geno_coded}: numeric genotype coding for the trio
+#'   \item ID: sample identifier
+#'   \item start, end: genomic coordinates of the variant
+#'   \item seqnames: chromosome name
+#'   \item group: inferred HMM hidden state
+#'   \item geno_coded: numeric genotype coding for the trio
 #' }
 #'
-#' If \code{add_ratios = TRUE}, additional columns are added:
+#' If add_ratios = TRUE, the following additional columns are included:
 #' \itemize{
-#'   \item \code{quality_proband}, \code{quality_mother}, \code{quality_father}:
-#'         per-variant depth or summed allele depth metrics.
+#'   \item quality_proband, quality_mother, quality_father:
+#'         per-variant depth values or summed allele-depth metrics.
 #' }
-#' If the requested depth field is not found, these columns are filled with \code{NA}.
-#'
-#' @return A \code{data.frame} with one row per variant and columns as described above.
-#'
-#'
+#' If the requested depth field is unavailable, these columns are returned as \code{NA}.
+#' 
 asDfVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL) {
 
   ## Extract column metadata and variant metadata
