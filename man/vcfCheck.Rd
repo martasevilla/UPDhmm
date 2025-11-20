@@ -2,50 +2,37 @@
 % Please edit documentation in R/vcfCheck.R
 \name{vcfCheck}
 \alias{vcfCheck}
-\title{Check variant quality, rename trio samples, and encode genotypes numerically}
+\title{Check quality parameters (optional) and change IDs.}
 \usage{
 vcfCheck(largeCollapsedVcf, father, mother, proband, check_quality = FALSE)
 }
 \arguments{
-\item{largeCollapsedVcf}{A VCF object of class \emph{CollapsedVCF}.}
+\item{largeCollapsedVcf}{The file in largeCollapsedVcf format.}
 
-\item{father}{Character string with the sample ID corresponding to the father.}
+\item{father}{Name of the father's sample.}
 
-\item{mother}{Character string with the sample ID corresponding to the mother.}
+\item{mother}{Name of the mother's sample.}
 
-\item{proband}{Character string with the sample ID corresponding to the proband.}
+\item{proband}{Name of the proband's sample.}
 
 \item{check_quality}{Optional argument. TRUE/FALSE. If quality parameters
 want to be measured.
 Default = FALSE}
 }
 \value{
-A \emph{largeCollapsedVcf} object identical to the input with samples renamed
-to standard names for the trio and a new metadata column \emph{geno_coded} containing
-the numeric encoding of the trio genotypes for each variant.
+largeCollapsedVcf (VariantAnnotation VCF format).
 }
 \description{
-This function processes a VCF file and converts it into a \emph{largeCollapsedVcf}
-object using the \emph{VariantAnnotation} package. It renames the samples to standard
-names for subsequent analyses within the UPDhmm package and generates a numeric
-encoding of the trio genotypes for each variant, which is stored in the metadata
-column \emph{geno_coded}.
-}
-\details{
-Additionally, the function includes an optional \emph{quality_check} parameter. When
-enabled, it triggers warnings for variants that do not meet minimum quality
-thresholds based on read depth (RD) and genotype quality (GQ) values in the
-input VCF.
+This function takes a VCF file and converts it into a largeCollapsedVcf
+object using the VariantAnnotation package. It also rename the sample for
+subsequent steps needed in UPDhmm package.
+Additionally, it features an optional parameter, quality_check, which triggers warnings
+when variants lack sufficient quality based on RD and GQ parameters in the input VCF.
 }
 \examples{
-file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
-vcf  <- VariantAnnotation::readVcf(file)
-
-processedVcf <- vcfCheck(
-    vcf,
-    proband = "NA19675",
-    mother  = "NA19678",
-    father  = "NA19679"
-)
+fl <- system.file("extdata", "test_het_mat.vcf.gz", package = "UPDhmm")
+vcf <- VariantAnnotation::readVcf(fl)
+processedVcf <-
+   vcfCheck(vcf, proband = "Sample1", mother = "Sample3", father = "Sample2")
 
 }

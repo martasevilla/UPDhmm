@@ -1,43 +1,15 @@
 #' Process a single chromosome for UPD detection
 #'
-#' This internal helper function runs the full UPD-calling pipeline for a single
-#' chromosome. It applies the Viterbi algorithm to infer hidden states from trio
-#' genotype observations, summarizes consecutive variants with identical inferred
-#' states into blocks, counts Mendelian-inconsistent sites per block, and
-#' optionally computes block-level read-depth ratios.
+#' Internal helper function to run the full pipeline on one chromosome:
+#' - applyViterbi
+#' - asDfVcf
+#' - blocksVcf
 #'
+#' @param vcf_chr CollapsedVCF object for one chromosome
+#' @param hmm Hidden Markov Model object
+#' @param genotypes Named vector mapping genotype strings to numeric states
 #'
-#' @param vcf_chr A CollapsedVCF object representing a single chromosome.
-#'
-#' @param hmm A Hidden Markov Model object.
-#' 
-#' @param add_ratios Logical; default = FALSE.
-#' 
-#' If TRUE, computes normalized per-block read depth ratios for each individual based on total mean depth.
-#'
-#' @param field_DP Optional character string specifying which VCF FORMAT field to use for depth metrics (e.g., DP, AD, or a custom field). 
-#'
-#' @param total_mean Optional numeric vector of per-sample mean read depths across the entire VCF, used to normalize per-block depth ratios computed via \code{computeTrioTotals()} in \code{calculateEvents()}.
-#'
-#' @param mendelian_error_values Character vector of genotype codes considered
-#'   Mendelian errors (i.e., observations with minimal emission probability in 
-#'   the "normal" state).  
-#'   Provided by \code{calculateEvents()}.
-#'
-#' @return A data.frame summarizing blocks detected on the chromosome. Columns include:
-#' \itemize{
-#'   \item `seqnames` – chromosome name
-#'   \item `start`, `end` – genomic coordinates of the block
-#'   \item `group` – inferred HMM state
-#'   \item `n_snps` – number of SNPs in the block
-#'   \item `n_mendelian_error` – number of Mendelian-inconsistent genotypes in the block
-#'   \item depth-ratio metrics (if add_ratios = TRUE)
-#' }
-#'
-#' If an error occurs during processing, a message is printed and `NULL` is returned.
-#' 
-#' @keywords internal
-#' 
+#' @return A data.frame of detected blocks for the chromosome, or NULL if error
 processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, mendelian_error_values) {
   
   tryCatch({
@@ -45,25 +17,36 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
     chr_name <- as.character(GenomeInfoDb::seqnames(vcf_chr)[1])
     
     #################################################
-    # 1. Run Viterbi to infer hidden states for all variants
+    # 1) Run Viterbi
     #################################################
-    vcf_vit <- applyViterbi(vcf_chr, hmm)
-      
+    vcf_vit <- tryCatch(
+      applyViterbi(largeCollapsedVcf = vcf_chr,
+                   hmm = hmm),
+      error = function(e) {
+        stop(sprintf("[Chromosome %s] Error in applyViterbi: %s",
+                     chr_name, conditionMessage(e)))
+      }
+    )
     if (!inherits(vcf_vit, "CollapsedVCF")) {
-      stop(sprintf("[Chromosome %s] applyViterbi did not return a CollapsedVCF object.", chr_name))
+      stop(sprintf("[Chromosome %s] applyViterbi did not return CollapsedVCF.", chr_name))
     }
     
     #################################################
-    # 2. Build block-level representation and optionally compute depth ratios
+    # 2) Create blocks and optionally compute depth ratios
     #################################################
-    blk <- blocksVcf(vcf_vit, add_ratios, field_DP, total_mean)
-
+    blk <- tryCatch(
+      blocksVcf(vcf_vit, add_ratios, field_DP, total_mean),
+      error = function(e) {
+        stop(sprintf("[Chromosome %s] Error in blocksVcf: %s",
+                     chr_name, conditionMessage(e)))
+      }
+    )
     if (!inherits(blk, "data.frame")) {
       stop(sprintf("[Chromosome %s] blocksVcf did not return a data.frame.", chr_name))
     }
     
     #################################################
-    # 3. Count Mendelian-inconsistent genotypes per block
+    # 3) Count Mendelian-inconsistent genotypes per block
     #################################################
     if (!is.null(hmm)) {
       

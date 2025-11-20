@@ -1,21 +1,11 @@
-#' Apply the Hidden Markov Model using the Viterbi algorithm
+#' Apply the hidden Markov model using the Viterbi algorithm.
 #'
-#' This function takes a VCF object and a pre-defined Hidden Markov Model (HMM), 
-#' applies the Viterbi algorithm to infer the most likely sequence of hidden states 
-#' for each variant, and stores the resulting state sequence inside the VCF metadata.
 #'
-#' It expects that the metadata column *geno_coded* exists, containing a numeric
-#' encoding of the genotypes. This column is automatically generated when the VCF
-#' is processed with \code{vcfCheck()} from the UPDhmm package.
-#'
-#' @param largeCollapsedVcf A CollapsedVCF object. 
-#' @param hmm A Hidden Markov Model object.
-#'
-#' @return The input CollapsedVCF object updated with a new metadata column *states*,
-#'   which contains the inferred hidden state for each variant.
-#'   
-#' @keywords internal
-#'
+#' @param largeCollapsedVcf input vcf file
+#' @param hmm Hidden Markov Model used to infer the events
+#' @param genotypes Possible GT formats and its correspondence with the hmm
+#' @return largeCollapsedVcf
+
 applyViterbi <- function(largeCollapsedVcf, hmm) {
 
   ## Retrieve the precomputed numeric genotypes (observations) from the VCF metadata
