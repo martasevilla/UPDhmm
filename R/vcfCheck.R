@@ -52,12 +52,6 @@ vcfCheck <- function(
       stop("Argument 'mother' is missing.")
     }
     
-    
-    # Check if `largeCollapsedVcf` is a VCF object
-    if (!inherits(largeCollapsedVcf, "CollapsedVCF")) {
-      stop("Argument 'largeCollapsedVcf' must be a VCF object.")
-    }
-    
     # Check if `proband` ,`father` and `mother` is a character vector
     if (!inherits(proband, "character")) {
       stop("Argument 'proband' must be a character vector")
