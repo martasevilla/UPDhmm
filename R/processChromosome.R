@@ -19,7 +19,7 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
     #################################################
     # 1) Run Viterbi
     #################################################
-    vcf_vit <- tryCatch(
+    df_vit <- tryCatch(
       applyViterbi(largeCollapsedVcf = vcf_chr,
                    hmm = hmm),
       error = function(e) {
@@ -27,7 +27,7 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
                      chr_name, conditionMessage(e)))
       }
     )
-    if (!inherits(vcf_vit, "CollapsedVCF")) {
+    if (!inherits(df_vit, "CollapsedVCF")) {
       stop(sprintf("[Chromosome %s] applyViterbi did not return CollapsedVCF.", chr_name))
     }
     
@@ -35,7 +35,7 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
     # 2) Create blocks and optionally compute depth ratios
     #################################################
     blk <- tryCatch(
-      blocksVcf(vcf_vit, add_ratios, field_DP, total_mean),
+      blocksVcf(df_vit, add_ratios, field_DP, total_mean),
       error = function(e) {
         stop(sprintf("[Chromosome %s] Error in blocksVcf: %s",
                      chr_name, conditionMessage(e)))

@@ -6,7 +6,8 @@
 #' @param genotypes Possible GT formats and its correspondence with the hmm
 #' @return largeCollapsedVcf
 
-applyViterbi <- function(largeCollapsedVcf, hmm) {
+applyViterbi <-
+  function(largeCollapsedVcf, hmm) {
   
   ## Retrieve the precomputed numeric genotypes (observations) from the VCF metadata
   geno_coded_values <- S4Vectors::mcols(largeCollapsedVcf)$geno_coded
