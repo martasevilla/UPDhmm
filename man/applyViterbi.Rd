@@ -25,3 +25,4 @@ It expects that the metadata column \emph{geno_coded} exists, containing a numer
 encoding of the genotypes. This column is automatically generated when the VCF
 is processed with \code{vcfCheck()} from the UPDhmm package.
 }
+\keyword{internal}

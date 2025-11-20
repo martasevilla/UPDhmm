@@ -51,3 +51,4 @@ genotype observations, summarizes consecutive variants with identical inferred
 states into blocks, counts Mendelian-inconsistent sites per block, and
 optionally computes block-level read-depth ratios.
 }
+\keyword{internal}

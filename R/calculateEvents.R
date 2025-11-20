@@ -15,15 +15,6 @@
 #' @param hmm Optional custom Hidden Markov Model object Default = NULL. 
 #'  
 #'   If NULL, the function uses the default Mendelian HMM included in the UPDhmm package.  
-#'   A custom HMM must be a list following the structure of the HMM package, containing:
-#'   
-#'   \itemize{
-#'     \item States – character vector of hidden state names
-#'     \item Symbols – vector of allowed observation symbols (genotype codes)
-#'     \item startProbs – named vector of initial state probabilities
-#'     \item transProbs – state transition probability matrix
-#'     \item emissionProbs – matrix of emission probabilities for each state × symbol
-#'   }
 #'   
 #' @param field_DP Default = NULL. Character string specifying which FORMAT field in the VCF
 #' contains the read depth information.
@@ -69,6 +60,17 @@
 #' 
 #' All blocks from all chromosomes are combined into a single data.frame and filtered to retain only those with more than one SNP, a state different from normal, and located on autosomes. The final output summarizes detected UPD events, including genomic coordinates, HMM state, number of SNPs, number of Mendelian errors per block, and, if calculated, per-block depth ratios.
 #' 
+#' ### Custom HMM structure
+#' A custom HMM must be a list following the structure of the HMM package, containing:
+#'   
+#'   \itemize{
+#'     \item States – character vector of hidden state names
+#'     \item Symbols – vector of allowed observation symbols (genotype codes)
+#'     \item startProbs – named vector of initial state probabilities
+#'     \item transProbs – state transition probability matrix
+#'     \item emissionProbs – matrix of emission probabilities for each state × symbol
+#'   }
+#'   
 #' @return A data.frame summarizing all detected UPD-like events.  
 #' Columns include:
 #' \itemize{
@@ -195,20 +197,35 @@ calculateEvents <- function(largeCollapsedVcf,
   return(filtered_def_blocks_states)
 }
 
-
+#' Compute per-sample total mean read depth for a trio
+#' 
+#' This internal helper function calculates the per-sample total mean read depth 
+#' across a VCF for a trio, optionally using a specified FORMAT field.
+#' The resulting totals are used to normalize per-block depth ratios in 
+#' downstream analyses.
+#' 
+#' @param vcf A CollapsedVCF object containing the trio genotype data.
+#' @param expected_samples Character vector of length 3 specifying the column
+#'   order of the trio: proband, mother, father. Default = c("proband","mother","father").
+#' @param field_DP Optional character string specifying the FORMAT field in the VCF
+#'   to use for depth calculations. 
+#'   
+#' @details
+#'
+#' The function selects the depth or coverage field to use, giving priority to field_DP if specified and present in the VCF, followed by `DP` (standard depth) and then `AD` (allelic depth) if available.  
+#' If AD is used, the depth for each variant is calculated as the sum across all alleles per sample.  
+#' NA values are ignored when computing the per-sample mean depth.
+#' 
+#' @return Numeric vector of per-sample mean read depths, named according to 
+#'   expected_samples. Returns NULL if no valid depth field is found.
+#'
+#' @keywords internal
+#' 
 computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","father"), field_DP = NULL) {
   mean_depth <- NULL
   geno_list <- VariantAnnotation::geno(vcf)
   
-  # ---------------------------------------------------------------
   # Determine which depth/coverage field to use for calculations
-  # Priority:
-  # 1) Use 'field_DP' if specified and exists in VCF
-  # 2) Use standard 'DP' field if present
-  # 3) Use 'AD' (allele depths) if present
-  # 4) Otherwise, no depth field available
-  # ---------------------------------------------------------------
-  
   dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_list)) { field_DP } 
               else if ("DP" %in% names(geno_list)) { "DP" } 
               else if ("AD" %in% names(geno_list)) { "AD" } 

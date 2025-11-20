@@ -13,6 +13,8 @@
 #'
 #' @return The input CollapsedVCF object updated with a new metadata column *states*,
 #'   which contains the inferred hidden state for each variant.
+#'   
+#' @keywords internal
 #'
 applyViterbi <- function(largeCollapsedVcf, hmm) {
 

@@ -32,8 +32,9 @@
 #'     \item \code{geno_coded} – list of numeric genotype codes per block
 #'     \item Optional ratio columns relative to total_mean
 #'   }
+#' @keywords internal
 #'
-blocksVcfNew <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father")) {
+blocksVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father")) {
   
   # Extract metadata and genotype matrices
   mcol <- S4Vectors::mcols(largeCollapsedVcf)

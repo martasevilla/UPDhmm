@@ -17,7 +17,6 @@ input <- vcfCheck(
 
 # Load the default HMM
 utils::data("hmm", package = "UPDhmm")
-hmm <- hmm
 
 test_that("Test if viterbi algorithm works", {
     out <- applyViterbi(

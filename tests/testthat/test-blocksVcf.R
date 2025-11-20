@@ -1,4 +1,4 @@
-# test-blocksVcfNew.R
+# test-blocksVcf.R
 
 # Expected output block 
 expected_df <- data.frame(
@@ -25,7 +25,7 @@ input <- vcfCheck(
 
 # Load the default HMM
 utils::data("hmm", package = "UPDhmm")
-hmm <- hmm
+
 input <- applyViterbi(input, hmm)
 
 # Split processed VCF by chromosome and select chromosome 6
@@ -36,11 +36,11 @@ chr6 <- split_vcf[["6"]]
 total_mean <- c(proband = 904/15, mother = 886/15, father = 902/15)
 
 # ------------------------------------------------------------------------- #
-# Test blocksVcfNew() with add_ratios = FALSE
+# Test blocksVcf() with add_ratios = FALSE
 # ------------------------------------------------------------------------- #
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(largeCollapsedVcf = chr6)
+    out <- blocksVcf(largeCollapsedVcf = chr6)
 
     out <- as.data.frame(out)
     
@@ -51,11 +51,11 @@ test_that("Test if simplification into blocks works", {
 })
 
 # ------------------------------------------------------------------------- #
-# Test blocksVcfNew() with add_ratios = TRUE using DP field
+# Test blocksVcf() with add_ratios = TRUE using DP field
 # ------------------------------------------------------------------------- #
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean)
+    out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean)
 
     out <- as.data.frame(out)
     
@@ -68,11 +68,11 @@ test_that("Test if simplification into blocks works", {
 })
 
 # ------------------------------------------------------------------------- #
-# Test blocksVcfNew() with add_ratios = TRUE using AD field
+# Test blocksVcf() with add_ratios = TRUE using AD field
 # ------------------------------------------------------------------------- #
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean)
+    out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean)
 
     out <- as.data.frame(out)
     
@@ -85,11 +85,11 @@ test_that("Test if simplification into blocks works", {
 })
 
 # ------------------------------------------------------------------------- #
-# Test blocksVcfNew() with add_ratios = TRUE and no field_DP defined
+# Test blocksVcf() with add_ratios = TRUE and no field_DP defined
 # ------------------------------------------------------------------------- #
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, total_mean = total_mean)
+    out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, total_mean = total_mean)
 
     out <- as.data.frame(out)
     
@@ -129,7 +129,7 @@ total_mean <- c(proband = 844/14, mother = 886/15, father = 902/15)
 # ------------------------------------------------------------------------- #
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean)
+    out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean)
 
     out <- as.data.frame(out)
     
@@ -143,7 +143,7 @@ test_that("Test if simplification into blocks works", {
 
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean)
+    out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean)
 
     out <- as.data.frame(out)
     
@@ -156,7 +156,7 @@ test_that("Test if simplification into blocks works", {
 })
 
 test_that("Test if simplification into blocks works", {
-    out <- blocksVcfNew(largeCollapsedVcf = chr6, add_ratios = TRUE, total_mean = total_mean)
+    out <- blocksVcf(largeCollapsedVcf = chr6, add_ratios = TRUE, total_mean = total_mean)
 
     out <- as.data.frame(out)
     

@@ -35,7 +35,9 @@
 #' }
 #'
 #' If an error occurs during processing, a message is printed and `NULL` is returned.
-#'
+#' 
+#' @keywords internal
+#' 
 processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, mendelian_error_values) {
   
   tryCatch({
@@ -54,10 +56,10 @@ processChromosome <- function(vcf_chr, hmm, add_ratios = FALSE, field_DP = NULL,
     #################################################
     # 2. Build block-level representation and optionally compute depth ratios
     #################################################
-    blk <- blocksVcfNew(vcf_vit, add_ratios, field_DP, total_mean)
+    blk <- blocksVcf(vcf_vit, add_ratios, field_DP, total_mean)
 
     if (!inherits(blk, "data.frame")) {
-      stop(sprintf("[Chromosome %s] blocksVcfNew did not return a data.frame.", chr_name))
+      stop(sprintf("[Chromosome %s] blocksVcf did not return a data.frame.", chr_name))
     }
     
     #################################################

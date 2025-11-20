@@ -19,16 +19,7 @@ with \code{vcfCheck()} function from UPDhmm package.}
 
 \item{hmm}{Optional custom Hidden Markov Model object Default = NULL.
 
-If NULL, the function uses the default Mendelian HMM included in the UPDhmm package.
-A custom HMM must be a list following the structure of the HMM package, containing:
-
-\itemize{
-\item States – character vector of hidden state names
-\item Symbols – vector of allowed observation symbols (genotype codes)
-\item startProbs – named vector of initial state probabilities
-\item transProbs – state transition probability matrix
-\item emissionProbs – matrix of emission probabilities for each state × symbol
-}}
+If NULL, the function uses the default Mendelian HMM included in the UPDhmm package.}
 
 \item{field_DP}{Default = NULL. Character string specifying which FORMAT field in the VCF
 contains the read depth information.
@@ -96,6 +87,18 @@ This step can be executed in series or in parallel depending on the BPPARAM para
 \emph{3. Consolidation and filtering of detected UPD events}
 
 All blocks from all chromosomes are combined into a single data.frame and filtered to retain only those with more than one SNP, a state different from normal, and located on autosomes. The final output summarizes detected UPD events, including genomic coordinates, HMM state, number of SNPs, number of Mendelian errors per block, and, if calculated, per-block depth ratios.
+\subsection{Custom HMM structure}{
+
+A custom HMM must be a list following the structure of the HMM package, containing:
+
+\itemize{
+\item States – character vector of hidden state names
+\item Symbols – vector of allowed observation symbols (genotype codes)
+\item startProbs – named vector of initial state probabilities
+\item transProbs – state transition probability matrix
+\item emissionProbs – matrix of emission probabilities for each state × symbol
+}
+}
 }
 \examples{
 file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
