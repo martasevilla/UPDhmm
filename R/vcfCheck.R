@@ -28,42 +28,45 @@ vcfCheck <- function(
     mother,
     proband,
     check_quality = FALSE) {
-    # Check if `largeCollapsedVcf` is provided
-    
-    if (missing(largeCollapsedVcf)) {
-      stop("Argument 'largeCollapsedVcf' is missing.")
-    }
-    
-    # Check if `largeCollapsedVcf` is a VCF object
-    if (!inherits(largeCollapsedVcf, "CollapsedVCF")) {
-      stop("Argument 'largeCollapsedVcf' must be a VCF object.")
-    }
-    
-    # Check if `proband`,`father` and `mother` is provided
-    
-    if (missing(proband)) {
-      stop("Argument 'proband' is missing.")
-    }
-    if (missing(father)) {
-      stop("Argument 'father' is missing.")
-    }
-    
-    if (missing(mother)) {
-      stop("Argument 'mother' is missing.")
-    }
-    
-    # Check if `proband` ,`father` and `mother` is a character vector
-    if (!inherits(proband, "character")) {
-      stop("Argument 'proband' must be a character vector")
-    }
-    
-    if (!inherits(mother, "character")) {
-      stop("Argument 'mother' must be a character vector")
-    }
-    
-    if (!inherits(father, "character")) {
-      stop("Argument 'father' must be a character vector")
-    }
+  # Check if `largeCollapsedVcf` is provided
+  
+  if (missing(largeCollapsedVcf)) {
+    stop("Argument 'largeCollapsedVcf' is missing.")
+  }
+  
+  # Check if `largeCollapsedVcf` is a VCF object
+  if (!inherits(largeCollapsedVcf, "CollapsedVCF")) {
+    stop("Argument 'largeCollapsedVcf' must be a VCF object.")
+  }
+  
+  # Check if `proband`,`father` and `mother` is provided
+  
+  if (missing(proband)) {
+    stop("Argument 'proband' is missing.")
+  }
+  if (missing(father)) {
+    stop("Argument 'father' is missing.")
+  }
+  
+  if (missing(mother)) {
+    stop("Argument 'mother' is missing.")
+  }
+  
+  
+  # Check if `proband` ,`father` and `mother` is a character vector
+  if (!inherits(proband, "character")) {
+    stop("Argument 'proband' must be a character vector")
+  }
+  
+  if (!inherits(mother, "character")) {
+    stop("Argument 'mother' must be a character vector")
+  }
+  
+  if (!inherits(father, "character")) {
+    stop("Argument 'father' must be a character vector")
+  }
+  
+  
     # Extract genotype data
     geno_data <- VariantAnnotation::geno(largeCollapsedVcf)
     
