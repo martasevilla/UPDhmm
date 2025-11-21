@@ -18,16 +18,41 @@ processChromosome(
 
 \item{hmm}{Hidden Markov Model object}
 
-\item{genotypes}{Named vector mapping genotype strings to numeric states}
+\item{add_ratios}{Logical; default = FALSE.}
+
+\item{field_DP}{Default = \code{NULL}. Character string specifying which FORMAT field in the VCF
+contains the read depth information to use in \code{addRatioDepth()}.
+If \code{NULL} (default), the function will automatically try \code{"DP"} (standard depth)
+or \code{"AD"} (allelic depths, summed across alleles).
+Use this parameter if your VCF uses a non-standard field name for depth,
+e.g. \code{field = "NR"} or \code{"field_DP"}.
+
+If TRUE, computes normalized per-block read depth ratios for each individual based on total mean depth.}
+
+\item{total_mean}{Optional numeric vector of per-sample mean read depths across the entire VCF, used to normalize per-block depth ratios computed via \code{computeTrioTotals()} in \code{calculateEvents()}.}
+
+\item{mendelian_error_values}{Character vector of genotype codes considered
+Mendelian errors (i.e., observations with minimal emission probability in
+the "normal" state).
+Provided by \code{calculateEvents()}.}
 }
 \value{
 A data.frame of detected blocks for the chromosome, or NULL if error
+Columns include:
+\itemize{
+\item \code{seqnames} – chromosome name
+\item \code{start}, \code{end} – genomic coordinates of the block
+\item \code{group} – inferred HMM state
+\item \code{n_snps} – number of SNPs in the block
+\item \code{n_mendelian_error} – number of Mendelian-inconsistent genotypes in the block
+\item depth-ratio metrics (if add_ratios = TRUE)
+}
 }
 \description{
 Internal helper function to run the full pipeline on one chromosome:
 \itemize{
 \item applyViterbi
-\item asDfVcf
 \item blocksVcf
 }
 }
+\keyword{internal}

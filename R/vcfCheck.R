@@ -1,8 +1,10 @@
-#' Check quality parameters (optional) and change IDs.
+#' Check quality parameters (optional), change IDs and encode genotypes numerically
 #'
 #' This function takes a VCF file and converts it into a largeCollapsedVcf
 #' object using the VariantAnnotation package. It also rename the sample for 
-#' subsequent steps needed in UPDhmm package.
+#' subsequent steps needed in UPDhmm package and generates a numeric 
+#' encoding of the trio genotypes for each variant, which is stored in the metadata 
+#' column *geno_coded*.  
 #' Additionally, it features an optional parameter, quality_check, which triggers warnings 
 #' when variants lack sufficient quality based on RD and GQ parameters in the input VCF.
 #'
@@ -14,13 +16,16 @@
 #' want to be measured.
 #' Default = FALSE
 #'
-#' @return largeCollapsedVcf (VariantAnnotation VCF format).
+#' @return largeCollapsedVcf (VariantAnnotation VCF format) object identical to the 
+#' input with samples renamed to standard names for the trio and a new metadata column 
+#' *geno_coded* containing the numeric encoding of the trio genotypes for each variant.
+#' 
 #' @export
 #' @examples
 #' fl <- system.file("extdata", "test_het_mat.vcf.gz", package = "UPDhmm")
 #' vcf <- VariantAnnotation::readVcf(fl)
 #' processedVcf <-
-#'    vcfCheck(vcf, proband = "Sample1", mother = "Sample3", father = "Sample2")
+#'    vcfCheck(vcf, proband = "NA19675", mother = "NA19678", father = "NA19679")
 #'
 vcfCheck <- function(
     largeCollapsedVcf,
