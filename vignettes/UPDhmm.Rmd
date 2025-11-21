@@ -167,7 +167,7 @@ identifying Uniparental disomies (UPDs):
 (1) Split vcf into chromosomes
 (2) Apply Viterbi algorithm to every chromosome
 (3) Convert Viterbi results into contiguous genomic blocks by collapsing consecutive variants sharing the same inferred state and compute block-level statistics. Optionally, calculate depth-based ratios for each block.
-(4) Calculate including Mendelian errors.
+(4) Calculate block-level statistics including Mendelian error counts.
 
 In this example, we run the function in serial mode, but `calculateEvents()` now includes an optional argument, *BPPARAM*, which controls parallel execution settings and is passed to bplapply. By default, it uses BiocParallel::SerialParam() (serial execution). To enable parallelization, provide a BiocParallel backend, for example:
 
