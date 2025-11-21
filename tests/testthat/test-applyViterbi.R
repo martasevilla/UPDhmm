@@ -1,4 +1,4 @@
-# create the expected output
+# test-applyViterbi.R
 
 file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
 expected_vcf <- VariantAnnotation::readVcf(file)
@@ -7,23 +7,20 @@ S4Vectors::mcols(expected_vcf)$states <-
     c("iso_mat", "iso_mat", "iso_mat")
 
 
-# read vcf
 input <- VariantAnnotation::readVcf(file)
-colnames(input) <- c("proband", "father", "mother")
 
-
-utils::data("hmm")
-hmm <- hmm
-genotypes <- c(
-    "0/0" = "1", "0/1" = "2", "1/0" = "2", "1/1" = "3",
-    "0|0" = "1", "0|1" = "2", "1|0" = "2", "1|1" = "3"
+input <- vcfCheck(
+  largeCollapsedVcf = input,
+  father = "NA19689", mother = "NA19688",
+  proband = "NA19685", check_quality = TRUE
 )
 
+# Load the default HMM
+utils::data("hmm", package = "UPDhmm")
 
 test_that("Test if viterbi algorithm works", {
     out <- applyViterbi(
         largeCollapsedVcf = input,
-        genotypes = genotypes,
         hmm = hmm
     )
     expect_s4_class(out, "CollapsedVCF")
@@ -31,4 +28,6 @@ test_that("Test if viterbi algorithm works", {
         S4Vectors::mcols(out)$states,
         S4Vectors::mcols(expected_vcf)$states
     )
+    expect_equal(length(S4Vectors::mcols(out)$states), nrow(out))
+    
 })

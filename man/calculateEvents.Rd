@@ -8,6 +8,7 @@ calculateEvents(
   largeCollapsedVcf,
   hmm = NULL,
   field_DP = NULL,
+  add_ratios = FALSE,
   BPPARAM = BiocParallel::SerialParam(),
   verbose = FALSE
 )

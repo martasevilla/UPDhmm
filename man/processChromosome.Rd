@@ -4,7 +4,14 @@
 \alias{processChromosome}
 \title{Process a single chromosome for UPD detection}
 \usage{
-processChromosome(vcf_chr, hmm, genotypes)
+processChromosome(
+  vcf_chr,
+  hmm,
+  add_ratios = FALSE,
+  field_DP = NULL,
+  total_mean = NULL,
+  mendelian_error_values
+)
 }
 \arguments{
 \item{vcf_chr}{CollapsedVCF object for one chromosome}

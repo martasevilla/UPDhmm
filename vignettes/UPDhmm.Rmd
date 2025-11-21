@@ -166,15 +166,15 @@ identifying Uniparental disomies (UPDs):
 
 (1) Split vcf into chromosomes
 (2) Apply Viterbi algorithm to every chromosome
-(3) Transform the inferred hidden states to coordinates `data.frame`
-(4) Create blocks of contiguous variants with the same state
-(5) Calculate the statistics (log-likelihood and p-value).
+(3) Convert Viterbi results into contiguous genomic blocks by collapsing consecutive variants sharing the same inferred state and compute block-level statistics. Optionally, calculate depth-based ratios for each block.
+(4) Calculate block-level statistics including Mendelian error counts.
 
 In this example, we run the function in serial mode, but `calculateEvents()` now includes an optional argument, *BPPARAM*, which controls parallel execution settings and is passed to bplapply. By default, it uses BiocParallel::SerialParam() (serial execution). To enable parallelization, provide a BiocParallel backend, for example:
 
 
 ```{r}
-events_list <- lapply(vcf_list, calculateEvents)
+events_list <- lapply(vcf_list, calculateEvents, add_ratios = TRUE)
+
 head(events_list[[1]])
 
 ```
@@ -187,26 +187,26 @@ The `calculateEvents` function returns a `data.frame` containing all
 detected events in the provided trio. If no events are found, the function  
 will return an empty `data.frame`.  
 
+By default, this function only calculates the number of Mendelian errors as a block-level statistic. Sequencing depth ratios can be included by enabling the optional parameter `add_ratios = TRUE`, which defaults to `FALSE`.
 
-| Column name         | Description                                                                                                                                                                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ID`                | Identifier of the proband (child sample)                                                                                                                                                                                                   |
-| `seqnames`          | Chromosome name                                                                                                                                                                                                                            |
-| `start`             | Start position of the block (genomic coordinate)                                                                                                                                                                                           |
-| `end`               | End position of the block                                                                                                                                                                                                                  |
-| `group`             | Predicted inheritance state (`iso_mat`, `iso_fat`, `het_mat`, `het_fat`)                                                                                                                                                                   |
-| `n_snps`            | Number of informative SNPs within the event                                                                                                                                                                                                |
-| `log_likelihood`    | Log-likelihood ratio comparing the probability of the observed genotype configuration under the best-fitting UPD model versus the null (biparental inheritance). Higher values indicate stronger evidence supporting a UPD-like pattern.   |
-| `p_value`           | Empirical p-value derived from the likelihood ratio test                                                                                                                                                                                   |
-| `n_mendelian_error` | Number of Mendelian inconsistencies detected within the region                                                                                                                                                                             |
-| `ratio_proband`     | Ratio between the average sequencing depth inside the event and the depth outside it for the proband. A value close to 1 indicates balanced coverage, while significant deviations may suggest copy-number changes. |
-| `ratio_mother`      | Same ratio computed for the maternal sample                                                                                                                                                                                                |
-| `ratio_father`      | Same ratio computed for the paternal sample                                                                                                                                                                                                |
 
-In this example, we run the function in serial mode, but `calculateEvents()` now includes an optional argument BPPARAM that controls parallel execution.
+| Column name         | Description                                                                                                                                                                                                                          |
+|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ID`               | Identifier of the proband (child sample)                                                                                                                                                                                              |
+| `seqnames`         | Chromosome name                                                                                                                                                                                                                       |
+| `start`            | Start position of the block (genomic coordinate)                                                                                                                                                                                      |
+| `end`              | End position of the block                                                                                                                                                                                                             |
+| `group`            | Predicted inheritance state (`iso_mat`, `iso_fat`, `het_mat`, `het_fat`)                                                                                                                                                              |
+| `n_snps`           | Number of informative SNPs within the event                                                                                                                                                                                           |
+| `ratio_proband`    | *Optional*. Ratio between the average sequencing depth inside the event and the depth outside it for the proband. A value close to 1 indicates balanced coverage; significant deviations may suggest copy-number changes.             |
+| `ratio_mother`     | *Optional*. Same ratio computed for the maternal sample                                                                                                                                                                               |
+| `ratio_father`     | *Optional*. Same ratio computed for the paternal sample                                                                                                                                                                               |
+| `n_mendelian_error`| Number of Mendelian inconsistencies detected within the region                                                                                                                                                                        |
+
+In this example, we run the function in serial mode, but `calculateEvents()` now includes an optional argument `BPPARAM` that controls parallel execution.
 
 | Argument  | Description                                                                                                                                                                                                                                |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `BPPARAM` | Parallelization settings, passed to **`BiocParallel::bplapply()`**. By default, the function uses `BiocParallel::SerialParam()` (serial execution). To enable parallel computation, a BiocParallel backend can be specified — for example: |
 
 

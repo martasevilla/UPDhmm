@@ -4,7 +4,7 @@
 \alias{applyViterbi}
 \title{Apply the hidden Markov model using the Viterbi algorithm.}
 \usage{
-applyViterbi(largeCollapsedVcf, hmm, genotypes)
+applyViterbi(largeCollapsedVcf, hmm)
 }
 \arguments{
 \item{largeCollapsedVcf}{input vcf file}
