@@ -3,9 +3,11 @@
 #'
 #' @param largeCollapsedVcf input vcf file
 #' @param hmm Hidden Markov Model used to infer the events
-#' @param genotypes Possible GT formats and its correspondence with the hmm
-#' @return largeCollapsedVcf
-
+#' @return the input largeCollapsedVcf object updated with a new metadata column *states*,
+#'   which contains the inferred hidden state for each variant.
+#'   
+#' @keywords internal
+#' 
 applyViterbi <-
   function(largeCollapsedVcf, hmm) {
     
