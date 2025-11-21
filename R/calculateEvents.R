@@ -11,15 +11,7 @@
 #'
 #' @param hmm Default = `NULL`. If no arguments are added, the package 
 #' will use the default HMM already implemented, based on Mendelian 
-#' inheritance. If an optional HMM is desired, it should adhere to the 
-#' general HMM format from `HMM` package with the following elements inside 
-#' a list:
-#'   1. The hidden state names in the "States" vector.
-#'   2. All possible observations in the "Symbols" vector.
-#'   3. Start probabilities of every hidden state in the "startProbs" vector.
-#'   4. Transition probabilities matrix between states in "transProbs".
-#'   5. Probabilities associated between every hidden state and all possible 
-#'      observations in the "emissionProbs" matrix.
+#' inheritance. 
 #'
 #' @param field_DP Default = `NULL`. Character string specifying which FORMAT field in the VCF
 #' contains the read depth information to use in `addRatioDepth()`.
@@ -27,6 +19,11 @@
 #' or `"AD"` (allelic depths, summed across alleles).
 #' Use this parameter if your VCF uses a non-standard field name for depth,
 #' e.g. `field = "NR"` or `"field_DP"`.
+#' 
+#' @param add_ratios Logical; default = FALSE.
+#'   
+#'   If TRUE, per-sample mean depth is computed across the entire VCF and 
+#'   used to calculate normalized per-block depth ratios.
 #'
 #' @param BPPARAM Parallelization settings, passed to
 #'   \link[BiocParallel]{bplapply}.
@@ -40,7 +37,29 @@
 #' @param verbose Logical, default = `FALSE`. 
 #'   If `TRUE`, progress messages will be printed during processing.
 #'
+#' @details
+#' ### Custom HMM structure
+#' A custom HMM must be a list following the structure of the HMM package, containing:
+#'   
+#'   \itemize{
+#'     \item States – character vector of hidden state names
+#'     \item Symbols – vector of allowed observation symbols (genotype codes)
+#'     \item startProbs – named vector of initial state probabilities
+#'     \item transProbs – state transition probability matrix
+#'     \item emissionProbs – matrix of emission probabilities for each state × symbol
+#'   }
+#'   
 #' @return A `data.frame` object containing all detected events in the provided trio. 
+#' Columns include:
+#' \itemize{
+#'   \item seqnames – chromosome name  
+#'   \item start, end – genomic coordinates  
+#'   \item group – inferred HMM state  
+#'   \item n_snps – number of SNPs in the block  
+#'   \item n_mendelian_error – number of Mendelian errors in the block  
+#'   \item depth-ratio metrics (if add_ratios = TRUE)  
+#' }
+#'
 #' If no events are found, the function will return an empty `data.frame`.
 #'
 #' @export
