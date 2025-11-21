@@ -10,12 +10,12 @@ applyViterbi(largeCollapsedVcf, hmm)
 \item{largeCollapsedVcf}{input vcf file}
 
 \item{hmm}{Hidden Markov Model used to infer the events}
-
-\item{genotypes}{Possible GT formats and its correspondence with the hmm}
 }
 \value{
-largeCollapsedVcf
+the input largeCollapsedVcf object updated with a new metadata column \emph{states},
+which contains the inferred hidden state for each variant.
 }
 \description{
 Apply the hidden Markov model using the Viterbi algorithm.
 }
+\keyword{internal}

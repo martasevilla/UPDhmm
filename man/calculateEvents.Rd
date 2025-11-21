@@ -20,17 +20,7 @@ calculateEvents(
 
 \item{hmm}{Default = \code{NULL}. If no arguments are added, the package
 will use the default HMM already implemented, based on Mendelian
-inheritance. If an optional HMM is desired, it should adhere to the
-general HMM format from \code{HMM} package with the following elements inside
-a list:
-\enumerate{
-\item The hidden state names in the "States" vector.
-\item All possible observations in the "Symbols" vector.
-\item Start probabilities of every hidden state in the "startProbs" vector.
-\item Transition probabilities matrix between states in "transProbs".
-\item Probabilities associated between every hidden state and all possible
-observations in the "emissionProbs" matrix.
-}}
+inheritance.}
 
 \item{field_DP}{Default = \code{NULL}. Character string specifying which FORMAT field in the VCF
 contains the read depth information to use in \code{addRatioDepth()}.
@@ -38,6 +28,11 @@ If \code{NULL} (default), the function will automatically try \code{"DP"} (stand
 or \code{"AD"} (allelic depths, summed across alleles).
 Use this parameter if your VCF uses a non-standard field name for depth,
 e.g. \code{field = "NR"} or \code{"field_DP"}.}
+
+\item{add_ratios}{Logical; default = FALSE.
+
+If TRUE, per-sample mean depth is computed across the entire VCF and
+used to calculate normalized per-block depth ratios.}
 
 \item{BPPARAM}{Parallelization settings, passed to
 \link[BiocParallel]{bplapply}.
@@ -53,6 +48,16 @@ If \code{TRUE}, progress messages will be printed during processing.}
 }
 \value{
 A \code{data.frame} object containing all detected events in the provided trio.
+Columns include:
+\itemize{
+\item seqnames – chromosome name
+\item start, end – genomic coordinates
+\item group – inferred HMM state
+\item n_snps – number of SNPs in the block
+\item n_mendelian_error – number of Mendelian errors in the block
+\item depth-ratio metrics (if add_ratios = TRUE)
+}
+
 If no events are found, the function will return an empty \code{data.frame}.
 }
 \description{
@@ -60,6 +65,20 @@ This function predicts the hidden states by applying the Viterbi algorithm
 using the Hidden Markov Model (HMM) from the UPDhmm package. It takes the
 genotypes of the trio as input and includes a final step to simplify the
 results into blocks.
+}
+\details{
+\subsection{Custom HMM structure}{
+
+A custom HMM must be a list following the structure of the HMM package, containing:
+
+\itemize{
+\item States – character vector of hidden state names
+\item Symbols – vector of allowed observation symbols (genotype codes)
+\item startProbs – named vector of initial state probabilities
+\item transProbs – state transition probability matrix
+\item emissionProbs – matrix of emission probabilities for each state × symbol
+}
+}
 }
 \examples{
 file <- system.file(package = "UPDhmm", "extdata", "test_het_mat.vcf.gz")
