@@ -1,11 +1,11 @@
 # Input test dataframe
 test_df <- data.frame(
-    ID = c("S1", "S1", "S1", "S2", "S2"),
-    seqnames = c("1", "1", "1", "2", "2"),
-    start = c(100, 150, 300, 500, 550),
-    end = c(120, 180, 320, 520, 580),
-    group = c("iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
-    n_mendelian_error = c(5, 10, 2, 50, 30),
+    ID = c("S1", "S1", "S1", "S1", "S1", "S2", "S2"),
+    seqnames = c("1", "1", "1", "1", "1", "2", "2"),
+    start = c(50, 55, 100, 150, 300, 500, 550),
+    end = c(70, 65, 120, 180, 320, 520, 580),
+    group = c("iso_mat", "iso_mat", "iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
+    n_mendelian_error = c(1, 5, 5, 10, 2, 50, 30),
     stringsAsFactors = FALSE
   )
   
@@ -28,7 +28,7 @@ expected_result <- data.frame(
 
 test_that("Test if calculation collapseEvents works correctly", {
   # Run function
-  out <- collapseEvents(test_df)
+  out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 20)
   # Test equality
   expect_equal(out, expected_result)
 })
