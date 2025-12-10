@@ -11,7 +11,14 @@
 #'   end: End position of the event.
 #'   group: Event group/class.
 #'   n_mendelian_error: Number of Mendelian errors in the event.
+#' 
+#' @param largeCollapsedVcf Optional CollapsedVCF object. If provided, depth ratios
+#'   per sample (proband, mother, father) will be calculated for the collapsed events.
 #'
+#' @param field_DP Optional character string specifying which VCF FORMAT field to use 
+#'   for depth metrics (e.g., "DP" or "AD"). Default = NULL, which will try "DP" first 
+#'   and then "AD".
+#'   
 #' @param min_ME Minimum number of Mendelian errors required to retain an event
 #'   before collapsing (default: 2).
 #'   
@@ -25,6 +32,8 @@
 #'  total_size: Total genomic span size covered by events
 #'   collapsed_events: Comma-separated list of collapsed events
 #'   min_start, max_end: Genomic span of collapsed block
+#'   ratio_proband, ratio_mother, ratio_father: Normalized depth ratios per sample
+#'     (only present if `largeCollapsedVcf` is provided).
 #'
 #' @export
 #' @examples
@@ -38,7 +47,7 @@
 #' stringsAsFactors = FALSE
 #' )
 #' out <- collapseEvents(all_events)
-collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
+collapseEvents <- function(subset_df, largeCollapsedVcf = NULL, field_DP = NULL, min_ME = 2, min_size = 500e3) {
   # Create event string and size per row
   subset_df$event_string <- paste0(
     subset_df$seqnames, ":", subset_df$start, "-", subset_df$end
@@ -80,6 +89,59 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
   })
   
   collapsed_events <- do.call(rbind, collapsed_list)
+  
+  # Compute depth ratios if VCF provided
+  if (!is.null(largeCollapsedVcf)) {
+    
+    geno_all <- VariantAnnotation::geno(largeCollapsedVcf)
+    
+    dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_all)) { field_DP }
+    else if ("DP" %in% names(geno_all)) { "DP" }
+    else if ("AD" %in% names(geno_all)) { "AD" }
+    else stop("No DP/AD field found in VCF")
+    
+    if (dp_field == "AD") {
+      ad <- geno_all$AD
+      depth_matrix <- sapply(seq_len(ncol(ad)), function(j) {
+        vapply(ad[, j], function(x) if (all(is.na(x))) NA else sum(x, na.rm = TRUE), numeric(1))
+      })
+      depth_matrix <- as.matrix(depth_matrix)
+      colnames(depth_matrix) <- colnames(ad)
+    } else {
+      depth_matrix <- as.matrix(geno_all[[dp_field]])
+    }
+    
+    total_mean <- computeTrioTotals(largeCollapsedVcf, field_DP = field_DP)
+
+    gr_events <- GenomicRanges::GRanges(
+      seqnames = collapsed_events$seqnames,
+      ranges = IRanges(collapsed_events$min_start, collapsed_events$max_end)
+    )
+    
+    hits <- GenomicRanges::findOverlaps(gr_events, rowRanges(largeCollapsedVcf))
+    idx_list <- split(S4Vectors::subjectHits(hits), S4Vectors::queryHits(hits))
+    
+    compute_ratio_event <- function(vcf_idx) {
+      if (length(vcf_idx) == 0) return(rep(NA, length(total_mean)))
+      dp <- depth_matrix[vcf_idx, , drop = FALSE]
+      block_mean <- colMeans(dp, na.rm = TRUE)
+      block_mean / total_mean
+    }
+    
+    ratio_list <- lapply(idx_list, compute_ratio_event)
+    
+    # Fill NA for non-overlapping events
+    fill_na <- rep(list(rep(NA, 3)), nrow(collapsed_events))
+    fill_na[as.integer(names(ratio_list))] <- ratio_list
+    
+    collapsed_events$ratio_proband <- sapply(fill_na, `[`, 1)
+    collapsed_events$ratio_mother  <- sapply(fill_na, `[`, 2)
+    collapsed_events$ratio_father  <- sapply(fill_na, `[`, 3)
+  }
+  
+  chr_num <- suppressWarnings(as.numeric(collapsed_events$seqnames))
+  collapsed_events <- collapsed_events[order(collapsed_events$ID, chr_num), ]
   rownames(collapsed_events) <- NULL
+  
   return(collapsed_events)
 }
