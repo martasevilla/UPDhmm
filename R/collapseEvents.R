@@ -12,6 +12,12 @@
 #'   group: Event group/class.
 #'   n_mendelian_error: Number of Mendelian errors in the event.
 #'
+#' @param min_ME Minimum number of Mendelian errors required to retain an event
+#'   before collapsing (default: 2).
+#'   
+#' @param min_size Minimum genomic span size required to retain an event
+#'   before collapsing, in base pairs (default: 500e3).
+#'   
 #' @return A data.frame with collapsed events and columns:
 #'  ID, seqnames, group
 #'  n_events: Number of events collapsed
@@ -32,12 +38,24 @@
 #' stringsAsFactors = FALSE
 #' )
 #' out <- collapseEvents(all_events)
-collapseEvents <- function(subset_df) {
+collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
   # Create event string and size per row
   subset_df$event_string <- paste0(
     subset_df$seqnames, ":", subset_df$start, "-", subset_df$end
   )
   subset_df$event_size <- subset_df$end - subset_df$start
+  
+  # Filter events based on quality thresholds:
+  # keep only those with ≥ min_ME Mendelian errors and ≥ min_size genomic span
+  subset_df <- subset_df[
+    subset_df$n_mendelian_error >= min_ME &
+      subset_df$event_size >= min_size,
+  ]
+  
+  # Return empty output if no events remain after filtering
+  if (nrow(subset_df) == 0) {
+    return(data.frame())
+  }
   
   # Create grouping key
   subset_df$group_key <- paste(subset_df$ID, subset_df$seqnames, subset_df$group, sep = "_")
