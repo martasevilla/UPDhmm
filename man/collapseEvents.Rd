@@ -4,7 +4,13 @@
 \alias{collapseEvents}
 \title{Collapse events per sample and chromosome}
 \usage{
-collapseEvents(subset_df, min_ME = 2, min_size = 5e+05)
+collapseEvents(
+  subset_df,
+  largeCollapsedVcf = NULL,
+  field_DP = NULL,
+  min_ME = 2,
+  min_size = 5e+05
+)
 }
 \arguments{
 \item{subset_df}{A data.frame containing event-level data with columns:
@@ -14,6 +20,13 @@ start: Start position of the event.
 end: End position of the event.
 group: Event group/class.
 n_mendelian_error: Number of Mendelian errors in the event.}
+
+\item{largeCollapsedVcf}{Optional CollapsedVCF object. If provided, depth ratios
+per sample (proband, mother, father) will be calculated for the collapsed events.}
+
+\item{field_DP}{Optional character string specifying which VCF FORMAT field to use
+for depth metrics (e.g., "DP" or "AD"). Default = NULL, which will try "DP" first
+and then "AD".}
 
 \item{min_ME}{Minimum number of Mendelian errors required to retain an event
 before collapsing (default: 2).}
@@ -29,6 +42,8 @@ total_mendelian_error: Sum of Mendelian errors across events
 total_size: Total genomic span size covered by events
 collapsed_events: Comma-separated list of collapsed events
 min_start, max_end: Genomic span of collapsed block
+ratio_proband, ratio_mother, ratio_father: Normalized depth ratios per sample
+(only present if \code{largeCollapsedVcf} is provided).
 }
 \description{
 This function collapses genomic events per individual, chromosome, and group,
