@@ -63,7 +63,21 @@ collapseEvents <- function(subset_df, largeCollapsedVcf = NULL, field_DP = NULL,
   
   # Return empty output if no events remain after filtering
   if (nrow(subset_df) == 0) {
-    return(data.frame())
+    return(data.frame(
+      ID = character(),
+      seqnames = character(),
+      group = character(),
+      n_events = numeric(),
+      total_mendelian_error = numeric(),
+      total_size = numeric(),
+      collapsed_events = character(),
+      min_start = numeric(),
+      max_end = numeric(),
+      ratio_proband = numeric(),
+      ratio_mother = numeric(),
+      ratio_father = numeric(),
+      stringsAsFactors = FALSE
+    ))
   }
   
   # Create grouping key
