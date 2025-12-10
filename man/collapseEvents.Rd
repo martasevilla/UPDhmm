@@ -4,7 +4,7 @@
 \alias{collapseEvents}
 \title{Collapse events per sample and chromosome}
 \usage{
-collapseEvents(subset_df)
+collapseEvents(subset_df, min_ME = 2, min_size = 5e+05)
 }
 \arguments{
 \item{subset_df}{A data.frame containing event-level data with columns:
@@ -14,6 +14,12 @@ start: Start position of the event.
 end: End position of the event.
 group: Event group/class.
 n_mendelian_error: Number of Mendelian errors in the event.}
+
+\item{min_ME}{Minimum number of Mendelian errors required to retain an event
+before collapsing (default: 2).}
+
+\item{min_size}{Minimum genomic span size required to retain an event
+before collapsing, in base pairs (default: 500e3).}
 }
 \value{
 A data.frame with collapsed events and columns:
