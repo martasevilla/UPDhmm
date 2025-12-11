@@ -10,14 +10,9 @@
 #'   start: Start position of the event.
 #'   end: End position of the event.
 #'   group: Event group/class.
+#'   n_snps: Number of SNPs in the event. 
 #'   n_mendelian_error: Number of Mendelian errors in the event.
-#' 
-#' @param largeCollapsedVcf Optional CollapsedVCF object. If provided, depth ratios
-#'   per sample (proband, mother, father) will be calculated for the collapsed events.
-#'
-#' @param field_DP Optional character string specifying which VCF FORMAT field to use 
-#'   for depth metrics (e.g., "DP" or "AD"). Default = NULL, which will try "DP" first 
-#'   and then "AD".
+#'   ratio_proband, ratio_mother, ratio_father: (optional) depth-ratio metrics
 #'   
 #' @param min_ME Minimum number of Mendelian errors required to retain an event
 #'   before collapsing (default: 2).
@@ -30,10 +25,14 @@
 #'  n_events: Number of events collapsed
 #'  total_mendelian_error: Sum of Mendelian errors across events
 #'  total_size: Total genomic span size covered by events
-#'   collapsed_events: Comma-separated list of collapsed events
-#'   min_start, max_end: Genomic span of collapsed block
-#'   ratio_proband, ratio_mother, ratio_father: Normalized depth ratios per sample
-#'     (only present if `largeCollapsedVcf` is provided).
+#'  collapsed_events: Comma-separated list of collapsed events
+#'  min_start, max_end: Genomic span of collapsed block
+#'  total_snps: Total SNPs in the overlapping events
+#'  prop_covered: Proportion of the region covered by events
+#'  ratio_proband, ratio_mother, ratio_father: Weighted mean ratios across the collapsed events,
+#'    calculated as \(\sum_i r_i \cdot N_i / \sum_i N_i\), where \(r_i\) is the ratio of each
+#'    individual event and \(N_i\) is the number of SNPs in that event. Returned only if
+#'    the input contains all three ratio columns
 #'
 #' @export
 #' @examples
@@ -47,7 +46,7 @@
 #' stringsAsFactors = FALSE
 #' )
 #' out <- collapseEvents(all_events)
-collapseEvents <- function(subset_df, largeCollapsedVcf = NULL, field_DP = NULL, min_ME = 2, min_size = 500e3) {
+collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
   # Create event string and size per row
   subset_df$event_string <- paste0(
     subset_df$seqnames, ":", subset_df$start, "-", subset_df$end
@@ -73,6 +72,8 @@ collapseEvents <- function(subset_df, largeCollapsedVcf = NULL, field_DP = NULL,
       collapsed_events = character(),
       min_start = numeric(),
       max_end = numeric(),
+      total_snps = numeric(),
+      prop_covered = numeric(),
       ratio_proband = numeric(),
       ratio_mother = numeric(),
       ratio_father = numeric(),
@@ -88,72 +89,43 @@ collapseEvents <- function(subset_df, largeCollapsedVcf = NULL, field_DP = NULL,
   
   # Collapse manually
   collapsed_list <- lapply(splitted, function(df) {
-    data.frame(
+    
+    region_min <- min(df$start, na.rm = TRUE)
+    region_max <- max(df$end,   na.rm = TRUE)
+    region_span <- region_max - region_min
+    
+    event_sizes <- df$event_size
+    snps        <- df$n_snps
+    
+    out <- data.frame(
       ID = df$ID[1],
       seqnames = df$seqnames[1],
       group = df$group[1],
       n_events = nrow(df),
       total_mendelian_error = sum(df$n_mendelian_error, na.rm = TRUE),
-      total_size = sum(df$event_size, na.rm = TRUE),
+      total_size = sum(event_sizes, na.rm = TRUE),
       collapsed_events = paste(df$event_string, collapse = ","),
-      min_start = min(df$start, na.rm = TRUE),
-      max_end = max(df$end, na.rm = TRUE),
+      min_start = region_min,
+      max_end = region_max,
+      total_snps = sum(snps, na.rm = TRUE),
+      prop_covered = sum(event_sizes, na.rm = TRUE) / region_span,
       stringsAsFactors = FALSE
     )
+    
+    if (all(c("ratio_proband", "ratio_mother", "ratio_father") %in% colnames(df))) {
+      w <- snps
+      out$ratio_proband <- weighted.mean(df$ratio_proband, w, na.rm = TRUE)
+      out$ratio_mother  <- weighted.mean(df$ratio_mother,  w, na.rm = TRUE)
+      out$ratio_father  <- weighted.mean(df$ratio_father,  w, na.rm = TRUE)
+    }
+    
+    return(out)
+    
   })
   
   collapsed_events <- do.call(rbind, collapsed_list)
   
-  # Compute depth ratios if VCF provided
-  if (!is.null(largeCollapsedVcf)) {
-    
-    geno_all <- VariantAnnotation::geno(largeCollapsedVcf)
-    
-    dp_field <- if (!is.null(field_DP) && field_DP %in% names(geno_all)) { field_DP }
-    else if ("DP" %in% names(geno_all)) { "DP" }
-    else if ("AD" %in% names(geno_all)) { "AD" }
-    else stop("No DP/AD field found in VCF")
-    
-    if (dp_field == "AD") {
-      ad <- geno_all$AD
-      depth_matrix <- sapply(seq_len(ncol(ad)), function(j) {
-        vapply(ad[, j], function(x) if (all(is.na(x))) NA else sum(x, na.rm = TRUE), numeric(1))
-      })
-      depth_matrix <- as.matrix(depth_matrix)
-      colnames(depth_matrix) <- colnames(ad)
-    } else {
-      depth_matrix <- as.matrix(geno_all[[dp_field]])
-    }
-    
-    total_mean <- computeTrioTotals(largeCollapsedVcf, field_DP = field_DP)
-
-    gr_events <- GenomicRanges::GRanges(
-      seqnames = collapsed_events$seqnames,
-      ranges = IRanges(collapsed_events$min_start, collapsed_events$max_end)
-    )
-    
-    hits <- GenomicRanges::findOverlaps(gr_events, rowRanges(largeCollapsedVcf))
-    idx_list <- split(S4Vectors::subjectHits(hits), S4Vectors::queryHits(hits))
-    
-    compute_ratio_event <- function(vcf_idx) {
-      if (length(vcf_idx) == 0) return(rep(NA, length(total_mean)))
-      dp <- depth_matrix[vcf_idx, , drop = FALSE]
-      block_mean <- colMeans(dp, na.rm = TRUE)
-      block_mean / total_mean
-    }
-    
-    ratio_list <- lapply(idx_list, compute_ratio_event)
-    
-    # Fill NA for non-overlapping events
-    fill_na <- rep(list(rep(NA, 3)), nrow(collapsed_events))
-    fill_na[as.integer(names(ratio_list))] <- ratio_list
-    
-    collapsed_events$ratio_proband <- sapply(fill_na, `[`, 1)
-    collapsed_events$ratio_mother  <- sapply(fill_na, `[`, 2)
-    collapsed_events$ratio_father  <- sapply(fill_na, `[`, 3)
-  }
-  
-  chr_num <- suppressWarnings(as.numeric(collapsed_events$seqnames))
+  chr_num <- as.numeric(collapsed_events$seqnames)
   collapsed_events <- collapsed_events[order(collapsed_events$ID, chr_num), ]
   rownames(collapsed_events) <- NULL
   
