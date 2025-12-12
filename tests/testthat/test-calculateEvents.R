@@ -3,7 +3,7 @@
 # Expected UPD event blocks 
 expected_def_blocks <- data.frame(
   ID = c("NA19685", "NA19685"),
-  seqnames = c("6", "15"),
+  chromosome = c("6", "15"),
   start = c(32489853, 22368862),
   end = c(33499925, 42109975),
   group = c("het_mat", "iso_mat"),
@@ -111,7 +111,6 @@ test_that("computeTrioTotals calculates mean read depths correctly with default 
 test_that("Test if the general function works (default HMM, add_ratios = FALSE)", {
   out <- calculateEvents(largeCollapsedVcf = input)
   
-  out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   
   # Should not contain ratio columns when add_ratios = FALSE
@@ -128,8 +127,6 @@ test_that("Test if the general function works (default HMM, add_ratios = FALSE)"
 # ------------------------------------------------------------------------- #
 test_that("Test if the general function works (default HMM, add_ratios = TRUE)", {
     out <- calculateEvents(largeCollapsedVcf = input, add_ratios = TRUE, field_DP = "DP")
-    
-    out$seqnames <- as.character(out$seqnames)
     
     out <- as.data.frame(out)
     expect_equal(expected_def_blocks, out, tolerance = 1e-6)
@@ -182,7 +179,7 @@ new_hmm<-list(
 
 expected_def_blocks <- data.frame(
   ID = c("NA19685", "NA19685"),
-  seqnames = c("6", "15"),
+  chromosome = c("6", "15"),
   start = c(32489853, 22368862),
   end = c(33499925, 42109975),
   group = c("het_mat", "iso_mat"),
@@ -209,7 +206,6 @@ input <- vcfCheck(
 
 test_that("Test if the general function works (custom HMM, add_ratios = FALSE)", {
   out <- calculateEvents(largeCollapsedVcf = input, hmm = new_hmm, field_DP = "DP")
-  out$seqnames <- as.character(out$seqnames)
   
   expect_false(any(c("ratio_proband", "ratio_mother", "ratio_father") %in% names(out)))
   expected_no_ratio <- expected_def_blocks[, !(names(expected_def_blocks) %in% c("ratio_proband", "ratio_mother", "ratio_father"))]
@@ -225,7 +221,6 @@ test_that("Test if the general function works (custom HMM, add_ratios = FALSE)",
 
 test_that("Test if the general function works (custom HMM, add_ratios = TRUE)", {
   out <- calculateEvents(largeCollapsedVcf = input, hmm = new_hmm, field_DP = "DP", add_ratios = TRUE)
-  out$seqnames <- as.character(out$seqnames)
   
   out <- as.data.frame(out)
   expect_equal(expected_def_blocks, out, tolerance = 1e-6)
