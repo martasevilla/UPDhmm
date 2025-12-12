@@ -1,9 +1,9 @@
 # Input test dataframe
 test_df <- data.frame(
     ID = c("S1", "S1", "S1", "S1", "S1", "S2", "S2"),
-    seqnames = c("1", "1", "1", "1", "1", "2", "2"),
-    start = c(50, 55, 100, 150, 300, 500, 550),
-    end = c(70, 65, 120, 180, 320, 520, 580),
+    chromosome = c("1", "1", "1", "1", "1", "2", "2"),
+    start = c(50, 75, 100, 150, 300, 500, 550),
+    end = c(70, 85, 120, 180, 320, 520, 580),
     n_snps = c(5, 3, 8, 10, 6, 12, 7),
     group = c("iso_mat", "iso_mat", "iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
     n_mendelian_error = c(1, 5, 5, 10, 2, 50, 30),
@@ -14,31 +14,34 @@ test_df <- data.frame(
 # Expected result after collapsing
 expected_result <- data.frame(
     ID = c("S1", "S1", "S2"),
-    seqnames = c("1", "1", "2"),
+    chromosome = c("1", "1", "2"),
+    start = c(300,100, 500),
+    end = c(320, 180, 580),
     group = c("het_pat","iso_mat", "iso_mat"),
     n_events = c(1, 2, 2),
     total_mendelian_error = c(2, 15, 80),
     total_size = c(20, 50, 50),
-    collapsed_events = c( "1:300-320","1:100-120,1:150-180", "2:500-520,2:550-580"),
-    min_start = c(300,100, 500),
-    max_end = c(320, 180, 580),
     total_snps = c(6, 18, 19),
     prop_covered = c(1, 0.625, 0.625),
+    collapsed_events = c( "1:300-320","1:100-120,1:150-180", "2:500-520,2:550-580"),
+    ratio_proband = rep(NA_real_, 3),
+    ratio_mother  = rep(NA_real_, 3),
+    ratio_father  = rep(NA_real_, 3),
     stringsAsFactors = FALSE
   )
   
 
-test_that("collapseEvents returns empty df with correct structure when all events are filtered out", {
+expected_cols <- c(
+  "ID", "chromosome", "start", "end", "group", 
+  "n_events", "total_mendelian_error", "total_size",
+  "total_snps", "prop_covered", "collapsed_events",
+  "ratio_proband", "ratio_mother", "ratio_father"
+)
+
+test_that("Test if collapseEvents returns empty df with correct structure when all events are filtered out", {
   # Run function
   out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 200)
-  
-  expected_cols <- c(
-    "ID", "seqnames", "group", "n_events",
-    "total_mendelian_error", "total_size",
-    "collapsed_events", "min_start", "max_end",
-    "total_snps", "prop_covered"
-  )
-  
+
   # Must be empty
   expect_equal(nrow(out), 0)
   
@@ -47,7 +50,7 @@ test_that("collapseEvents returns empty df with correct structure when all event
   
 }) 
 
-test_that("Test if calculation collapseEvents works correctly", {
+test_that("Test if calculation collapseEvents works correctly (no ratios)", {
   # Run function
   out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 20)
   # Test equality
@@ -58,9 +61,9 @@ test_that("Test if calculation collapseEvents works correctly", {
 # Input test dataframe
 test_df <- data.frame(
   ID = c("S1", "S1", "S1", "S1", "S1", "S2", "S2"),
-  seqnames = c("1", "1", "1", "1", "1", "2", "2"),
-  start = c(50, 55, 100, 150, 300, 500, 550),
-  end = c(70, 65, 120, 180, 320, 520, 580),
+  chromosome = c("1", "1", "1", "1", "1", "2", "2"),
+  start = c(50, 75, 100, 150, 300, 500, 550),
+  end = c(70, 85, 120, 180, 320, 520, 580),
   n_snps = c(5, 3, 8, 10, 6, 12, 7),
   group = c("iso_mat", "iso_mat", "iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
   n_mendelian_error = c(1, 5, 5, 10, 2, 50, 30),
@@ -74,33 +77,25 @@ test_df <- data.frame(
 # Expected result after collapsing
 expected_result <- data.frame(
   ID = c("S1", "S1", "S2"),
-  seqnames = c("1", "1", "2"),
+  chromosome = c("1", "1", "2"),
+  start = c(300,100, 500),
+  end = c(320, 180, 580),
   group = c("het_pat","iso_mat", "iso_mat"),
   n_events = c(1, 2, 2),
   total_mendelian_error = c(2, 15, 80),
   total_size = c(20, 50, 50),
-  collapsed_events = c( "1:300-320","1:100-120,1:150-180", "2:500-520,2:550-580"),
-  min_start = c(300,100, 500),
-  max_end = c(320, 180, 580),
   total_snps = c(6, 18, 19),
   prop_covered = c(1, 0.625, 0.625),
+  collapsed_events = c( "1:300-320","1:100-120,1:150-180", "2:500-520,2:550-580"),
   ratio_proband = c(0.97, 1.01, 1.02),
   ratio_mother  = c(0.98, 1.03, 1.04),
   ratio_father  = c(0.99, 0.97, 1.00),
   stringsAsFactors = FALSE
 )
 
-test_that("collapseEvents returns empty df with correct structure when all events are filtered out and ratios are present", {
+test_that("Test if collapseEvents returns empty df with correct structure when all events are filtered out and ratios are present", {
   # Run function
   out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 200)
-  
-  expected_cols <- c(
-    "ID", "seqnames", "group", "n_events",
-    "total_mendelian_error", "total_size",
-    "collapsed_events", "min_start", "max_end",
-    "total_snps", "prop_covered",
-    "ratio_proband", "ratio_mother", "ratio_father"
-  )
   
   # Must be empty
   expect_equal(nrow(out), 0)
@@ -110,7 +105,7 @@ test_that("collapseEvents returns empty df with correct structure when all event
   
 })   
   
-test_that("Test if calculation collapseEvents works correctly", {
+test_that("Test if calculation collapseEvents works correctly (with ratios)", {
   # Run function
   out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 20)
   # Test equality
@@ -120,17 +115,22 @@ test_that("Test if calculation collapseEvents works correctly", {
 
 expected_result <- data.frame(
   ID = c("NA19685", "NA19685"),
-  seqnames = c("6", "15"),
-  group = c("het_mat", "iso_mat"),
+  chromosome = c("15", "6"),
+  start = c(22368862, 32489853),
+  end = c(42109975, 33499925),
+  group = c("iso_mat", "het_mat"),
   n_events = c(1, 1),
-  total_mendelian_error = c(3, 6),
-  total_size = c(1010072, 19741113),
-  collapsed_events = c("6:32489853-33499925", "15:22368862-42109975"),
-  min_start = c(32489853,22368862),
-  max_end = c(33499925, 42109975),
-  total_snps = c(5, 10),
-  prop_covered = c(1, 1)
+  total_mendelian_error = c(6, 3),
+  total_size = c(19741113, 1010072),
+  total_snps = c(10, 5),
+  prop_covered = c(1, 1),
+  collapsed_events = c("15:22368862-42109975", "6:32489853-33499925"),
+  ratio_proband = rep(NA_real_, 2),
+  ratio_mother  = rep(NA_real_, 2),
+  ratio_father  = rep(NA_real_, 2),
+  stringsAsFactors = FALSE
 )
+
 
 file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
 input <- VariantAnnotation::readVcf(file)
@@ -156,19 +156,20 @@ test_that("Test if calculation collapseEvents calculates mean read depths correc
 
 expected_result <- data.frame(
   ID = c("NA19685", "NA19685"),
-  seqnames = c("6", "15"),
-  group = c("het_mat", "iso_mat"),
+  chromosome = c("15", "6"),
+  start = c(22368862, 32489853),
+  end = c(42109975, 33499925),
+  group = c("iso_mat", "het_mat"),
   n_events = c(1, 1),
-  total_mendelian_error = c(3, 6),
-  total_size = c(1010072, 19741113),
-  collapsed_events = c("6:32489853-33499925", "15:22368862-42109975"),
-  min_start = c(32489853,22368862),
-  max_end = c(33499925, 42109975),
-  total_snps = c(5, 10),
+  total_mendelian_error = c(6, 3),
+  total_size = c(19741113, 1010072),
+  total_snps = c(10, 5),
   prop_covered = c(1, 1),
-  ratio_proband = c(0.978982, 1.010509),
-  ratio_mother = c(1.002257, 1.025959),
-  ratio_father = c(0.951220, 0.997783)
+  collapsed_events = c("15:22368862-42109975", "6:32489853-33499925"),
+  ratio_proband = c(1.010509, 0.978982),
+  ratio_mother = c(1.025959, 1.002257),
+  ratio_father = c(0.997783, 0.951220),
+  stringsAsFactors = FALSE
 )
 
 test_df <- calculateEvents(largeCollapsedVcf = input, add_ratios = TRUE, field_DP = "AD")
