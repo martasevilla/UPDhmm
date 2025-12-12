@@ -50,7 +50,7 @@ If \code{TRUE}, progress messages will be printed during processing.}
 A \code{data.frame} object containing all detected events in the provided trio.
 Columns include:
 \itemize{
-\item seqnames – chromosome name
+\item chromosome – chromosome name
 \item start, end – genomic coordinates
 \item group – inferred HMM state
 \item n_snps – number of SNPs in the block
