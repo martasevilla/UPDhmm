@@ -66,4 +66,5 @@ n_mendelian_error = c(5, 10, 2, 50, 30),
 stringsAsFactors = FALSE
 )
 out <- collapseEvents(all_events)
+
 }
