@@ -1,6 +1,6 @@
 df <- data.frame(
   ID = c("S1", "S2", "S3", "S3"),
-  seqnames = c("chr1", "chr1", "chr1", "chr1"),
+  chromosome = c("chr1", "chr1", "chr1", "chr1"),
   start = c(100, 120, 500, 510),
   end = c(150, 170, 550, 560),
   n_mendelian_error = c(10, 20, 5, 5)
