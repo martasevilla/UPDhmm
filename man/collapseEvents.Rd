@@ -9,7 +9,7 @@ collapseEvents(subset_df, min_ME = 2, min_size = 5e+05)
 \arguments{
 \item{subset_df}{A data.frame containing event-level data with columns:
 ID: Sample identifier.
-seqnames: Chromosome name.
+chromosome: Chromosome name.
 start: Start position of the event.
 end: End position of the event.
 group: Event group/class.
@@ -25,28 +25,40 @@ before collapsing, in base pairs (default: 500e3).}
 }
 \value{
 A data.frame with collapsed events and columns:
-ID, seqnames, group
+ID, chromosome
+start, end: Genomic span of collapsed block
+group: HMM state of the block
 n_events: Number of events collapsed
 total_mendelian_error: Sum of Mendelian errors across events
 total_size: Total genomic span size covered by events
-collapsed_events: Comma-separated list of collapsed events
-min_start, max_end: Genomic span of collapsed block
 total_snps: Total SNPs in the overlapping events
 prop_covered: Proportion of the region covered by events
-ratio_proband, ratio_mother, ratio_father: Weighted mean ratios across the collapsed events,
-calculated as \(\sum_i r_i \cdot N_i / \sum_i N_i\), where \(r_i\) is the ratio of each
-individual event and \(N_i\) is the number of SNPs in that event. Returned only if
-the input contains all three ratio columns
+collapsed_events: Comma-separated list of collapsed events
+ratio_proband, ratio_mother, ratio_father: Weighted mean ratios across the collapsed events
+If not present in the input, these columns are returned as NA_real_.
 }
 \description{
 This function collapses genomic events per individual, chromosome, and group,
 summarising the number of events, total Mendelian errors, the total span size,
 and a string listing all merged event coordinates.
 }
+\details{
+When ratio columns (\code{ratio_proband}, \code{ratio_mother}, \code{ratio_father}) are present,
+weighted mean ratios are computed across the collapsed events.
+The weighted mean ratio is calculated as:
+
+\deqn{\frac{\sum_{i} r_i \times N_i}{\sum_{i} N_i}}
+
+where \eqn{r_i} is the ratio of each individual event and \eqn{N_i} the number
+of SNPs in that event.
+If the ratio columns are \strong{not present} in the input \code{subset_df}, the collapsed
+data.frame will still contain the columns \code{ratio_proband}, \code{ratio_mother},
+and \code{ratio_father}, but all values will be \code{NA_real_}.
+}
 \examples{
 all_events <- data.frame(
 ID = c("S1", "S1", "S1", "S2", "S2"),
-seqnames = c("1", "1", "1", "2", "2"),
+chromosome = c("1", "1", "1", "2", "2"),
 start = c(100, 150, 300, 500, 550),
 end = c(120, 180, 320, 520, 580),
 group = c("iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
