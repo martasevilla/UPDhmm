@@ -5,7 +5,7 @@
 #'
 #' @param df A data.frame with columns:
 #'   - ID: Sample identifier.
-#'   - seqnames: Chromosome name.
+#'   - chromosome: Chromosome name.
 #'   - start: Start coordinate of the region.
 #'   - end: End coordinate of the region.
 #'   - n_mendelian_error: Number of Mendelian errors in the region.
@@ -22,7 +22,7 @@
 #' @examples
 #' df <- data.frame(
 #' ID = c("S1", "S2", "S3", "S3"),
-#' seqnames = c("chr1", "chr1", "chr1", "chr1"),
+#' chromosome = c("chr1", "chr1", "chr1", "chr1"),
 #' start = c(100, 120, 500, 510),
 #' end = c(150, 170, 550, 560),
 #' n_mendelian_error = c(10, 20, 5, 5)
@@ -58,7 +58,7 @@ identifyRecurrentRegions <- function(df,
   # 2. Convert to GRanges
   #---------------------------------------------------------------
   gr <- GenomicRanges::GRanges(
-    seqnames = df$seqnames,
+    seqnames = df$chromosome,
     ranges = IRanges::IRanges(
       start = as.numeric(df[[start_col]]),
       end = as.numeric(df[[end_col]])

@@ -26,7 +26,7 @@
 #' @return A data.frame with one row per block, containing:
 #'   \itemize{
 #'     \item \code{ID} – sample identifier
-#'     \item \code{seqnames}, start, end – genomic coordinates
+#'     \item \code{chromosome}, start, end – genomic coordinates
 #'     \item \code{group} – HMM state of the block
 #'     \item \code{n_snps} – number of variants in the block
 #'     \item \code{geno_coded} – list of numeric genotype codes per block
@@ -58,7 +58,7 @@ blocksVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, to
   # Construct initial data.frame with block information
   df <- data.frame(
     ID       = sample_ID,
-    seqnames = seqnames_chr[starts_idx],
+    chromosome = seqnames_chr[starts_idx],
     start    = start_pos[starts_idx],
     end      = end_pos[ends_idx],
     group    = r$values,

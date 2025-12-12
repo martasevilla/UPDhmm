@@ -3,7 +3,7 @@
 # Expected output block 
 expected_df <- data.frame(
   ID = "NA19685",
-  seqnames = "6",
+  chromosome = "6",
   start = 32489853,
   end=  33499925,
   group = "iso_mat",
