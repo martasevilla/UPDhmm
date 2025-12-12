@@ -52,7 +52,7 @@
 #' @return A `data.frame` object containing all detected events in the provided trio. 
 #' Columns include:
 #' \itemize{
-#'   \item seqnames – chromosome name  
+#'   \item chromosome – chromosome name  
 #'   \item start, end – genomic coordinates  
 #'   \item group – inferred HMM state  
 #'   \item n_snps – number of SNPs in the block  
@@ -153,7 +153,7 @@ calculateEvents <- function(largeCollapsedVcf,
   filtered_def_blocks_states <- def_blocks_states[
     def_blocks_states$n_snps > 1 &
       def_blocks_states$group != "normal" &
-      !(def_blocks_states$seqnames %in% c("chrX", "X")), ]
+      !(def_blocks_states$chromosome %in% c("chrX", "X")), ]
   
   if (nrow(filtered_def_blocks_states) == 0) {
     if (verbose) message("No non-normal events found.")
