@@ -28,6 +28,25 @@ expected_result <- data.frame(
   )
   
 
+test_that("collapseEvents returns empty df with correct structure when all events are filtered out", {
+  # Run function
+  out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 200)
+  
+  expected_cols <- c(
+    "ID", "seqnames", "group", "n_events",
+    "total_mendelian_error", "total_size",
+    "collapsed_events", "min_start", "max_end",
+    "total_snps", "prop_covered"
+  )
+  
+  # Must be empty
+  expect_equal(nrow(out), 0)
+  
+  # Must have correct column structure
+  expect_equal(colnames(out), expected_cols)
+  
+}) 
+
 test_that("Test if calculation collapseEvents works correctly", {
   # Run function
   out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 20)
@@ -71,7 +90,26 @@ expected_result <- data.frame(
   stringsAsFactors = FALSE
 )
 
-
+test_that("collapseEvents returns empty df with correct structure when all events are filtered out and ratios are present", {
+  # Run function
+  out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 200)
+  
+  expected_cols <- c(
+    "ID", "seqnames", "group", "n_events",
+    "total_mendelian_error", "total_size",
+    "collapsed_events", "min_start", "max_end",
+    "total_snps", "prop_covered",
+    "ratio_proband", "ratio_mother", "ratio_father"
+  )
+  
+  # Must be empty
+  expect_equal(nrow(out), 0)
+  
+  # Must have correct column structure
+  expect_equal(colnames(out), expected_cols)
+  
+})   
+  
 test_that("Test if calculation collapseEvents works correctly", {
   # Run function
   out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 20)
@@ -133,7 +171,7 @@ expected_result <- data.frame(
   ratio_father = c(0.951220, 0.997783)
 )
 
-test_df <- calculateEvents(largeCollapsedVcf = input, add_ratios = TRUE, field_DP = "DP")
+test_df <- calculateEvents(largeCollapsedVcf = input, add_ratios = TRUE, field_DP = "AD")
 
 test_that("Test if calculation collapseEvents calculates mean read depths correctly with AD", {
   out <- collapseEvents(
