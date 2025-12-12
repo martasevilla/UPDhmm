@@ -67,7 +67,7 @@ genotypes of the trio as input and includes a final step to simplify the
 results into blocks.
 }
 \details{
-\subsection{Custom HMM structure. The user can implement its own HMM.}{
+\subsection{Custom HMM structure. The user can implement their own HMM.}{
 
 A custom HMM must be a list following the structure of the HMM package, containing:
 
