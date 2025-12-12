@@ -59,8 +59,6 @@
 #' )
 #' out <- collapseEvents(all_events)
 #' 
-#' @importFrom stats weighted.mean
-#' 
 collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
   # Create event string and size per row
   subset_df$event_string <- paste0(
@@ -129,9 +127,9 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
     
     if (all(c("ratio_proband", "ratio_mother", "ratio_father") %in% colnames(df))) {
       w <- snps
-      out$ratio_proband <- weighted.mean(df$ratio_proband, w, na.rm = TRUE)
-      out$ratio_mother  <- weighted.mean(df$ratio_mother,  w, na.rm = TRUE)
-      out$ratio_father  <- weighted.mean(df$ratio_father,  w, na.rm = TRUE)
+      out$ratio_proband <- stats::weighted.mean(df$ratio_proband, w, na.rm = TRUE)
+      out$ratio_mother  <- stats::weighted.mean(df$ratio_mother,  w, na.rm = TRUE)
+      out$ratio_father  <- stats::weighted.mean(df$ratio_father,  w, na.rm = TRUE)
     } else {
       out$ratio_proband <- NA_real_
       out$ratio_mother  <- NA_real_
