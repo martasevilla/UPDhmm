@@ -62,7 +62,8 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
   
   # Return empty output if no events remain after filtering
   if (nrow(subset_df) == 0) {
-    return(data.frame(
+    
+    base_cols <- list(
       ID = character(),
       seqnames = character(),
       group = character(),
@@ -73,13 +74,19 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
       min_start = numeric(),
       max_end = numeric(),
       total_snps = numeric(),
-      prop_covered = numeric(),
-      ratio_proband = numeric(),
-      ratio_mother = numeric(),
-      ratio_father = numeric(),
-      stringsAsFactors = FALSE
-    ))
+      prop_covered = numeric()
+    )
+    
+    # Add ratio columns ONLY if present in input
+    if (all(c("ratio_proband", "ratio_mother", "ratio_father") %in% colnames(subset_df))) {
+      base_cols$ratio_proband <- numeric()
+      base_cols$ratio_mother  <- numeric()
+      base_cols$ratio_father  <- numeric()
+    }
+    
+    return(as.data.frame(base_cols, stringsAsFactors = FALSE))
   }
+  
   
   # Create grouping key
   subset_df$group_key <- paste(subset_df$ID, subset_df$seqnames, subset_df$group, sep = "_")
