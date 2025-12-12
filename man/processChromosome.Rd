@@ -40,7 +40,7 @@ Provided by \code{calculateEvents()}.}
 A data.frame of detected blocks for the chromosome, or NULL if error
 Columns include:
 \itemize{
-\item \code{seqnames} – chromosome name
+\item \code{chromosome} – chromosome name
 \item \code{start}, \code{end} – genomic coordinates of the block
 \item \code{group} – inferred HMM state
 \item \code{n_snps} – number of SNPs in the block
