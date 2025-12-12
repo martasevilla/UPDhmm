@@ -29,7 +29,7 @@
 #' @return A data.frame of detected blocks for the chromosome, or NULL if error
 #' Columns include:
 #' \itemize{
-#'   \item `seqnames` – chromosome name
+#'   \item `chromosome` – chromosome name
 #'   \item `start`, `end` – genomic coordinates of the block
 #'   \item `group` – inferred HMM state
 #'   \item `n_snps` – number of SNPs in the block
