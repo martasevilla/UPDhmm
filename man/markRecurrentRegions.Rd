@@ -25,7 +25,7 @@ this function labels each row as "Yes" (recurrent) or "No".
 \examples{
 input <- data.frame(
 ID = c("S1", "S2", "S3", "S4"),
-seqnames = c("chr1", "chr1", "chr1", "chr2"),
+chromosome = c("chr1", "chr1", "chr1", "chr2"),
 start = c(100, 120, 500, 100),
 end = c(150, 170, 550, 150),
 n_mendelian_error = c(10, 20, 5, 200)
