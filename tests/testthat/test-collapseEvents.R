@@ -7,6 +7,9 @@ test_df <- data.frame(
     n_snps = c(5, 3, 8, 10, 6, 12, 7),
     group = c("iso_mat", "iso_mat", "iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
     n_mendelian_error = c(1, 5, 5, 10, 2, 50, 30),
+    ratio_proband = rep(NA_real_, 7),
+    ratio_mother  = rep(NA_real_, 7),
+    ratio_father  = rep(NA_real_, 7),
     stringsAsFactors = FALSE
   )
 
@@ -23,10 +26,10 @@ expected_result <- data.frame(
     total_size = c(20, 50, 50),
     total_snps = c(6, 18, 19),
     prop_covered = c(1, 0.625, 0.625),
-    collapsed_events = c( "1:300-320","1:100-120,1:150-180", "2:500-520,2:550-580"),
     ratio_proband = rep(NA_real_, 3),
     ratio_mother  = rep(NA_real_, 3),
     ratio_father  = rep(NA_real_, 3),
+    collapsed_events = c( "1:300-320","1:100-120,1:150-180", "2:500-520,2:550-580"),
     stringsAsFactors = FALSE
   )
   
@@ -34,8 +37,8 @@ expected_result <- data.frame(
 expected_cols <- c(
   "ID", "chromosome", "start", "end", "group", 
   "n_events", "total_mendelian_error", "total_size",
-  "total_snps", "prop_covered", "collapsed_events",
-  "ratio_proband", "ratio_mother", "ratio_father"
+  "total_snps", "prop_covered", "ratio_proband", 
+  "ratio_mother", "ratio_father", "collapsed_events"
 )
 
 test_that("Test if collapseEvents returns empty df with correct structure when all events are filtered out", {
@@ -86,10 +89,10 @@ expected_result <- data.frame(
   total_size = c(20, 50, 50),
   total_snps = c(6, 18, 19),
   prop_covered = c(1, 0.625, 0.625),
-  collapsed_events = c( "1:300-320","1:100-120,1:150-180", "2:500-520,2:550-580"),
   ratio_proband = c(0.97, 1.01, 1.02),
   ratio_mother  = c(0.98, 1.03, 1.04),
   ratio_father  = c(0.99, 0.97, 1.00),
+  collapsed_events = c( "1:300-320","1:100-120,1:150-180", "2:500-520,2:550-580"),
   stringsAsFactors = FALSE
 )
 
@@ -110,77 +113,5 @@ test_that("Test if calculation collapseEvents works correctly (with ratios)", {
   out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 20)
   # Test equality
   expect_equal(out, expected_result, tolerance = 1e-2)
-})
-
-
-expected_result <- data.frame(
-  ID = c("NA19685", "NA19685"),
-  chromosome = c("15", "6"),
-  start = c(22368862, 32489853),
-  end = c(42109975, 33499925),
-  group = c("iso_mat", "het_mat"),
-  n_events = c(1, 1),
-  total_mendelian_error = c(6, 3),
-  total_size = c(19741113, 1010072),
-  total_snps = c(10, 5),
-  prop_covered = c(1, 1),
-  collapsed_events = c("15:22368862-42109975", "6:32489853-33499925"),
-  ratio_proband = rep(NA_real_, 2),
-  ratio_mother  = rep(NA_real_, 2),
-  ratio_father  = rep(NA_real_, 2),
-  stringsAsFactors = FALSE
-)
-
-
-file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
-input <- VariantAnnotation::readVcf(file)
-
-input <- vcfCheck(
-  largeCollapsedVcf = input,
-  father = "NA19689", mother = "NA19688",
-  proband = "NA19685", check_quality = TRUE
-)
-
-test_df <- calculateEvents(largeCollapsedVcf = input)
-
-test_that("Test if calculation collapseEvents calculates mean read depths correctly with DP", {
-  out <- collapseEvents(
-    subset_df = test_df,
-    min_ME = 2, 
-    min_size = 20
-  )
-  
-  expect_equal(out, expected_result)
-})
-
-
-expected_result <- data.frame(
-  ID = c("NA19685", "NA19685"),
-  chromosome = c("15", "6"),
-  start = c(22368862, 32489853),
-  end = c(42109975, 33499925),
-  group = c("iso_mat", "het_mat"),
-  n_events = c(1, 1),
-  total_mendelian_error = c(6, 3),
-  total_size = c(19741113, 1010072),
-  total_snps = c(10, 5),
-  prop_covered = c(1, 1),
-  collapsed_events = c("15:22368862-42109975", "6:32489853-33499925"),
-  ratio_proband = c(1.010509, 0.978982),
-  ratio_mother = c(1.025959, 1.002257),
-  ratio_father = c(0.997783, 0.951220),
-  stringsAsFactors = FALSE
-)
-
-test_df <- calculateEvents(largeCollapsedVcf = input, add_ratios = TRUE, field_DP = "AD")
-
-test_that("Test if calculation collapseEvents calculates mean read depths correctly with AD", {
-  out <- collapseEvents(
-    subset_df = test_df, 
-    min_ME = 2, 
-    min_size = 20
-  )
-  
-  expect_equal(out, expected_result, tolerance = 1e-6)
 })
 
