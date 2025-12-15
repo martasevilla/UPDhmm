@@ -55,7 +55,7 @@ Columns include:
 \item group – inferred HMM state
 \item n_snps – number of SNPs in the block
 \item n_mendelian_error – number of Mendelian errors in the block
-\item depth-ratio metrics (if add_ratios = TRUE)
+\item depth-ratio metrics (always present; if add_ratios = FALSE, filled with NA)
 }
 
 If no events are found, the function will return an empty \code{data.frame}.
