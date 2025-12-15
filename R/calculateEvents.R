@@ -38,7 +38,7 @@
 #'   If `TRUE`, progress messages will be printed during processing.
 #'
 #' @details
-#' ### Custom HMM structure. The user can implement their own HMM. 
+#' ### Custom HMM structure. The user can implement its own HMM.
 #' A custom HMM must be a list following the structure of the HMM package, containing:
 #'   
 #'   \itemize{
