@@ -6,7 +6,7 @@ test_df <- data.frame(
     end = c(70, 85, 120, 180, 320, 520, 580),
     n_snps = c(5, 3, 8, 10, 6, 12, 7),
     group = c("iso_mat", "iso_mat", "iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
-    n_mendelian_error = c(1, 5, 5, 10, 2, 50, 30),
+    n_mendelian_error = c(1, 5, 5, 10, 3, 50, 30),
     ratio_proband = rep(NA_real_, 7),
     ratio_mother  = rep(NA_real_, 7),
     ratio_father  = rep(NA_real_, 7),
@@ -22,7 +22,7 @@ expected_result <- data.frame(
     end = c(320, 180, 580),
     group = c("het_pat","iso_mat", "iso_mat"),
     n_events = c(1, 2, 2),
-    total_mendelian_error = c(2, 15, 80),
+    total_mendelian_error = c(3, 15, 80),
     total_size = c(20, 50, 50),
     total_snps = c(6, 18, 19),
     prop_covered = c(1, 0.625, 0.625),
@@ -55,7 +55,7 @@ test_that("Test if collapseEvents returns empty df with correct structure when a
 
 test_that("Test if calculation collapseEvents works correctly (no ratios)", {
   # Run function
-  out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 20)
+  out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 19)
   # Test equality
   expect_equal(out, expected_result)
 })
@@ -69,7 +69,7 @@ test_df <- data.frame(
   end = c(70, 85, 120, 180, 320, 520, 580),
   n_snps = c(5, 3, 8, 10, 6, 12, 7),
   group = c("iso_mat", "iso_mat", "iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
-  n_mendelian_error = c(1, 5, 5, 10, 2, 50, 30),
+  n_mendelian_error = c(1, 5, 5, 10, 3, 50, 30),
   ratio_proband = c(0.98, 1.01, 0.99, 1.02, 0.97, 1.03, 1.01),
   ratio_mother  = c(1.00, 1.03, 1.01, 1.04, 0.98, 1.05, 1.02),
   ratio_father  = c(0.95, 0.97, 0.96, 0.98, 0.99, 1.00, 0.99),
@@ -85,7 +85,7 @@ expected_result <- data.frame(
   end = c(320, 180, 580),
   group = c("het_pat","iso_mat", "iso_mat"),
   n_events = c(1, 2, 2),
-  total_mendelian_error = c(2, 15, 80),
+  total_mendelian_error = c(3, 15, 80),
   total_size = c(20, 50, 50),
   total_snps = c(6, 18, 19),
   prop_covered = c(1, 0.625, 0.625),
@@ -110,7 +110,7 @@ test_that("Test if collapseEvents returns empty df with correct structure when a
   
 test_that("Test if calculation collapseEvents works correctly (with ratios)", {
   # Run function
-  out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 20)
+  out <- collapseEvents(subset_df = test_df, min_ME = 2, min_size = 19)
   # Test equality
   expect_equal(out, expected_result, tolerance = 1e-2)
 })
