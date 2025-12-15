@@ -225,11 +225,13 @@ The output of `calculateEvents` needs some pre-processing before the interpretat
 
 The function `collapseEvents()` handles both situations. First,`collapseEvents()` filters the detected events using the following parameters:  
 
-- n_mendelian_error (default = 2): number of Mendelian Errors found in the UPD event.
+- n_mendelian_error (default > 2): minimum number of Mendelian errors supporting the UPD event. Requiring multiple Mendelian inconsistencies reduces the likelihood that the signal is driven by sporadic genotyping errors.
 
-- size (default = 500,000): minimum length of the event to be considered.
+- size (default = 500,000): minimum length (in base pairs) of the event to be considered, aimed at excluding short spurious segments frequently observed as false positives.
 
-Second, `collapseEvents()` combines UPD events with the same type and reported in the same chromosome as a single event. Thus, we obtain a list of UPD events for individual and chromosome: 
+These thresholds were defined based on the evaluation conducted in the publication in which the package was introduced and validated, including simulations of UPD events of different sizes and application to a real trio-based cohort, with the aim of removing small events and excluding those likely driven by technical noise.
+
+Second, `collapseEvents()` merges UPD events with the same predicted type occurring on the same chromosome into a single collapsed event. This step ensures that extended UPD regions initially detected as multiple adjacent segments are represented as a single biologically meaningful event per individual and chromosome.
 
 
 ```{r}
@@ -237,7 +239,7 @@ collapsed_list <- lapply(events_list, collapseEvents)
 collapsed_all <- do.call(rbind.data.frame, c(collapsed_list, make.row.names = FALSE))
 head(collapsed_all)
 ```
-
+The resulting table contains one row per individual, chromosome, and UPD type, with the following columns:
 
 | Column name             | Description                                                                 |
 |-------------------------|-----------------------------------------------------------------------------|
@@ -255,6 +257,8 @@ head(collapsed_all)
 | `ratio_mother`          | Weighted mean ratio of the mother across the collapsed events               |
 | `ratio_father`          | Weighted mean ratio of the father across the collapsed events               |
 
+
+The read-depth ratios are reported as supportive metrics to facilitate downstream interpretation. Values close to one indicate balanced coverage across trio members, whereas strong deviations may suggest copy-number gains or losses rather than true UPD events. Importantly, these ratios are not used as hard filtering criteria at this stage, but are provided to aid quality control and biological interpretation.
 
 # 4. Perform postprocessing analyses
 
