@@ -14,6 +14,19 @@ expected_df <- data.frame(
   ratio_father = 0.951220
 )
 
+expected_df_no_ratio <- data.frame(
+  ID = "NA19685",
+  chromosome = "6",
+  start = 32489853,
+  end=  33499925,
+  group = "iso_mat",
+  n_snps = 5L,
+  geno_coded = I(setNames(list(c("133", "133", "121", "122", "133")), "1")),
+  ratio_proband = NA_real_,
+  ratio_mother = NA_real_,
+  ratio_father = NA_real_
+)
+
 file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
 input <- VariantAnnotation::readVcf(file)
 
@@ -35,18 +48,19 @@ chr6 <- split_vcf[["6"]]
 # Expected mean sequencing depth per individual for chromosome 6
 total_mean <- c(proband = 904/15, mother = 886/15, father = 902/15)
 
+
+
+
 # ------------------------------------------------------------------------- #
 # Test blocksVcf() with add_ratios = FALSE
 # ------------------------------------------------------------------------- #
 
 test_that("Test if simplification into blocks works", {
     out <- blocksVcf(largeCollapsedVcf = chr6)
-
+    
     out <- as.data.frame(out)
     
-    expected_no_ratio <- expected_df[, !(names(expected_df) %in% c("ratio_proband", "ratio_mother", "ratio_father"))]
-    
-    expect_equal(out, expected_no_ratio)
+    expect_equal(out, expected_df_no_ratio)
     expect_s3_class(out, "data.frame")
 })
 
