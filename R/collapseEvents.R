@@ -72,8 +72,8 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
   # Filter events based on quality thresholds:
   # keep only those with ≥ min_ME Mendelian errors and ≥ min_size genomic span
   subset_df <- subset_df[
-    subset_df$n_mendelian_error >= min_ME &
-      subset_df$event_size >= min_size,
+    subset_df$n_mendelian_error > min_ME &
+      subset_df$event_size > min_size,
   ]
   
   # Return empty output if no events remain after filtering
