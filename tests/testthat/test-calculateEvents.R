@@ -14,6 +14,19 @@ expected_def_blocks <- data.frame(
   n_mendelian_error = c(3, 6)
 )
 
+expected_df_no_ratio <- data.frame(
+  ID = c("NA19685", "NA19685"),
+  chromosome = c("6", "15"),
+  start = c(32489853, 22368862),
+  end = c(33499925, 42109975),
+  group = c("het_mat", "iso_mat"),
+  n_snps = c(5, 10),
+  ratio_proband = c(NA_real_, NA_real_),
+  ratio_mother = c(NA_real_, NA_real_),
+  ratio_father = c(NA_real_, NA_real_),
+  n_mendelian_error = c(3, 6)
+)
+
 file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
 input <- VariantAnnotation::readVcf(file)
 
@@ -113,12 +126,7 @@ test_that("Test if the general function works (default HMM, add_ratios = FALSE)"
   
   out <- as.data.frame(out)
   
-  # Should not contain ratio columns when add_ratios = FALSE
-  expect_false(any(c("ratio_proband", "ratio_mother", "ratio_father") %in% names(out)))
-  expected_no_ratio <- expected_def_blocks[, !(names(expected_def_blocks) %in% c("ratio_proband", "ratio_mother", "ratio_father"))]
-  
-  # Compare structural output against expected UPD blocks
-  expect_equal(out[, names(expected_no_ratio)], expected_no_ratio)
+  expect_equal(out, expected_df_no_ratio)
   expect_s3_class(out, "data.frame")
 })
 
@@ -207,9 +215,7 @@ input <- vcfCheck(
 test_that("Test if the general function works (custom HMM, add_ratios = FALSE)", {
   out <- calculateEvents(largeCollapsedVcf = input, hmm = new_hmm, field_DP = "DP")
   
-  expect_false(any(c("ratio_proband", "ratio_mother", "ratio_father") %in% names(out)))
-  expected_no_ratio <- expected_def_blocks[, !(names(expected_def_blocks) %in% c("ratio_proband", "ratio_mother", "ratio_father"))]
-  expect_equal(out[, names(expected_no_ratio)], expected_no_ratio)
+  expect_equal(out, expected_df_no_ratio)
   
   out <- as.data.frame(out)
   expect_s3_class(out, "data.frame")
