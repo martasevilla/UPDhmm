@@ -38,7 +38,7 @@
 #'   If `TRUE`, progress messages will be printed during processing.
 #'
 #' @details
-#' ### Custom HMM structure. The user can implement its own HMM. 
+#' ### Custom HMM structure. The user can implement its own HMM.
 #' A custom HMM must be a list following the structure of the HMM package, containing:
 #'   
 #'   \itemize{
@@ -52,12 +52,13 @@
 #' @return A `data.frame` object containing all detected events in the provided trio. 
 #' Columns include:
 #' \itemize{
-#'   \item seqnames – chromosome name  
+#'   \item chromosome – chromosome name  
 #'   \item start, end – genomic coordinates  
 #'   \item group – inferred HMM state  
 #'   \item n_snps – number of SNPs in the block  
 #'   \item n_mendelian_error – number of Mendelian errors in the block  
-#'   \item depth-ratio metrics (if add_ratios = TRUE)  
+#'   \item depth-ratio metrics (always present; if add_ratios = FALSE, filled with NA)
+
 #' }
 #'
 #' If no events are found, the function will return an empty `data.frame`.
@@ -153,7 +154,7 @@ calculateEvents <- function(largeCollapsedVcf,
   filtered_def_blocks_states <- def_blocks_states[
     def_blocks_states$n_snps > 1 &
       def_blocks_states$group != "normal" &
-      !(def_blocks_states$seqnames %in% c("chrX", "X")), ]
+      !(def_blocks_states$chromosome %in% c("chrX", "X")), ]
   
   if (nrow(filtered_def_blocks_states) == 0) {
     if (verbose) message("No non-normal events found.")

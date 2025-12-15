@@ -33,11 +33,11 @@ when total_mean is provided. Default: \code{c("ratio_proband", "ratio_mother", "
 A data.frame with one row per block, containing:
 \itemize{
 \item \code{ID} – sample identifier
-\item \code{seqnames}, start, end – genomic coordinates
+\item \code{chromosome}, start, end – genomic coordinates
 \item \code{group} – HMM state of the block
 \item \code{n_snps} – number of variants in the block
 \item \code{geno_coded} – list of numeric genotype codes per block
-\item Optional ratio columns relative to total_mean
+\item Ratio columns relative to total_mean (always present; if add_ratios = FALSE, filled with NA)
 }
 }
 \description{

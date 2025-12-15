@@ -26,11 +26,12 @@
 #' @return A data.frame with one row per block, containing:
 #'   \itemize{
 #'     \item \code{ID} – sample identifier
-#'     \item \code{seqnames}, start, end – genomic coordinates
+#'     \item \code{chromosome}, start, end – genomic coordinates
 #'     \item \code{group} – HMM state of the block
 #'     \item \code{n_snps} – number of variants in the block
 #'     \item \code{geno_coded} – list of numeric genotype codes per block
-#'     \item Optional ratio columns relative to total_mean
+#'     \item Ratio columns relative to total_mean (always present; if add_ratios = FALSE, filled with NA)
+
 #'   }
 #' @keywords internal
 #'
@@ -58,13 +59,15 @@ blocksVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, to
   # Construct initial data.frame with block information
   df <- data.frame(
     ID       = sample_ID,
-    seqnames = seqnames_chr[starts_idx],
+    chromosome = seqnames_chr[starts_idx],
     start    = start_pos[starts_idx],
     end      = end_pos[ends_idx],
     group    = r$values,
     n_snps   = r$lengths,
     geno_coded = I(split(geno_coded, rep(seq_len(n_blocks), r$lengths)))
   )
+  
+  df[ratio_cols] <- NA_real_
   
   # Optionally compute per-block depth ratios
   if (add_ratios) {
@@ -99,7 +102,7 @@ blocksVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, to
         # Compute ratios relative to total_mean
         ratio_matrix <- sweep(means, 2, total_mean, FUN = "/")
         colnames(ratio_matrix) <- ratio_cols
-        df <- cbind(df, as.data.frame(ratio_matrix))
+        df[, ratio_cols] <- as.data.frame(ratio_matrix)
       } 
     }
   }

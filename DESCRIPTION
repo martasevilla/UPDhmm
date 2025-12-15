@@ -41,7 +41,6 @@ Imports:
   S4Vectors,
   IRanges,
   SummarizedExperiment,
-  Biobase,
   stats,
   BiocParallel,
   GenomeInfoDb

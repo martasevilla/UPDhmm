@@ -40,12 +40,12 @@ Provided by \code{calculateEvents()}.}
 A data.frame of detected blocks for the chromosome, or NULL if error
 Columns include:
 \itemize{
-\item \code{seqnames} – chromosome name
+\item \code{chromosome} – chromosome name
 \item \code{start}, \code{end} – genomic coordinates of the block
 \item \code{group} – inferred HMM state
 \item \code{n_snps} – number of SNPs in the block
 \item \code{n_mendelian_error} – number of Mendelian-inconsistent genotypes in the block
-\item depth-ratio metrics (if add_ratios = TRUE)
+\item depth-ratio metrics (always present; if add_ratios = FALSE, filled with NA)
 }
 }
 \description{

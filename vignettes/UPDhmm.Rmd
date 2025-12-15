@@ -193,7 +193,7 @@ By default, this function only calculates the number of Mendelian errors as a bl
 | Column name         | Description                                                                                                                                                                                                                          |
 |--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `ID`               | Identifier of the proband (child sample)                                                                                                                                                                                              |
-| `seqnames`         | Chromosome name                                                                                                                                                                                                                       |
+| `chromosome`         | Chromosome name                                                                                                                                                                                                                       |
 | `start`            | Start position of the block (genomic coordinate)                                                                                                                                                                                      |
 | `end`              | End position of the block                                                                                                                                                                                                             |
 | `group`            | Predicted inheritance state (`iso_mat`, `iso_fat`, `het_mat`, `het_fat`)                                                                                                                                                              |
@@ -219,75 +219,48 @@ events_list <- lapply(vcf_list, calculateEvents, BPPARAM = BPPARAM)
 ```
 
 
+# 3. Collapse and summarize results per individual
 
-# 3. Apply quality filters to the detected events
-Based on the evaluation conducted in the publication, where the UPDhmm package was presented and validated through simulations of events of different sizes and application to a real cohort, we established a series of filtering criteria to remove small events and exclude those likely caused by gains or losses of genetic material in one of the trio members.
+The output of `calculateEvents` needs some pre-processing before the interpretation of the results. On one hand, `calculateEvents` can detect small regions which are likely to be artifacts, instead of real UPD events. On the other, large UPD events, i.e. spanning across a whole chromosome, can be detected as multiple contiguous events. 
 
-Specifically, the following thresholds are applied:
+The function `collapseEvents()` handles both situations. First,`collapseEvents()` filters the detected events using the following parameters:  
 
-- n_mendelian_error > 2: at least three Mendelian errors are required to support a true UPD signal.
+- n_mendelian_error (default > 2): minimum number of Mendelian errors supporting the UPD event. Requiring multiple Mendelian inconsistencies reduces the likelihood that the signal is driven by sporadic genotyping errors.
 
-- size > 500,000: events must span at least 500 kb to avoid small spurious segments.
+- size (default = 500,000): minimum length (in base pairs) of the event to be considered, aimed at excluding short spurious segments frequently observed as false positives.
 
-- ratio_proband, ratio_father, ratio_mother between 0.8 and 1.2: ensures balanced read depth across trio members, excluding events likely caused by copy-number variation.
+These thresholds were defined based on the evaluation conducted in the publication in which the package was introduced and validated, including simulations of UPD events of different sizes and application to a real trio-based cohort, with the aim of removing small events and excluding those likely driven by technical noise.
 
-
-```{r}
-filtered_events_list <- lapply(events_list, function(df) {
-  if (nrow(df) == 0) return(df)  # skip empty results
-  
-  df$size <- df$end - df$start
-  
-  dplyr::filter(
-    df,
-    n_mendelian_error > 2,
-    size > 500000,
-    ratio_proband >= 0.8 & ratio_proband <= 1.2,
-    ratio_father  >= 0.8 & ratio_father  <= 1.2,
-    ratio_mother  >= 0.8 & ratio_mother  <= 1.2
-  )
-})
-```
-
-
-
-# 4. Collapse and summarize results per individual
-The `collapseEvents()`function provides a concise summary of detected UPD events per individual and chromosome.
-It merges multiple contiguus or overlapping events that share the same predicted type (e.g., maternal isodisomy or paternal heterodisomy within the same chromosome.
-
-During this process, the function:
-
-- Aggregates the total number of collapsed events.
-
-- Sums up the Mendelian errors across merged regions.
-
-- Calculates the minimum start and maximum end coordinates, defining the overall genomic span of the collapsed event.
+Second, `collapseEvents()` merges UPD events with the same predicted type occurring on the same chromosome into a single collapsed event. This step ensures that extended UPD regions initially detected as multiple adjacent segments are represented as a single biologically meaningful event per individual and chromosome.
 
 
 ```{r}
-collapsed_list <- lapply(filtered_events_list, collapseEvents)
+collapsed_list <- lapply(events_list, collapseEvents)
 collapsed_all <- do.call(rbind.data.frame, c(collapsed_list, make.row.names = FALSE))
 head(collapsed_all)
 ```
-
-
-The function returns a simplified table summarizing one row per individual, chromosome, and UPD type.
+The resulting table contains one row per individual, chromosome, and UPD type, with the following columns:
 
 | Column name             | Description                                                                 |
-|-------------------------|-----------------------------------------------|
+|-------------------------|-----------------------------------------------------------------------------|
 | `ID`                    | Identifier of the proband                                                   |
-| `seqnames`              | Chromosome                                                                  |
+| `chromosome`            | Chromosome                                                                  |
+| `start` / `end`         | Genomic span of collapsed block                                             |
 | `group`                 | Predicted state                                                             |
 | `n_events`              | Number of events collapsed                                                  |
 | `total_mendelian_error` | Sum of Mendelian errors                                                     |
 | `total_size`            | Total genomic span covered                                                  |
+| `total_snps`            | Total SNPs in the overlapping events                                        |
+| `prop_covered`          | Proportion of the region covered by events                                   |
 | `collapsed_events`      | Comma-separated list of merged events                                       |
-| `min_start / max_end`   | Genomic span of collapsed block                                             |
+| `ratio_proband`         | Weighted mean ratio of the proband across the collapsed events              |
+| `ratio_mother`          | Weighted mean ratio of the mother across the collapsed events               |
+| `ratio_father`          | Weighted mean ratio of the father across the collapsed events               |
 
 
+The read-depth ratios are reported as supportive metrics to facilitate downstream interpretation. Values close to one indicate balanced coverage across trio members, whereas strong deviations may suggest copy-number gains or losses rather than true UPD events. Importantly, these ratios are not used as hard filtering criteria at this stage, but are provided to aid quality control and biological interpretation.
 
-
-# 5. Perform postprocessing analyses
+# 4. Perform postprocessing analyses
 
 In this final step, we perform postprocessing analyses to refine the detected UPD events and highlight potentially true or recurrent regions across samples.
 This helps to distinguish genuine biological UPDs from artifact-prone genomic regions (e.g., repetitive or complex loci that may systematically produce false positives).
@@ -380,7 +353,7 @@ Conversely, highly recurrent or error-prone regions should be interpreted with c
 
 
 
-# 6. Visualizing UPD events across the genome
+# 5. Visualizing UPD events across the genome
 
 After identifying and postprocessing UPD events, a final and highly informative step is to visualize their genomic distribution.
 Visualization helps to quickly assess the size, chromosomal location, and type (maternal or paternal; hetero- or isodisomy) of the detected events.
@@ -411,9 +384,9 @@ plotUPDKp <- function(updEvents) {
   #--------------------------------------------------------------
   # 2. Ensure chromosome naming format (e.g. "chr3")
   #--------------------------------------------------------------
-  updEvents$seqnames <- ifelse(grepl("^chr", updEvents$seqnames),
+  updEvents$seqnames <- ifelse(grepl("^chr", updEvents$chromosome),
                                updEvents$seqnames,
-                               paste0("chr", updEvents$seqnames))
+                               paste0("chr", updEvents$chromosome))
 
   #--------------------------------------------------------------
   # 3. Helper function to safely create GRanges only if events exist

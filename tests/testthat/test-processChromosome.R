@@ -26,7 +26,7 @@ mendelian_error_values <- names(emission_probs[emission_probs == min(emission_pr
 # Expected output block 
 expected_df <- data.frame(
   ID = "NA19685",
-  seqnames = "6",
+  chromosome = "6",
   start = 32489853,
   end=  33499925,
   group = "het_mat",
@@ -34,6 +34,19 @@ expected_df <- data.frame(
   ratio_proband = 0.978982,
   ratio_mother = 1.002257,
   ratio_father = 0.951220,
+  n_mendelian_error = 3L
+)
+
+expected_df_no_ratio <- data.frame(
+  ID = "NA19685",
+  chromosome = "6",
+  start = 32489853,
+  end=  33499925,
+  group = "het_mat",
+  n_snps = 5L,
+  ratio_proband = NA_real_,
+  ratio_mother = NA_real_,
+  ratio_father = NA_real_,
   n_mendelian_error = 3L
 )
 
@@ -46,13 +59,9 @@ test_that("processChromosome works with valid chromosome input", {
   
   out <- processChromosome(vcf_chr = chr6, hmm = hmm, mendelian_error_values = mendelian_error_values)
   
-  out$seqnames <- as.character(out$seqnames)  
   out <- as.data.frame(out)
   
-  expected_no_ratio <- expected_df[, !(names(expected_df) %in% c("ratio_proband", "ratio_mother", "ratio_father"))]
-  out_no_ratio <- out[, names(expected_no_ratio), drop = FALSE]
-  
-  expect_equal(out_no_ratio, expected_no_ratio)
+  expect_equal(out, expected_df_no_ratio)
   expect_s3_class(out, "data.frame")
 
 })
@@ -64,7 +73,6 @@ test_that("processChromosome works with valid chromosome input", {
   
   out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   
-  out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   
   expect_equal(out, expected_df, tolerance = 1e-6)
@@ -79,7 +87,6 @@ test_that("processChromosome works with valid chromosome input", {
   
   out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   
-  out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   
   expect_equal(out, expected_df, tolerance = 1e-6)
@@ -93,7 +100,7 @@ test_that("processChromosome works with valid chromosome input", {
 test_that("processChromosome works with valid chromosome input", {
   
   out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
-  out$seqnames <- as.character(out$seqnames)
+
   out <- as.data.frame(out)
   
   expect_equal(out, expected_df, tolerance = 1e-6)
@@ -127,8 +134,7 @@ total_mean_per_individual <- c(proband = 844/14, mother = 886/15, father = 902/1
 test_that("processChromosome works with valid chromosome input", {
   
   out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, field_DP = "DP", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
-  
-  out$seqnames <- as.character(out$seqnames)
+
   out <- as.data.frame(out)
   
   expect_equal(out, expected_df, tolerance = 1e-6)
@@ -141,7 +147,6 @@ test_that("processChromosome works with valid chromosome input", {
   
   out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, field_DP = "AD", total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   
-  out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   
   expect_equal(out, expected_df, tolerance = 1e-6)
@@ -153,7 +158,6 @@ test_that("processChromosome works with valid chromosome input", {
   
   out <- processChromosome(vcf_chr = chr6, hmm = hmm, add_ratios = TRUE, total_mean = total_mean_per_individual, mendelian_error_values = mendelian_error_values)
   
-  out$seqnames <- as.character(out$seqnames)
   out <- as.data.frame(out)
   
   expect_equal(out, expected_df, tolerance = 1e-6)

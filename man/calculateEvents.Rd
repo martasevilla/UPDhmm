@@ -50,12 +50,12 @@ If \code{TRUE}, progress messages will be printed during processing.}
 A \code{data.frame} object containing all detected events in the provided trio.
 Columns include:
 \itemize{
-\item seqnames – chromosome name
+\item chromosome – chromosome name
 \item start, end – genomic coordinates
 \item group – inferred HMM state
 \item n_snps – number of SNPs in the block
 \item n_mendelian_error – number of Mendelian errors in the block
-\item depth-ratio metrics (if add_ratios = TRUE)
+\item depth-ratio metrics (always present; if add_ratios = FALSE, filled with NA)
 }
 
 If no events are found, the function will return an empty \code{data.frame}.
@@ -67,7 +67,7 @@ genotypes of the trio as input and includes a final step to simplify the
 results into blocks.
 }
 \details{
-\subsection{Custom HMM structure}{
+\subsection{Custom HMM structure. The user can implement its own HMM.}{
 
 A custom HMM must be a list following the structure of the HMM package, containing:
 
