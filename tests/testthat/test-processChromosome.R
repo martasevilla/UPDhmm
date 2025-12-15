@@ -37,6 +37,19 @@ expected_df <- data.frame(
   n_mendelian_error = 3L
 )
 
+expected_df_no_ratio <- data.frame(
+  ID = "NA19685",
+  chromosome = "6",
+  start = 32489853,
+  end=  33499925,
+  group = "het_mat",
+  n_snps = 5L,
+  ratio_proband = NA_real_,
+  ratio_mother = NA_real_,
+  ratio_father = NA_real_,
+  n_mendelian_error = 3L
+)
+
 
 # ------------------------------------------------------------------------- #
 # Test processChromosome() with add_ratios = FALSE
@@ -48,10 +61,7 @@ test_that("processChromosome works with valid chromosome input", {
   
   out <- as.data.frame(out)
   
-  expected_no_ratio <- expected_df[, !(names(expected_df) %in% c("ratio_proband", "ratio_mother", "ratio_father"))]
-  out_no_ratio <- out[, names(expected_no_ratio), drop = FALSE]
-  
-  expect_equal(out_no_ratio, expected_no_ratio)
+  expect_equal(out, expected_df_no_ratio)
   expect_s3_class(out, "data.frame")
 
 })
