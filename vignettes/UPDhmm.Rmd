@@ -220,26 +220,16 @@ events_list <- lapply(vcf_list, calculateEvents, BPPARAM = BPPARAM)
 
 
 # 3. Collapse and summarize results per individual
-Based on the evaluation conducted in the publication, where the UPDhmm package was presented and validated through simulations of events of different sizes and application to a real cohort, we established a series of filtering criteria to remove small events and exclude those likely caused by gains or losses of genetic material in one of the trio members.
 
-Specifically, the following thresholds are applied:
+The output of `calculateEvents` needs some pre-processing before the interpretation of the results. On one hand, `calculateEvents` can detect small regions which are likely to be artifacts, instead of real UPD events. On the other, large UPD events, i.e. spanning across a whole chromosome, can be detected as multiple contiguous events. 
 
-- n_mendelian_error > 2: at least three Mendelian errors are required to support a true UPD signal.
+The function `collapseEvents()` handles both situations. First,`collapseEvents()` filters the detected events using the following parameters:  
 
-- size > 500,000: events must span at least 500 kb to avoid small spurious segments.
+- n_mendelian_error (default = 2): number of Mendelian Errors found in the UPD event.
 
-These filtering steps are now integrated directly inside the collapseEvents() function, so users no longer need to filter events manually before collapsing.
+- size (default = 500,000): minimum length of the event to be considered.
 
-The `collapseEvents()`function provides a concise summary of detected UPD events per individual and chromosome.
-It merges multiple contiguus or overlapping events that share the same predicted type (e.g., maternal isodisomy or paternal heterodisomy within the same chromosome.
-
-During this process, the function:
-
-- Aggregates the total number of collapsed events.
-
-- Sums up the Mendelian errors across merged regions.
-
-- Calculates the minimum start and maximum end coordinates, defining the overall genomic span of the collapsed event.
+Second, `collapseEvents()` combines UPD events with the same type and reported in the same chromosome as a single event. Thus, we obtain a list of UPD events for individual and chromosome: 
 
 
 ```{r}
@@ -248,8 +238,6 @@ collapsed_all <- do.call(rbind.data.frame, c(collapsed_list, make.row.names = FA
 head(collapsed_all)
 ```
 
-
-The function returns a simplified table summarizing one row per individual, chromosome, and UPD type.
 
 | Column name             | Description                                                                 |
 |-------------------------|-----------------------------------------------------------------------------|
