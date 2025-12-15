@@ -8,14 +8,16 @@ collapseEvents(subset_df, min_ME = 2, min_size = 5e+05)
 }
 \arguments{
 \item{subset_df}{A data.frame containing event-level data with columns:
-ID: Sample identifier.
-chromosome: Chromosome name.
-start: Start position of the event.
-end: End position of the event.
-group: Event group/class.
-n_snps: Number of SNPs in the event.
-n_mendelian_error: Number of Mendelian errors in the event.
-ratio_proband, ratio_mother, ratio_father: (optional) depth-ratio metrics}
+\itemize{
+\item ID – Sample identifier.
+\item chromosome – Chromosome name.
+\item start – Start position of the event.
+\item end – End position of the event.
+\item group – Event group/class.
+\item n_snps – Number of SNPs in the event.
+\item n_mendelian_error – Number of Mendelian errors in the event.
+\item ratio_proband, ratio_mother, ratio_father – (optional) depth-ratio metrics.
+}}
 
 \item{min_ME}{Minimum number of Mendelian errors required to retain an event
 before collapsing (default: 2).}
@@ -25,17 +27,20 @@ before collapsing, in base pairs (default: 500e3).}
 }
 \value{
 A data.frame with collapsed events and columns:
-ID, chromosome
-start, end: Genomic span of collapsed block
-group: HMM state of the block
-n_events: Number of events collapsed
-total_mendelian_error: Sum of Mendelian errors across events
-total_size: Total genomic span size covered by events
-total_snps: Total SNPs in the overlapping events
-prop_covered: Proportion of the region covered by events
-collapsed_events: Comma-separated list of collapsed events
-ratio_proband, ratio_mother, ratio_father: Weighted mean ratios across the collapsed events
-If not present in the input, these columns are returned as NA_real_.
+\itemize{
+\item ID – Sample identifier.
+\item chromosome – Chromosome name.
+\item start, end – Genomic span of the collapsed block.
+\item group – HMM state of the block.
+\item n_events – Number of events collapsed.
+\item total_mendelian_error – Sum of Mendelian errors across events.
+\item total_size – Total genomic span size covered by events.
+\item total_snps – Total SNPs in the overlapping events.
+\item prop_covered – Proportion of the region covered by events.
+\item ratio_proband, ratio_mother, ratio_father – Weighted mean ratios across the collapsed events.
+If all values are NA, the column will contain NA_real_.
+\item collapsed_events – Comma-separated list of collapsed events.
+}
 }
 \description{
 This function collapses genomic events per individual, chromosome, and group,
@@ -51,16 +56,14 @@ The weighted mean ratio is calculated as:
 
 where \eqn{r_i} is the ratio of each individual event and \eqn{N_i} the number
 of SNPs in that event.
-If the ratio columns are \strong{not present} in the input \code{subset_df}, the collapsed
-data.frame will still contain the columns \code{ratio_proband}, \code{ratio_mother},
-and \code{ratio_father}, but all values will be \code{NA_real_}.
+If all values in a ratio column are \code{NA}, the corresponding collapsed value will be \code{NA_real_}.
 }
 \examples{
 all_events <- data.frame(
 ID = c("S1", "S1", "S1", "S2", "S2"),
 chromosome = c("1", "1", "1", "2", "2"),
-start = c(100, 150, 300, 500, 550),
-end = c(120, 180, 320, 520, 580),
+start = c(100e4, 200e4, 300e4, 500e4, 600e4),
+end   = c(160e4, 260e4, 360e4, 560e4, 700e4),
 group = c("iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
 n_mendelian_error = c(5, 10, 2, 50, 30),
 stringsAsFactors = FALSE
