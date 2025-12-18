@@ -1,0 +1,126 @@
+---
+title: "Long reads VCF Preprocessing User Guide"
+author: 
+  - name: "Marta Sevilla Porras"
+    affiliation:
+      - "Universitat Pompeu Fabra (UPF)"
+      - "Centro de Investigación Biomédica en Red (CIBERER)"
+    email: "marta.sevilla@upf.edu"
+  - name: "Carlos Ruiz Arenas"
+    affiliation: 
+      - "Universidad de Navarra (UNAV)"
+    email: "cruizarenas@unav.es"
+output: 
+  BiocStyle::html_document:
+    number_sections: false
+    toc: true
+    fig_caption: true
+    toc_float: true
+vignette: >
+  %\VignetteIndexEntry{Long reads VCF Preprocessing User Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+This vignette shows how to process long-read PacBio HiFi variant calls from a 
+validated trio (HG002–HG003–HG004) and prepare them for UPDhmm analysis. 
+
+
+
+
+## Data source
+
+Ashkenazi trio (GIAB, NIST) – PacBio HiFi Revio, DeepVariant calls (GRCh38).
+
+
+## 1. Download phased VCFs for each individual
+
+
+```{bash, eval=FALSE}
+
+# Proband (HG002)
+wget ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/PacBio_HiFi-Revio_20231031/pacbio-wgs-wdl_germline_20231031/HG002.GRCh38.deepvariant.phased.vcf.gz
+wget ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/PacBio_HiFi-Revio_20231031/pacbio-wgs-wdl_germline_20231031/HG002.GRCh38.deepvariant.phased.vcf.gz.tbi
+
+# Father (HG003)
+wget ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/PacBio_HiFi-Revio_20231031/pacbio-wgs-wdl_germline_20231031/HG003.GRCh38.deepvariant.phased.vcf.gz
+wget ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/PacBio_HiFi-Revio_20231031/pacbio-wgs-wdl_germline_20231031/HG003.GRCh38.deepvariant.phased.vcf.gz.tbi
+
+# Mother (HG004)
+wget ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/PacBio_HiFi-Revio_20231031/pacbio-wgs-wdl_germline_20231031/HG004.GRCh38.deepvariant.phased.vcf.gz
+wget ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/PacBio_HiFi-Revio_20231031/pacbio-wgs-wdl_germline_20231031/HG004.GRCh38.deepvariant.phased.vcf.gz.tbi
+
+
+```
+
+
+
+## 2. Merge individual VCFs into a trio VCF
+
+
+```{bash, eval=FALSE}
+bcftools merge \
+  -O z \
+  -o trio_HiFi_GRCh38_phased.vcf.gz \
+  HG002.GRCh38.deepvariant.phased.vcf.gz \
+  HG003.GRCh38.deepvariant.phased.vcf.gz \
+  HG004.GRCh38.deepvariant.phased.vcf.gz
+
+bcftools index trio_HiFi_GRCh38_phased.vcf.gz
+```
+
+
+## 3. Filter variants for UPDhmm input
+
+The following filtering steps are applied:
+
+- keep only biallelic variants
+
+- remove sites where all trio members are reference (0/0 or 0|0)
+
+- remove sites where all trio members are missing (./. or .|.)
+
+```{bash, eval=FALSE}
+bcftools view \
+  -m2 -M2 \
+  -e 'COUNT(GT="0/0" || GT="0|0")==3 || COUNT(GT="./." || GT=".|.")==3' \
+  -O z \
+  -o trio_HiFi_GRCh38_phased_biallelic_nonref_nomissing.vcf.gz \
+  trio_HiFi_GRCh38_phased.vcf.gz
+
+bcftools index trio_HiFi_GRCh38_phased_biallelic_nonref_nomissing.vcf.gz
+
+```
+
+
+
+## 4. UPDhmm analysis in R  
+
+```{bash, eval=FALSE}
+library(UPDhmm)
+library(VariantAnnotation)
+
+vcf <- readVcf(
+  "trio_HiFi_GRCh38_phased_biallelic_nonref_nomissing.vcf.gz"
+)
+
+vcf_check <- vcfCheck(
+  <!-- vcf, -->
+  proband = "HG002",
+  father  = "HG003",
+  mother  = "HG004"
+)
+
+events <- calculateEvents(
+  vcf_check,
+  add_ratios = TRUE
+)
+```
+
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
