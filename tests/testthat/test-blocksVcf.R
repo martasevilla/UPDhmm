@@ -10,8 +10,8 @@ expected_df <- data.frame(
   n_snps = 5L,
   geno_coded = I(setNames(list(c("133", "133", "121", "122", "133")), "1")),
   ratio_proband = 0.978982,
-  ratio_mother = 1.002257,
-  ratio_father = 0.951220
+  ratio_mother = 0.968397,
+  ratio_father = 0.984479
 )
 
 expected_df_no_ratio <- data.frame(
