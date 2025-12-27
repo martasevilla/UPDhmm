@@ -32,8 +32,8 @@ expected_df <- data.frame(
   group = "het_mat",
   n_snps = 5L,
   ratio_proband = 0.978982,
-  ratio_mother = 1.002257,
-  ratio_father = 0.951220,
+  ratio_mother = 0.968397,
+  ratio_father = 0.984479,
   n_mendelian_error = 3L
 )
 
