@@ -97,7 +97,7 @@ blocksVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, to
       # Compute means per block
       means <- sums / pmax(counts, 1)
       means[counts == 0] <- NA
-
+      
       means <- means[, names(total_mean), drop = FALSE]
 
       if (!is.null(total_mean)) {
