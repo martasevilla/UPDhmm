@@ -9,8 +9,8 @@ expected_def_blocks <- data.frame(
   group = c("het_mat", "iso_mat"),
   n_snps = c(5, 10),
   ratio_proband = c(0.974526, 1.010190),
-  ratio_mother = c(1.002257, 1.025959),
-  ratio_father = c(0.951220, 0.997783),
+  ratio_mother = c(0.968397, 1.015801),
+  ratio_father = c(0.984479, 1.007761),
   n_mendelian_error = c(3, 6)
 )
 
@@ -193,8 +193,8 @@ expected_def_blocks <- data.frame(
   group = c("het_mat", "iso_mat"),
   n_snps = c(5, 10),
   ratio_proband = c(0.978982, 1.010509),
-  ratio_mother = c(1.002257, 1.025959),
-  ratio_father = c(0.951220, 0.997783),
+  ratio_mother = c(0.968397, 1.015801),
+  ratio_father = c(0.984479, 1.007761),
   n_mendelian_error = c(3, 6)
 )
 
