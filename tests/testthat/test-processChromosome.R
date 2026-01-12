@@ -14,7 +14,7 @@ split_vcf <- split(input, f = GenomicRanges::seqnames(input))
 chr6 <- split_vcf[["6"]]
 
 # Expected mean sequencing depth per individual for chromosome 6
-total_mean_per_individual <- c(proband = 904/15, mother = 886/15, father = 902/15)
+total_mean_per_individual <- c(father = 902/15, mother = 886/15, proband = 904/15)
 
 # Load the default HMM
 utils::data("hmm", package = "UPDhmm", envir = environment())
@@ -31,9 +31,9 @@ expected_df <- data.frame(
   end=  33499925,
   group = "het_mat",
   n_snps = 5L,
-  ratio_proband = 0.978982,
-  ratio_mother = 0.968397,
   ratio_father = 0.984479,
+  ratio_mother = 0.968397,
+  ratio_proband = 0.978982,
   n_mendelian_error = 3L
 )
 
@@ -44,9 +44,9 @@ expected_df_no_ratio <- data.frame(
   end=  33499925,
   group = "het_mat",
   n_snps = 5L,
-  ratio_proband = NA_real_,
-  ratio_mother = NA_real_,
   ratio_father = NA_real_,
+  ratio_mother = NA_real_,
+  ratio_proband = NA_real_,
   n_mendelian_error = 3L
 )
 
@@ -125,7 +125,7 @@ VariantAnnotation::geno(chr6)$AD <- g_ad
 # Expected proband ratio after introducing NA values
 expected_df$ratio_proband <- 0.974526
 
-total_mean_per_individual <- c(proband = 844/14, mother = 886/15, father = 902/15)
+total_mean_per_individual <- c(father = 902/15, mother = 886/15, proband = 844/14)
 
 # ------------------------------------------------------------------------- #
 # Repeat the three tests under conditions where NA values are present
