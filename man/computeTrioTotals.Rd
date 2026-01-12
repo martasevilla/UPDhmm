@@ -6,7 +6,7 @@
 \usage{
 computeTrioTotals(
   vcf,
-  expected_samples = c("proband", "mother", "father"),
+  expected_samples = c("father", "mother", "proband"),
   field_DP = NULL
 )
 }
