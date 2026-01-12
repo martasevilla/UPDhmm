@@ -35,7 +35,7 @@
 #'   }
 #' @keywords internal
 #'
-blocksVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father")) {
+blocksVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, total_mean = NULL, ratio_cols = c("ratio_father", "ratio_mother", "ratio_proband")) {
   
   # Extract metadata and genotype matrices
   mcol <- S4Vectors::mcols(largeCollapsedVcf)
@@ -48,7 +48,7 @@ blocksVcf <- function(largeCollapsedVcf, add_ratios = FALSE, field_DP = NULL, to
   seqnames_chr <- as.character(GenomicRanges::seqnames(largeCollapsedVcf))
   start_pos <- GenomicRanges::start(largeCollapsedVcf)
   end_pos <- GenomicRanges::end(largeCollapsedVcf)
-  sample_ID <- coldata$ID[1]
+  sample_ID <- coldata$ID[colnames(largeCollapsedVcf) == "proband"]
 
   # Identify contiguous blocks of variants sharing the same HMM state
   r <- rle(states)
