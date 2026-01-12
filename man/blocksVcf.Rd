@@ -9,7 +9,7 @@ blocksVcf(
   add_ratios = FALSE,
   field_DP = NULL,
   total_mean = NULL,
-  ratio_cols = c("ratio_proband", "ratio_mother", "ratio_father")
+  ratio_cols = c("ratio_father", "ratio_mother", "ratio_proband")
 )
 }
 \arguments{
