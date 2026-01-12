@@ -8,9 +8,9 @@ expected_def_blocks <- data.frame(
   end = c(33499925, 42109975),
   group = c("het_mat", "iso_mat"),
   n_snps = c(5, 10),
-  ratio_proband = c(0.974526, 1.010190),
-  ratio_mother = c(0.968397, 1.015801),
   ratio_father = c(0.984479, 1.007761),
+  ratio_mother = c(0.968397, 1.015801),
+  ratio_proband = c(0.974526, 1.010190),
   n_mendelian_error = c(3, 6)
 )
 
@@ -21,9 +21,9 @@ expected_df_no_ratio <- data.frame(
   end = c(33499925, 42109975),
   group = c("het_mat", "iso_mat"),
   n_snps = c(5, 10),
-  ratio_proband = c(NA_real_, NA_real_),
-  ratio_mother = c(NA_real_, NA_real_),
   ratio_father = c(NA_real_, NA_real_),
+  ratio_mother = c(NA_real_, NA_real_),
+  ratio_proband = c(NA_real_, NA_real_),
   n_mendelian_error = c(3, 6)
 )
 
@@ -36,7 +36,7 @@ input <- vcfCheck(
   proband = "NA19685", check_quality = TRUE
 )
 
-expected_mean <- c(proband = 904/15, mother = 886/15, father = 902/15)
+expected_mean <- c(father = 902/15, mother = 886/15, proband = 904/15)
 
 # ------------------------------------------------------------------------- #
 # Test computeTrioTotals using DP explicitly
@@ -45,7 +45,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with DP", {
   mean_dp <- computeTrioTotals(vcf = input, field_DP = "DP")
 
   expect_true(is.numeric(mean_dp))
-  expect_named(mean_dp, c("proband", "mother", "father"))
+  expect_named(mean_dp, c("father", "mother", "proband"))
   expect_equal(mean_dp, expected_mean)
 })
 
@@ -56,7 +56,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with AD", {
   mean_dp <- computeTrioTotals(vcf = input, field_DP = "AD")
 
   expect_true(is.numeric(mean_dp))
-  expect_named(mean_dp, c("proband", "mother", "father"))
+  expect_named(mean_dp, c("father", "mother", "proband"))
   expect_equal(mean_dp, expected_mean)
 })
 
@@ -68,7 +68,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with default 
   mean_dp <- computeTrioTotals(vcf = input)
 
   expect_true(is.numeric(mean_dp))
-  expect_named(mean_dp, c("proband", "mother", "father"))
+  expect_named(mean_dp, c("father", "mother", "proband"))
   expect_equal(mean_dp, expected_mean)
 })
 
@@ -89,7 +89,7 @@ g_ad[1, "proband"][[1]] <- c(NA,NA)
 VariantAnnotation::geno(input)$AD <- g_ad
 
 # Expected sums and valid counts after introducing NA values
-expected_mean <- c(proband = 844/14, mother = 886/15, father = 902/15)
+expected_mean <- c(father = 902/15, mother = 886/15, proband = 844/14)
 
 # ------------------------------------------------------------------------- #
 # Repeat the three tests under conditions where NA values are present
@@ -98,7 +98,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with DP", {
   mean_dp <- computeTrioTotals(vcf = input, field_DP = "DP")
 
   expect_true(is.numeric(mean_dp))
-  expect_named(mean_dp, c("proband", "mother", "father"))
+  expect_named(mean_dp, c("father", "mother", "proband"))
   expect_equal(mean_dp, expected_mean)
 })
 
@@ -106,7 +106,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with AD", {
   mean_dp <- computeTrioTotals(vcf = input, field_DP = "AD")
 
   expect_true(is.numeric(mean_dp))
-  expect_named(mean_dp, c("proband", "mother", "father"))
+  expect_named(mean_dp, c("father", "mother", "proband"))
   expect_equal(mean_dp, expected_mean)
 })
 
@@ -114,7 +114,7 @@ test_that("computeTrioTotals calculates mean read depths correctly with default 
   mean_dp <- computeTrioTotals(vcf = input)
 
   expect_true(is.numeric(mean_dp))
-  expect_named(mean_dp, c("proband", "mother", "father"))
+  expect_named(mean_dp, c("father", "mother", "proband"))
   expect_equal(mean_dp, expected_mean)
 })
 
@@ -192,9 +192,9 @@ expected_def_blocks <- data.frame(
   end = c(33499925, 42109975),
   group = c("het_mat", "iso_mat"),
   n_snps = c(5, 10),
-  ratio_proband = c(0.978982, 1.010509),
-  ratio_mother = c(0.968397, 1.015801),
   ratio_father = c(0.984479, 1.007761),
+  ratio_mother = c(0.968397, 1.015801),
+  ratio_proband = c(0.978982, 1.010509),
   n_mendelian_error = c(3, 6)
 )
 
