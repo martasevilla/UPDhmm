@@ -109,7 +109,20 @@ calculateEvents <- function(largeCollapsedVcf,
   
   if (length(split_vcf_raw) == 0) {
     if (verbose) message("No chromosomes found in VCF.")
-    return(data.frame())
+    return(data.frame(
+              ID = character(),
+              chromosome = character(),
+              start = integer(),
+              end = integer(),
+              group = character(),
+              n_snps = integer(),
+              ratio_proband = numeric(),
+              ratio_mother = numeric(),
+              ratio_father = numeric(),
+              n_mendelian_error = integer(),
+              stringsAsFactors = FALSE
+            )
+    ) 
   }
   
   if (verbose) message("Processing ", length(split_vcf_raw), " chromosomes...")
@@ -158,7 +171,20 @@ calculateEvents <- function(largeCollapsedVcf,
   
   if (nrow(filtered_def_blocks_states) == 0) {
     if (verbose) message("No non-normal events found.")
-    return(data.frame())
+    return(data.frame(
+      ID = character(),
+      chromosome = character(),
+      start = integer(),
+      end = integer(),
+      group = character(),
+      n_snps = integer(),
+      ratio_proband = numeric(),
+      ratio_mother = numeric(),
+      ratio_father = numeric(),
+      n_mendelian_error = integer(),
+      stringsAsFactors = FALSE
+    )
+    ) 
   }
   
   if (verbose) {
