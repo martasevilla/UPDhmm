@@ -16,7 +16,7 @@ collapseEvents(subset_df, min_ME = 2, min_size = 5e+05)
 \item group – Event group/class.
 \item n_snps – Number of SNPs in the event.
 \item n_mendelian_error – Number of Mendelian errors in the event.
-\item ratio_proband, ratio_mother, ratio_father – (optional) depth-ratio metrics.
+\item ratio_proband, ratio_mother, ratio_father – depth-ratio metrics.
 }}
 
 \item{min_ME}{Minimum number of Mendelian errors required to retain an event

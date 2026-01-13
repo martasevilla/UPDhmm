@@ -9,9 +9,9 @@ expected_df <- data.frame(
   group = "iso_mat",
   n_snps = 5L,
   geno_coded = I(setNames(list(c("133", "133", "121", "122", "133")), "1")),
-  ratio_proband = 0.978982,
-  ratio_mother = 1.002257,
-  ratio_father = 0.951220
+  ratio_father = 0.984479,
+  ratio_mother = 0.968397,
+  ratio_proband = 0.978982
 )
 
 expected_df_no_ratio <- data.frame(
@@ -22,9 +22,9 @@ expected_df_no_ratio <- data.frame(
   group = "iso_mat",
   n_snps = 5L,
   geno_coded = I(setNames(list(c("133", "133", "121", "122", "133")), "1")),
-  ratio_proband = NA_real_,
+  ratio_father = NA_real_,
   ratio_mother = NA_real_,
-  ratio_father = NA_real_
+  ratio_proband = NA_real_
 )
 
 file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
@@ -46,7 +46,7 @@ split_vcf <- split(input, f = GenomicRanges::seqnames(input))
 chr6 <- split_vcf[["6"]]
 
 # Expected mean sequencing depth per individual for chromosome 6
-total_mean <- c(proband = 904/15, mother = 886/15, father = 902/15)
+total_mean <- c(father = 902/15, mother = 886/15, proband = 904/15)
 
 
 
@@ -123,7 +123,7 @@ chr6 <- split_vcf[["6"]]
 # Expected proband ratio after introducing NA values
 expected_df$ratio_proband <- 0.974526
 
-total_mean <- c(proband = 844/14, mother = 886/15, father = 902/15)
+total_mean <- c(father = 902/15, mother = 886/15, proband = 844/14)
 
 
 # ------------------------------------------------------------------------- #

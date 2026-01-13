@@ -1,8 +1,5 @@
 # test-vcfCheck.R
 file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
-expected_vcf <- VariantAnnotation::readVcf(file)
-SummarizedExperiment::colData(expected_vcf)$ID <- colnames(expected_vcf)
-colnames(expected_vcf) <- c("proband", "father", "mother")
 
 # Expected numeric genotype encoding for chromosome 6
 expected_geno_coded <- c("133", "133", "121", "122", "133")
@@ -18,7 +15,13 @@ test_that("Test if the vcf loading works", {
   expect_s4_class(input, "CollapsedVCF")
   
   # Verify that sample names were renamed correctly
-  expect_equal(colnames(input), c("proband", "father", "mother"))
+  expect_equal(colnames(input), c("father", "mother", "proband"))
+  
+  # Check that VCF header sample names are consistent with colnames
+  expect_identical(
+    VariantAnnotation::header(input)@samples,
+    colnames(input)
+  )
   
   # Confirm that the new metadata column 'geno_coded' was created
   expect_true("geno_coded" %in% colnames(S4Vectors::mcols(input)))
@@ -56,7 +59,7 @@ test_that("vcfCheck reports low read depth", {
   expect_s4_class(input, "CollapsedVCF")
   
   # Ensure the sample columns were renamed as expected
-  expect_equal(colnames(input), c("proband", "father", "mother"))
+  expect_equal(colnames(input), c("father", "mother", "proband"))
   
   # Verify that geno_coded was generated
   expect_true("geno_coded" %in% colnames(S4Vectors::mcols(input)))

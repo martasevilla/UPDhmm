@@ -92,6 +92,24 @@ calculateEvents <- function(largeCollapsedVcf,
     stop("Argument 'largeCollapsedVcf' must be a CollapsedVCF object.")
   }
   
+  # Check trio sample names and order
+  expected_samples <- c("father", "mother", "proband")
+  current_samples <- colnames(largeCollapsedVcf)
+  
+  # Check that required samples are present
+  if (!all(expected_samples %in% current_samples)) {
+    stop(
+      "VCF samples must be named 'father', 'mother', and 'proband'. ",
+      "Please preprocess the VCF using vcfCheck()."
+    )
+  }
+  
+  # Reorder samples if necessary
+  if (!identical(current_samples, expected_samples)) {
+    largeCollapsedVcf <- largeCollapsedVcf[, expected_samples]
+  }
+  
+  
   if (is.null(hmm)) {
     utils::data("hmm", package = "UPDhmm", envir = environment())
   }
@@ -109,7 +127,20 @@ calculateEvents <- function(largeCollapsedVcf,
   
   if (length(split_vcf_raw) == 0) {
     if (verbose) message("No chromosomes found in VCF.")
-    return(data.frame())
+    return(data.frame(
+              ID = character(),
+              chromosome = character(),
+              start = integer(),
+              end = integer(),
+              group = character(),
+              n_snps = integer(),
+              ratio_father = numeric(),
+              ratio_mother = numeric(),
+              ratio_proband = numeric(),
+              n_mendelian_error = integer(),
+              stringsAsFactors = FALSE
+            )
+    ) 
   }
   
   if (verbose) message("Processing ", length(split_vcf_raw), " chromosomes...")
@@ -145,8 +176,6 @@ calculateEvents <- function(largeCollapsedVcf,
        check your VCF formatting and trio sample IDs.")
   }
   
-  
-  
   # 4. Clean results
   def_blocks_states <- do.call(rbind, blocks_state)
   
@@ -158,7 +187,20 @@ calculateEvents <- function(largeCollapsedVcf,
   
   if (nrow(filtered_def_blocks_states) == 0) {
     if (verbose) message("No non-normal events found.")
-    return(data.frame())
+    return(data.frame(
+      ID = character(),
+      chromosome = character(),
+      start = integer(),
+      end = integer(),
+      group = character(),
+      n_snps = integer(),
+      ratio_father = numeric(),
+      ratio_mother = numeric(),
+      ratio_proband = numeric(),
+      n_mendelian_error = integer(),
+      stringsAsFactors = FALSE
+    )
+    ) 
   }
   
   if (verbose) {
@@ -193,7 +235,7 @@ calculateEvents <- function(largeCollapsedVcf,
 #'
 #' @keywords internal
 #' 
-computeTrioTotals <- function(vcf, expected_samples = c("proband","mother","father"), field_DP = NULL) {
+computeTrioTotals <- function(vcf, expected_samples = c("father", "mother", "proband"), field_DP = NULL) {
   mean_depth <- NULL
   geno_list <- VariantAnnotation::geno(vcf)
   

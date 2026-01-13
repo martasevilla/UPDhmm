@@ -7,9 +7,9 @@ test_df <- data.frame(
     n_snps = c(5, 3, 8, 10, 6, 12, 7),
     group = c("iso_mat", "iso_mat", "iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
     n_mendelian_error = c(1, 5, 5, 10, 3, 50, 30),
-    ratio_proband = rep(NA_real_, 7),
-    ratio_mother  = rep(NA_real_, 7),
     ratio_father  = rep(NA_real_, 7),
+    ratio_mother  = rep(NA_real_, 7),
+    ratio_proband = rep(NA_real_, 7),
     stringsAsFactors = FALSE
   )
 
@@ -26,9 +26,9 @@ expected_result <- data.frame(
     total_size = c(20, 50, 50),
     total_snps = c(6, 18, 19),
     prop_covered = c(1, 0.625, 0.625),
-    ratio_proband = rep(NA_real_, 3),
-    ratio_mother  = rep(NA_real_, 3),
     ratio_father  = rep(NA_real_, 3),
+    ratio_mother  = rep(NA_real_, 3),
+    ratio_proband = rep(NA_real_, 3),
     collapsed_events = c( "1:300-320","1:100-120,1:150-180", "2:500-520,2:550-580"),
     stringsAsFactors = FALSE
   )
@@ -37,8 +37,8 @@ expected_result <- data.frame(
 expected_cols <- c(
   "ID", "chromosome", "start", "end", "group", 
   "n_events", "total_mendelian_error", "total_size",
-  "total_snps", "prop_covered", "ratio_proband", 
-  "ratio_mother", "ratio_father", "collapsed_events"
+  "total_snps", "prop_covered", "ratio_father", 
+  "ratio_mother", "ratio_proband", "collapsed_events"
 )
 
 test_that("Test if collapseEvents returns empty df with correct structure when all events are filtered out", {
@@ -70,9 +70,9 @@ test_df <- data.frame(
   n_snps = c(5, 3, 8, 10, 6, 12, 7),
   group = c("iso_mat", "iso_mat", "iso_mat", "iso_mat", "het_pat", "iso_mat", "iso_mat"),
   n_mendelian_error = c(1, 5, 5, 10, 3, 50, 30),
-  ratio_proband = c(0.98, 1.01, 0.99, 1.02, 0.97, 1.03, 1.01),
-  ratio_mother  = c(1.00, 1.03, 1.01, 1.04, 0.98, 1.05, 1.02),
   ratio_father  = c(0.95, 0.97, 0.96, 0.98, 0.99, 1.00, 0.99),
+  ratio_mother  = c(1.00, 1.03, 1.01, 1.04, 0.98, 1.05, 1.02),
+  ratio_proband = c(0.98, 1.01, 0.99, 1.02, 0.97, 1.03, 1.01),
   stringsAsFactors = FALSE
 )
 
@@ -89,9 +89,9 @@ expected_result <- data.frame(
   total_size = c(20, 50, 50),
   total_snps = c(6, 18, 19),
   prop_covered = c(1, 0.625, 0.625),
-  ratio_proband = c(0.97, 1.01, 1.02),
-  ratio_mother  = c(0.98, 1.03, 1.04),
   ratio_father  = c(0.99, 0.97, 1.00),
+  ratio_mother  = c(0.98, 1.03, 1.04),
+  ratio_proband = c(0.97, 1.01, 1.02),
   collapsed_events = c( "1:300-320","1:100-120,1:150-180", "2:500-520,2:550-580"),
   stringsAsFactors = FALSE
 )

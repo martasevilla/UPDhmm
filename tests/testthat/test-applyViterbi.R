@@ -2,7 +2,6 @@
 
 file <- system.file(package = "UPDhmm", "extdata", "test.vcf.gz")
 expected_vcf <- VariantAnnotation::readVcf(file)
-colnames(expected_vcf) <- c("proband", "father", "mother")
 S4Vectors::mcols(expected_vcf)$states <-
     c("iso_mat", "iso_mat", "iso_mat")
 

@@ -89,9 +89,9 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
       total_size = numeric(),
       total_snps = numeric(),
       prop_covered = numeric(),
-      ratio_proband = numeric(),
-      ratio_mother  = numeric(),
       ratio_father  = numeric(),
+      ratio_mother  = numeric(),
+      ratio_proband = numeric(),
       collapsed_events = character(),
       stringsAsFactors = FALSE
     ))
@@ -114,9 +114,10 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
     snps        <- df$n_snps
     
     w <- snps
-    ratio_proband_val <- if(all(is.na(df$ratio_proband))) NA_real_ else stats::weighted.mean(df$ratio_proband, w, na.rm = TRUE)
-    ratio_mother_val  <- if(all(is.na(df$ratio_mother)))  NA_real_ else stats::weighted.mean(df$ratio_mother,  w, na.rm = TRUE)
+    
     ratio_father_val  <- if(all(is.na(df$ratio_father)))  NA_real_ else stats::weighted.mean(df$ratio_father,  w, na.rm = TRUE)
+    ratio_mother_val  <- if(all(is.na(df$ratio_mother)))  NA_real_ else stats::weighted.mean(df$ratio_mother,  w, na.rm = TRUE)
+    ratio_proband_val <- if(all(is.na(df$ratio_proband))) NA_real_ else stats::weighted.mean(df$ratio_proband, w, na.rm = TRUE)
     
     out <- data.frame(
       ID = df$ID[1],
@@ -129,9 +130,9 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
       total_size = sum(event_sizes, na.rm = TRUE),
       total_snps = sum(snps, na.rm = TRUE),
       prop_covered = sum(event_sizes, na.rm = TRUE) / region_span,
-      ratio_proband = ratio_proband_val,
-      ratio_mother  = ratio_mother_val,
       ratio_father  = ratio_father_val,
+      ratio_mother  = ratio_mother_val,
+      ratio_proband = ratio_proband_val,
       collapsed_events = paste(df$event_string, collapse = ","),
       stringsAsFactors = FALSE
     )
