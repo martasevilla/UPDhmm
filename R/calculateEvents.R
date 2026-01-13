@@ -107,9 +107,6 @@ calculateEvents <- function(largeCollapsedVcf,
   # Reorder samples if necessary
   if (!identical(current_samples, expected_samples)) {
     largeCollapsedVcf <- largeCollapsedVcf[, expected_samples]
-    
-    # Update VCF header sample names (visual consistency)
-    VariantAnnotation::header(largeCollapsedVcf)@samples <- colnames(largeCollapsedVcf)
   }
   
   
