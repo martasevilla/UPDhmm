@@ -110,9 +110,12 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
     region_max <- max(df$end,   na.rm = TRUE)
     region_span <- region_max - region_min
     
-    event_sizes <- df$event_size
-    snps        <- df$n_snps
+    ranges <- IRanges::IRanges(start = df$start, end = df$end - 1)
+    merged_ranges <- IRanges::reduce(ranges)
+    covered_size <- sum(IRanges::width(merged_ranges))
     
+    snps        <- df$n_snps
+ 
     w <- snps
     
     ratio_father_val  <- if(all(is.na(df$ratio_father)))  NA_real_ else stats::weighted.mean(df$ratio_father,  w, na.rm = TRUE)
@@ -127,9 +130,9 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
       group = df$group[1],
       n_events = nrow(df),
       total_mendelian_error = sum(df$n_mendelian_error, na.rm = TRUE),
-      total_size = sum(event_sizes, na.rm = TRUE),
+      total_size = region_span,
       total_snps = sum(snps, na.rm = TRUE),
-      prop_covered = sum(event_sizes, na.rm = TRUE) / region_span,
+      prop_covered = covered_size / region_span,
       ratio_father  = ratio_father_val,
       ratio_mother  = ratio_mother_val,
       ratio_proband = ratio_proband_val,
