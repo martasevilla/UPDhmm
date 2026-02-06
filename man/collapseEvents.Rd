@@ -48,8 +48,8 @@ summarising the number of events, total Mendelian errors, the total span size,
 and a string listing all merged event coordinates.
 }
 \details{
-When ratio columns (\code{ratio_proband}, \code{ratio_mother}, \code{ratio_father}) are present,
-weighted mean ratios are computed across the collapsed events.
+When values are available in the ratio columns (\code{ratio_proband}, \code{ratio_mother}, \code{ratio_father})
+are present, weighted mean ratios are computed across the collapsed events.
 The weighted mean ratio is calculated as:
 
 \deqn{\frac{\sum_{i} r_i \times N_i}{\sum_{i} N_i}}
