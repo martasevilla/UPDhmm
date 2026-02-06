@@ -5,8 +5,8 @@
 #' and a string listing all merged event coordinates.
 #'
 #' @details
-#' When ratio columns (`ratio_proband`, `ratio_mother`, `ratio_father`) are present,
-#' weighted mean ratios are computed across the collapsed events.
+#' When values are available in the ratio columns (`ratio_proband`, `ratio_mother`, `ratio_father`) 
+#' are present, weighted mean ratios are computed across the collapsed events.
 #' The weighted mean ratio is calculated as:
 #'
 #' \deqn{\frac{\sum_{i} r_i \times N_i}{\sum_{i} N_i}}
@@ -110,10 +110,7 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
     region_max <- max(df$end,   na.rm = TRUE)
     region_span <- region_max - region_min
     
-    ranges <- IRanges::IRanges(start = df$start, end = df$end - 1)
-    merged_ranges <- IRanges::reduce(ranges)
-    covered_size <- sum(IRanges::width(merged_ranges))
-    
+    event_sizes <- df$event_size
     snps        <- df$n_snps
  
     w <- snps
@@ -132,7 +129,7 @@ collapseEvents <- function(subset_df, min_ME = 2, min_size = 500e3) {
       total_mendelian_error = sum(df$n_mendelian_error, na.rm = TRUE),
       total_size = region_span,
       total_snps = sum(snps, na.rm = TRUE),
-      prop_covered = covered_size / region_span,
+      prop_covered = sum(event_sizes, na.rm = TRUE) / region_span,
       ratio_father  = ratio_father_val,
       ratio_mother  = ratio_mother_val,
       ratio_proband = ratio_proband_val,
