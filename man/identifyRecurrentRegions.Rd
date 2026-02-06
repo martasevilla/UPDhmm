@@ -8,7 +8,9 @@ identifyRecurrentRegions(
   df,
   ID_col = "ID",
   error_threshold = 100,
-  min_support = 3
+  min_support = 3,
+  max_dist = 0.3,
+  linkage = "complete"
 )
 }
 \arguments{
@@ -18,7 +20,7 @@ identifyRecurrentRegions(
 \item chromosome: Chromosome name.
 \item start: Start coordinate of the region.
 \item end: End coordinate of the region.
-\item n_mendelian_error: Number of Mendelian errors in the region.
+\item n_mendelian_error or total_mendelian_error: Number of Mendelian errors in the region.
 }}
 
 \item{ID_col}{Character string indicating the column name containing
@@ -29,22 +31,79 @@ Maximum number of Mendelian errors allowed for a region to be considered.}
 
 \item{min_support}{Integer, default = 3.
 Minimum number of unique samples required to call a region recurrent.}
+
+\item{max_dist}{Numeric, default = 0.3.
+Maximum distance allowed to group events in the same cluster when cutting
+the hierarchical clustering dendrogram.}
+
+\item{linkage}{Character string specifying the linkage method for the
+agglomerative hierarchical clustering. Default \code{"complete"}, where the
+distance between two clusters is defined as the largest distance between
+all possible pairs of events belonging to the two clusters.}
 }
 \value{
 A GRanges object containing the recurrent regions that meet
-the minimum support threshold.
+the minimum support threshold. Metadata columns include:
+\itemize{
+\item \code{n_samples} – number of distinct samples supporting the region.
+\item \code{supporting_events} – a GRangesList with the individual events
+that compose the recurrent region, including per-event coverage metrics
+(pct_event_covered, pct_region_covered).
+}
+
+The \code{supporting_events} correspond exactly to the original events that
+were grouped into the cluster and define the boundaries of the resulting
+recurrent region.
+
+If no clusters meet the filtering criteria, the function returns \code{NULL}.
 }
 \description{
-This function finds recurrent genomic regions across samples based on overlapping intervals.
-Regions exceeding the Mendelian error threshold are excluded.
+This function identifies recurrent genomic regions supported by multiple
+samples based on overlapping genomic intervals. Intervals are first filtered
+by a Mendelian error threshold. Events are then clustered using an
+agglomerative hierarchical approach within each chromosome, with the distance
+between events defined based on their overlap. Clusters supported by a minimum
+number of distinct samples are retained and collapsed into recurrent regions
+summarizing all contributing events.
+}
+\details{
+The function operates chromosome-wise and proceeds in several steps. First,
+events are filtered based on a maximum Mendelian error threshold. Then, a
+pairwise distance matrix is computed for overlapping events, where the
+distance between two events e1 and e2 is defined as:
+
+\deqn{1 - (overlap\_width / max(width(e1), width(e2)))}
+
+Event pairs that do not overlap are not explicitly evaluated and are directly
+assigned a distance of 1. In addition, only the upper triangular part of the
+distance matrix is computed, exploiting its symmetry to avoid redundant
+calculations and reduce computational cost.
+
+Agglomerative hierarchical clustering is applied to this distance matrix. At
+each step, the most similar clusters are merged according to the specified
+linkage method (\code{linkage}), with the default \code{"complete"} linkage
+using the maximum distance between all possible pairs of events from the two
+clusters. The resulting dendrogram is cut at a height defined by
+\code{max_dist}, which represents the maximum distance allowed for events to
+be grouped in the same cluster. Smaller values enforce stricter overlap
+similarity.
+
+Only clusters supported by at least \code{min_support} distinct samples are
+retained. Each valid cluster is then collapsed into a single recurrent region
+whose coordinates span all contributing events, and the original events are
+stored as \code{supporting_events} with coverage metrics.
+
+These steps are performed internally by a helper function \code{identifyRecurrentRegionsByChr}.
+Results from all chromosomes are then combined into a single GRanges object returned by this function.
 }
 \examples{
 df <- data.frame(
-ID = c("S1", "S2", "S3", "S3"),
-chromosome = c("chr1", "chr1", "chr1", "chr1"),
-start = c(100, 120, 500, 510),
-end = c(150, 170, 550, 560),
-n_mendelian_error = c(10, 20, 5, 5)
+  ID = c("S1", "S2", "S3", "S4"),
+  chromosome = c("chr1", "chr1", "chr1", "chr1"),
+  start = c(100, 120, 500, 510),
+  end = c(150, 170, 550, 560),
+  n_mendelian_error = c(10, 20, 5, 5)
 )
 identifyRecurrentRegions(df, ID_col = "ID", error_threshold = 50, min_support = 2)
+
 }
