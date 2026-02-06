@@ -47,8 +47,7 @@ the minimum support threshold. Metadata columns include:
 \itemize{
 \item \code{n_samples} – number of distinct samples supporting the region.
 \item \code{supporting_events} – a GRangesList with the individual events
-that compose the recurrent region, including per-event coverage metrics
-(pct_event_covered, pct_region_covered).
+that compose the recurrent region.
 }
 
 The \code{supporting_events} correspond exactly to the original events that

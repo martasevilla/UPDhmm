@@ -295,7 +295,7 @@ It returns a GRanges object containing the recurrent regions, along with metadat
   - max_dist (default = 0.3) —
   Maximum distance threshold used to cut the hierarchical clustering dendrogram.
   Distance between two events is defined as:
-  \deqn{1 - (overlap\_width / max(event widths)}
+  \deqn{1 - (overlap\_width / max(event widths))}
   Smaller values enforce stricter overlap similarity.
   
   - linkage (default = "complete") —
@@ -305,7 +305,7 @@ It returns a GRanges object containing the recurrent regions, along with metadat
 
 - `markRecurrentRegions()` —
   This function annotates each event in a results table (from calculateEvents() or collapseEvents()) as recurrent or
-  non-recurrent,depending on whether it sufficiently overlaps any region defined as recurrent.
+  non-recurrent, depending on whether it sufficiently overlaps any region defined as recurrent.
   Recurrence is determined by evaluating the fraction of the event length that overlaps a recurrent genomic region. Events are classified as recurrent only if this overlap fraction exceeds a user-defined threshold.
   The function returns the same data.frame provided as input, but with two additional columns:
   - Recurrent: categorical variable indicating whether the event overlaps a recurrent region ("Yes" or "No").

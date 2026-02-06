@@ -33,8 +33,7 @@
 #'   \itemize{
 #'     \item \code{n_samples} – number of distinct samples supporting the region.
 #'     \item \code{supporting_events} – a GRangesList with the individual events
-#'       that compose the recurrent region, including per-event coverage metrics
-#'       (pct_event_covered, pct_region_covered).
+#'       that compose the recurrent region.
 #'   }
 #'   
 #' The \code{supporting_events} correspond exactly to the original events that
@@ -164,15 +163,14 @@ identifyRecurrentRegionsByChr  <- function(df,
   #---------------------------------------------------------------
   # 2. Convert to GRanges
   #---------------------------------------------------------------
-  gr <- GenomicRanges::GRanges(
-    seqnames = df$chromosome,
-    ranges = IRanges::IRanges(
-      start = as.numeric(df[["start"]]),
-      end   = as.numeric(df[["end"]])
-    ),
-    ID = df[[ID_col]],
-    n_mendelian_error = df[[err_col]]
+  gr <- GenomicRanges::makeGRangesFromDataFrame(
+    df,
+    seqnames.field = "chromosome",
+    start.field    = "start",
+    end.field      = "end",
+    keep.extra.columns = TRUE
   )
+  
   
   #---------------------------------------------------------------
   # 3. Filter by error threshold
@@ -248,11 +246,6 @@ identifyRecurrentRegionsByChr  <- function(df,
     # Define region boundaries spanning all supporting events
     region_start <- min(GenomicRanges::start(events))
     region_end   <- max(GenomicRanges::end(events))
-    
-    region_gr_tmp <- GenomicRanges::GRanges(
-      seqnames = GenomicRanges::seqnames(events),
-      ranges   = IRanges::IRanges(region_start, region_end)
-    )
     
     GenomicRanges::GRanges(
       seqnames = GenomicRanges::seqnames(events)[1],

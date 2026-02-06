@@ -5,8 +5,8 @@
 #' and a string listing all merged event coordinates.
 #'
 #' @details
-#' When values are available in the ratio columns (`ratio_proband`, `ratio_mother`, `ratio_father`) 
-#' are present, weighted mean ratios are computed across the collapsed events.
+#' When values are available in the ratio columns (`ratio_proband`, `ratio_mother`, `ratio_father`), 
+#' weighted mean ratios are computed across the collapsed events.
 #' The weighted mean ratio is calculated as:
 #'
 #' \deqn{\frac{\sum_{i} r_i \times N_i}{\sum_{i} N_i}}
