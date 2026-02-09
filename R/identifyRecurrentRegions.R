@@ -1,12 +1,9 @@
 #' Identify recurrent genomic regions across samples
 #'
 #' This function identifies recurrent genomic regions supported by multiple
-#' samples based on overlapping genomic intervals. Intervals are first filtered
-#' by a Mendelian error threshold. Events are then clustered using an
-#' agglomerative hierarchical approach within each chromosome, with the distance
-#' between events defined based on their overlap. Clusters supported by a minimum
-#' number of distinct samples are retained and collapsed into recurrent regions
-#' summarizing all contributing events.
+#' samples based on overlapping genomic intervals. UPD events are clustered based
+#' on their reciprocal overlap. Recurrent regions are defined as clusters supported
+#' by a minimum number of samples.
 #' 
 #' @param df A data.frame with columns:
 #'   - ID: Sample identifier.
@@ -44,13 +41,13 @@
 #' 
 #' @details
 #' The function operates chromosome-wise and proceeds in several steps. First,
-#' events are filtered based on a maximum Mendelian error threshold. Then, a
+#' events with a high number of Mendelian errors are filtered out. Then, a
 #' pairwise distance matrix is computed for overlapping events, where the
 #' distance between two events e1 and e2 is defined as:
 #'
 #' \deqn{1 - (overlap\_width / max(width(e1), width(e2)))}
 #'
-#' Event pairs that do not overlap are not explicitly evaluated and are directly
+#' Event pairs that do not overlap are not explicitly evaluated and are 
 #' assigned a distance of 1. In addition, only the upper triangular part of the
 #' distance matrix is computed, exploiting its symmetry to avoid redundant
 #' calculations and reduce computational cost.
