@@ -189,6 +189,7 @@ identifyRecurrentRegionsByChr  <- function(df,
   
   # Initialize distance matrix with maximum distance (1 = no overlap)
   dist_mat <- matrix(1, n, n)
+  diag(dist_mat) <- 0
   
   # Identify overlapping event pairs (distance is computed only for these to reduce computational cost)
   hits <- GenomicRanges::findOverlaps(gr, gr)
@@ -221,15 +222,14 @@ identifyRecurrentRegionsByChr  <- function(df,
   #---------------------------------------------------------------
   meta <- S4Vectors::mcols(gr)
   
-  valid_clusters <- meta |>
-    dplyr::as_tibble() |>
-    dplyr::group_by(cluster) |>
-    dplyr::summarise(
-      n_samples = dplyr::n_distinct(ID),
-      .groups = "drop"
-    ) |>
-    dplyr::filter(n_samples >= min_support) |>
-    dplyr::pull(cluster)
+  n_samples <- tapply(meta$ID, meta$cluster, function(x) length(unique(x)))
+  valid_clusters <- names(n_samples)[n_samples >= min_support]
+  
+  if (is.integer(cluster)) {
+    valid_clusters <- as.integer(valid_clusters)
+  } else if (is.numeric(cluster)) {
+    valid_clusters <- as.numeric(valid_clusters)
+  }
   
   if (length(valid_clusters) == 0) return(NULL)
   
