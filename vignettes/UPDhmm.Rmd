@@ -260,56 +260,54 @@ The resulting table contains one row per individual, chromosome, and UPD type, w
 
 The read-depth ratios are reported as supportive metrics to facilitate downstream interpretation. Values close to one indicate balanced coverage across trio members, whereas strong deviations may suggest copy-number gains or losses rather than true UPD events. Importantly, these ratios are not used as hard filtering criteria at this stage, but are provided to aid quality control and biological interpretation.
 
-# 4. Perform postprocessing analyses
+## 4. Perform postprocessing analyses
 
-In this final step, we perform postprocessing analyses to refine the detected UPD events and highlight potentially true or recurrent regions across samples.
-This helps to distinguish genuine biological UPDs from artifact-prone genomic regions (e.g., repetitive or complex loci that may systematically produce false positives).
+In this final step, we perform postprocessing analyses to refine the detected UPD events and highlight potentially true or recurrent regions across samples. This helps to distinguish genuine biological UPDs from artifact-prone genomic regions (e.g., repetitive or complex loci that may systematically produce false positives).
 
 To explore whether similar events recur across individuals, UPDhmm provides two complementary functions:
 
-- `identifyRecurrentRegions()` — identifies overlapping regions across multiple samples and counts how many individuals
-share each region. It returns a GRanges object with the recurrent segments and the number of supporting samples. The function includes several arguments that control how recurrence is determined:
-  
-  *Arguments:*
-  - df —
-  The input data.frame containing the genomic regions to evaluate.
-  This table must include columns describing chromosome (seqnames), genomic coordinates (start, end or min_start,
-  max_end), and a column with Mendelian error counts (n_mendelian_error or total_mendelian_error).
-    Filtering arguments:
-  - ID_col —
-  The name of the column containing sample identifiers.
-  It allows the function to determine how many unique individuals support each overlapping genomic region.
-  
-  - error_threshold (default = 100) —
-  Maximum number of Mendelian errors allowed for a region to be considered in the recurrence analysis.
-  Regions exceeding this threshold are excluded from recurrence counting. These regions, which often span broad genomic
-  segments, are not considered in the recurrence calculation since they could overlap with many smaller events and bias
-  the results. Instead, they are retained in the output as non-recurrent events, under the assumption that they may
-  represent genuine large-scale alterations rather than noise.
-  
-  - min_support (default = 3) —
-  Minimum number of unique samples that must overlap a region for it to be classified as recurrent.
-  This parameter can be adjusted depending on the cohort size — smaller values detect more shared regions, while higher
-  thresholds focus on the most consistently recurrent events.
+- `identifyRecurrentRegions()` — Identifies recurrent genomic regions shared across multiple samples by clustering overlapping genomic intervals.  
+  The function first filters events based on a Mendelian error threshold, then groups overlapping regions using an agglomerative hierarchical clustering approach applied chromosome-wise.  
+  Clusters supported by a minimum number of distinct individuals are collapsed into recurrent genomic regions.  
 
-- `markRecurrentRegions()` —
-  This function annotates each event in a results table (from calculateEvents() or collapseEvents()) as recurrent or
-  non-recurrent,depending on whether it overlaps any region defined as recurrent.
+  It returns a `GRanges` object containing the recurrent regions, along with metadata describing sample support and the individual events contributing to each region.
+
+  **Arguments:**
+  - `df` — The input data.frame containing the genomic regions to evaluate.  
+    This table must include columns describing chromosome (`chromosome`), genomic coordinates (`start`, `end`), sample identifiers, and a column with Mendelian error counts (`n_mendelian_error` or `total_mendelian_error`).
+
+  **Filtering arguments:**
+  - `ID_col` — The name of the column containing sample identifiers.  
+    It allows the function to determine how many unique individuals support each overlapping genomic region.
+  - `error_threshold` (default = 100) — Maximum number of Mendelian errors allowed for a region to be considered in the recurrence analysis.  
+    Regions exceeding this threshold are excluded from recurrence counting. These regions, which often span broad genomic segments, are not considered in the recurrence calculation since they could overlap with many smaller events and bias the results. Instead, they are retained in the output as non-recurrent events, under the assumption that they may represent genuine large-scale alterations rather than noise.
+  - `min_support` (default = 3) — Minimum number of distinct samples required for a cluster of overlapping events to be considered recurrent.  
+    This parameter can be adjusted depending on the cohort size — smaller values detect more shared regions, while higher thresholds focus on the most consistently recurrent events.
+  - `max_dist` (default = 0.3) — Maximum distance threshold used to cut the hierarchical clustering dendrogram.  
+    Distance between two events is defined as:  
+    \deqn{1 - (overlap\_width / max(event widths))}  
+    Smaller values enforce stricter overlap similarity.
+  - `linkage` (default = "complete") — Linkage method used in agglomerative hierarchical clustering.  
+    With *complete* linkage, the distance between two clusters is defined as the maximum distance between all pairs of events across clusters.
+
+- `markRecurrentRegions()` — Annotates each event in a results table (from `calculateEvents()` or `collapseEvents()`) as recurrent or non-recurrent, depending on whether it sufficiently overlaps any region defined as recurrent.  
+  Recurrence is determined by evaluating the fraction of the event length that overlaps a recurrent genomic region. Events are classified as recurrent only if this overlap fraction exceeds a user-defined threshold.
+
   The function returns the same data.frame provided as input, but with two additional columns:
-  - Recurrent: categorical variable indicating whether the event overlaps a recurrent region ("Yes" or "No").
-  - n_samples: the number of unique samples supporting that recurrent region (as determined in identifyRecurrentRegions()).
+  - `Recurrent` — Categorical variable indicating whether the event overlaps a recurrent region ("Yes" or "No").
+  - `n_samples` — Number of unique samples supporting the recurrent region (as determined in `identifyRecurrentRegions()`).
 
-These annotations facilitate the downstream filtering of events, allowing users to retain only non-recurrent regions, which are more likely to represent true UPD candidates rather than technical artifacts or common genomic polymorphisms.
-In summary, these two functions can thus be combined to systematically identify and flag recurrent genomic regions, facilitating the filtering of potential technical artifacts or recurrent UPDs.
+  These annotations facilitate downstream filtering of events, allowing users to retain only non-recurrent regions, which are more likely to represent true UPD candidates rather than technical artifacts or common genomic polymorphisms.
 
-
+In summary, these two functions can be combined to systematically identify and flag recurrent genomic regions, facilitating the filtering of potential technical artifacts or recurrent UPDs.
 
 ```{r}
 recurrentRegions <- identifyRecurrentRegions(
   df = collapsed_all,
   ID_col = "ID",
   error_threshold = 100,
-  min_support = 2
+  min_support = 2,
+  max_dist = 0.97
 )
 
 head(recurrentRegions)

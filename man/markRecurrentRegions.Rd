@@ -4,12 +4,15 @@
 \alias{markRecurrentRegions}
 \title{Annotate regions as recurrent or non-recurrent}
 \usage{
-markRecurrentRegions(df, recurrent_regions)
+markRecurrentRegions(df, recurrent_regions, min_overlap = 0.7)
 }
 \arguments{
 \item{df}{Data.frame with region coordinates and sample IDs.}
 
 \item{recurrent_regions}{GRanges object from identifyRecurrentRegions().}
+
+\item{min_overlap}{Numeric between 0 and 1, default = 0.7.
+Minimum fraction of the input region that must overlap a recurrent region to be annotated as recurrent.}
 }
 \value{
 The same data.frame with two added columns:
@@ -20,15 +23,20 @@ The same data.frame with two added columns:
 }
 \description{
 Given a results data.frame and a set of recurrent genomic regions,
-this function labels each row as "Yes" (recurrent) or "No".
+this function labels each row as "Yes" (recurrent) or "No" (non-recurrent)
+based on overlaps with a set of recurrent regions.
+}
+\details{
+A region is marked as recurrent if the fraction of its length overlapping a recurrent region
+is at least \code{min_overlap} (default 0.7).
 }
 \examples{
 input <- data.frame(
-ID = c("S1", "S2", "S3", "S4"),
-chromosome = c("chr1", "chr1", "chr1", "chr2"),
-start = c(100, 120, 500, 100),
-end = c(150, 170, 550, 150),
-n_mendelian_error = c(10, 20, 5, 200)
+    ID = c("S1", "S2", "S3", "S4"),
+    chromosome = c("chr1", "chr1", "chr1", "chr2"),
+    start = c(100, 150, 500, 100),
+    end = c(150, 200, 550, 150),
+    n_mendelian_error = c(10, 20, 5, 200)
 )
 
 recurrent_gr <- GenomicRanges::GRanges(
@@ -40,4 +48,5 @@ recurrent_gr <- GenomicRanges::GRanges(
  n_samples = 2
 )
 markRecurrentRegions(input, recurrent_gr)
+
 }
