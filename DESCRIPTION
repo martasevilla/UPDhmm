@@ -1,6 +1,10 @@
 Package: UPDhmm
 Title: Detecting Uniparental Disomy through NGS trio data
+<<<<<<< HEAD
 Version: 1.9.0
+=======
+Version: 1.8.1
+>>>>>>> bffe084 (Add Bioinformatics publication citation; bump to 1.8.1)
 BugReports: https://github.com/martasevilla/UPDhmm/issues
 Authors@R: 
   c(person(given = "Marta",
@@ -23,6 +27,7 @@ Description:
   By analyzing the genotypes in the trio, the model
   infers a hidden state (normal, father isodisomy, 
   mother isodisomy, father heterodisomy and mother heterodisomy).
+  For details see Sevilla-Porras et al. (2026) <doi:10.1093/bioinformatics/btag062>.
 biocViews: 
   Software,
   HiddenMarkovModel,

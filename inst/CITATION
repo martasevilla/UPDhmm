@@ -1,0 +1,20 @@
+bibentry(
+  bibtype = "Article",
+  title   = "{UPDhmm}: detecting uniparental disomy from {NGS} trio data",
+  author  = c(
+    person("Marta", "Sevilla-Porras"),
+    person("Carlos", "Ruiz-Arenas"),
+    person(c("Luis", "A."), "P\u00e9rez-Jurado")
+  ),
+  journal = "Bioinformatics",
+  year    = "2026",
+  volume  = "42",
+  number  = "3",
+  pages   = "btag062",
+  doi     = "10.1093/bioinformatics/btag062",
+  textVersion = paste(
+    "Sevilla-Porras M, Ruiz-Arenas C, P\u00e9rez-Jurado LA (2026).",
+    "UPDhmm: detecting uniparental disomy from NGS trio data.",
+    "Bioinformatics, 42(3), btag062. doi:10.1093/bioinformatics/btag062"
+  )
+)
